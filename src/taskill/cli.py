@@ -20,9 +20,16 @@ from rich.console import Console
 from rich.table import Table
 
 from taskill import __version__
-from taskill.bulk import bulk_run
+from taskill.bulk import bulk_run, find_repos
 from taskill.config import load_config
 from taskill.core import Taskill
+from taskill.filters import (
+    analyze_project,
+    create_extension_filter,
+    create_language_filter,
+    create_manifest_filter,
+    create_name_filter,
+)
 from taskill.updaters.changelog import release_unreleased
 from taskill.updaters.todo import empty_todo
 
@@ -82,32 +89,173 @@ def _print_run_result(result) -> None:
 
 
 @main.command()
+@click.argument("directory", required=False, default=".")
 @click.option("--force", is_flag=True, help="Run even if triggers say no")
 @click.option("--dry-run", is_flag=True, help="Don't write files or persist state")
 @click.option("--json", "as_json", is_flag=True, help="Output result as JSON")
+@click.option(
+    "--manifest", "-m", "manifests", multiple=True,
+    help="Filter: require specific manifest file (repeatable). E.g. -m pyproject.toml -m package.json",
+)
+@click.option(
+    "--language", "-l", "languages", multiple=True,
+    help="Filter: project language - python, javascript, typescript, rust, go, java, etc. (repeatable)",
+)
+@click.option(
+    "--ext", "-e", "extensions", multiple=True,
+    help="Filter: require files with extension (repeatable). E.g. -e .py -e .js",
+)
+@click.option(
+    "--name-filter", "-n", "name_filters", multiple=True,
+    help="Filter: repo name contains substring (repeatable)",
+)
+@click.option(
+    "--max-depth", "-d", default=2, show_default=True, type=int,
+    help="Max depth to scan for repos when filters are used",
+)
+@click.option(
+    "--max-projects", default=0, show_default=True, type=int,
+    help="Max projects to process when scanning (0 = unlimited)",
+)
 @click.pass_context
-def run(ctx: click.Context, force: bool, dry_run: bool, as_json: bool) -> None:
-    """Execute the update pipeline."""
-    cfg = load_config(ctx.obj["config_path"])
-    if dry_run:
-        cfg.dry_run = True
-    tk = Taskill(config=cfg)
-    result = tk.run(force=force)
+def run(
+    ctx: click.Context,
+    directory: str,
+    force: bool,
+    dry_run: bool,
+    as_json: bool,
+    manifests: tuple[str, ...],
+    languages: tuple[str, ...],
+    extensions: tuple[str, ...],
+    name_filters: tuple[str, ...],
+    max_depth: int,
+    max_projects: int,
+) -> None:
+    """Execute the update pipeline.
+
+    DIRECTORY is the target project directory (default: current directory).
+    Use filters to scan and run on multiple matching repos.
+
+    Examples:
+      taskill run                    # run on current directory
+      taskill run ../my-project      # run on specific directory
+      taskill run .. -l python       # scan and run on Python projects
+      taskill run .. -m pyproject.toml -l python  # filter by manifest + language
+      taskill run .. -e .py -e .rs   # filter by file extensions
+    """
+    project_root = Path(directory).resolve()
+
+    # Check if any filters are specified
+    has_filters = any([manifests, languages, extensions, name_filters])
+
+    if not has_filters:
+        # Simple case: run on single directory
+        cfg = load_config(ctx.obj["config_path"], project_root=project_root)
+        if dry_run:
+            cfg.dry_run = True
+        tk = Taskill(config=cfg)
+        result = tk.run(force=force)
+
+        if as_json:
+            click.echo(json.dumps(result.as_dict(), indent=2))
+            sys.exit(0 if result.ran or not result.errors else 1)
+
+        _print_run_result(result)
+        sys.exit(0 if result.ran else 0)
+
+    # Filter case: scan for repos and run on matching ones
+    repos = find_repos(project_root, max_depth=max_depth)
+
+    # Apply filters
+    filtered_repos: list[Path] = []
+    skipped: list[tuple[Path, str]] = []
+
+    for repo in repos:
+        # Check name filter
+        if name_filters and not create_name_filter(list(name_filters))(repo):
+            skipped.append((repo, "name filter mismatch"))
+            continue
+
+        # Check manifest filter
+        if manifests and not create_manifest_filter(list(manifests))(repo):
+            skipped.append((repo, f"missing manifests: {manifests}"))
+            continue
+
+        # Check language filter
+        if languages and not create_language_filter(list(languages))(repo):
+            skipped.append((repo, f"language filter mismatch: {languages}"))
+            continue
+
+        # Check extension filter
+        if extensions and not create_extension_filter(list(extensions))(repo):
+            skipped.append((repo, f"missing extensions: {extensions}"))
+            continue
+
+        filtered_repos.append(repo)
+
+    # Apply max_projects limit
+    if max_projects > 0 and len(filtered_repos) > max_projects:
+        limit_skipped = filtered_repos[max_projects:]
+        filtered_repos = filtered_repos[:max_projects]
+        skipped.extend((repo, "max_projects limit") for repo in limit_skipped)
+
+    # Run on filtered repos
+    if not filtered_repos:
+        console.print("[yellow]No matching repositories found.[/yellow]")
+        sys.exit(1)
+
+    console.print(f"[cyan]Found {len(filtered_repos)} matching repo(s)[/cyan]:")
+    for repo in filtered_repos:
+        info = analyze_project(repo)
+        lang_str = ", ".join(info.detected_languages[:3]) or "unknown"
+        console.print(f"  • [bold]{repo.name}[/bold] ({lang_str})")
+    console.print()
+
+    results: dict[Path, Any] = {}
+    errors: list[tuple[Path, str]] = []
+
+    for repo in filtered_repos:
+        try:
+            cfg = load_config(ctx.obj["config_path"], project_root=repo)
+            if dry_run:
+                cfg.dry_run = True
+            tk = Taskill(config=cfg)
+            result = tk.run(force=force)
+            results[repo] = result
+
+            if as_json:
+                continue
+
+            console.print(f"\n[bold cyan]{repo.name}:[/bold cyan]")
+            _print_run_result(result)
+
+        except Exception as e:
+            errors.append((repo, str(e)))
+            console.print(f"\n[red]Error in {repo.name}:[/red] {e}")
 
     if as_json:
-        click.echo(json.dumps(result.as_dict(), indent=2))
-        sys.exit(0 if result.ran or not result.errors else 1)
+        output = {
+            "repos": {str(r): res.as_dict() for r, res in results.items()},
+            "skipped": [{"path": str(p), "reason": r} for p, r in skipped],
+            "errors": [{"path": str(p), "error": e} for p, e in errors],
+        }
+        click.echo(json.dumps(output, indent=2, default=str))
 
-    _print_run_result(result)
-    sys.exit(0 if result.ran else 0)
+    if errors:
+        sys.exit(1)
 
 
 @main.command()
+@click.argument("directory", required=False, default=".")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 @click.pass_context
-def status(ctx: click.Context, as_json: bool) -> None:
-    """Show what taskill would do without running it."""
-    cfg = load_config(ctx.obj["config_path"])
+def status(ctx: click.Context, directory: str, as_json: bool) -> None:
+    """Show what taskill would do without running it.
+
+    DIRECTORY is the target project directory (default: current directory).
+    """
+    project_root = Path(directory).resolve()
+    cfg = load_config(ctx.obj["config_path"], project_root=project_root)
     tk = Taskill(config=cfg)
     info = tk.status()
 
@@ -244,6 +392,10 @@ def _print_bulk_table(result) -> None:
     "--filter", "-f", "repo_filter", multiple=True,
     help="Only run on repos whose name contains this substring (repeatable)",
 )
+@click.option(
+    "--require-file", "required_files", multiple=True,
+    help="Only run on repos that contain this file (repeatable). E.g. --require-file pyproject.toml",
+)
 def bulk_run_cmd(
     root: str,
     shared_config: str | None,
@@ -253,6 +405,7 @@ def bulk_run_cmd(
     dry_run: bool,
     as_json: bool,
     repo_filter: tuple[str, ...],
+    required_files: tuple[str, ...],
 ) -> None:
     """Run taskill across all git repos under a directory.
 
@@ -270,6 +423,7 @@ def bulk_run_cmd(
         force=force,
         dry_run=dry_run,
         repo_filter=list(repo_filter) if repo_filter else None,
+        required_files=list(required_files) if required_files else None,
     )
 
     if as_json:

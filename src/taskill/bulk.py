@@ -103,7 +103,11 @@ def _scan(directory: Path, repos: list[Path], depth: int, max_depth: int) -> Non
         return
 
     # Is this directory itself a repo?
-    if (directory / ".git").exists():
+    try:
+        is_repo = (directory / ".git").exists()
+    except (PermissionError, OSError):
+        return
+    if is_repo:
         repos.append(directory)
         return  # don't descend into nested repos
 
@@ -116,7 +120,10 @@ def _scan(directory: Path, repos: list[Path], depth: int, max_depth: int) -> Non
         return
 
     for child in children:
-        if not child.is_dir():
+        try:
+            if not child.is_dir():
+                continue
+        except (PermissionError, OSError):
             continue
         # skip hidden / common noise dirs
         if child.name.startswith(".") or child.name in {
@@ -184,9 +191,15 @@ def _apply_filters(
     repos: list[Path],
     repo_filter: list[str] | None,
     max_projects: int,
+    required_files: list[str] | None = None,
 ) -> tuple[list[Path], list[tuple[Path, str]]]:
-    """Apply name filter and max_projects cap. Returns (kept, skipped)."""
+    """Apply name filter, required-file filter and max_projects cap. Returns (kept, skipped)."""
     skipped: list[tuple[Path, str]] = []
+    if required_files:
+        missing = [repo for repo in repos if not all((repo / f).exists() for f in required_files)]
+        repos = [repo for repo in repos if all((repo / f).exists() for f in required_files)]
+        log.info("Filtered out %d repos (missing required files)", len(missing))
+        skipped.extend((repo, f"missing required files: {required_files}") for repo in missing)
     if repo_filter:
         filtered_out = [repo for repo in repos if not any(f in repo.name for f in repo_filter)]
         repos = [repo for repo in repos if any(f in repo.name for f in repo_filter)]
@@ -220,6 +233,7 @@ def bulk_run(
     force: bool = False,
     dry_run: bool = False,
     repo_filter: list[str] | None = None,
+    required_files: list[str] | None = None,
 ) -> BulkResult:
     """Run taskill across all repos found under `root`.
 
@@ -233,6 +247,7 @@ def bulk_run(
         dry_run: Forward to Taskill (don't write files or persist state)
         repo_filter: Optional list of repo names to include (substring match).
                      If provided, only repos whose name matches one of these are run.
+        required_files: Optional list of file names that must exist in a repo to be included.
 
     Returns:
         BulkResult with per-repo TaskillResult and aggregated counts.
@@ -243,7 +258,7 @@ def bulk_run(
     repos = find_repos(root, max_depth=max_depth)
     log.info("Found %d repos under %s", len(repos), root)
 
-    repos, skipped = _apply_filters(repos, repo_filter, max_projects)
+    repos, skipped = _apply_filters(repos, repo_filter, max_projects, required_files)
 
     result = BulkResult(root=root)
     result.skipped.extend(skipped)

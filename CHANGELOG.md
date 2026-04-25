@@ -81,6 +81,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - refactor(docs): code analysis engine
 - chore: update documentation and project metadata (README, CHANGELOG, TODO, SUMD, VERSION)
 
+- refactor(docs): CLI interface improvements
+- docs: update README and CHANGELOG to reflect CLI changes
+
+## [0.1.11] - 2026-04-25
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+
 ## [0.1.10] - 2026-04-25
 
 ### Docs
