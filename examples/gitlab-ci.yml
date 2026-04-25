@@ -1,0 +1,46 @@
+# GitLab CI snippet — copy into .gitlab-ci.yml or include via `include:`
+#
+# Required CI variables (Settings → CI/CD → Variables, masked + protected):
+#   OPENROUTER_API_KEY
+#   GITLAB_TOKEN          — Project Access Token with `api` + `write_repository`
+
+taskill:
+  image: python:3.12-slim
+  stage: docs
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+  variables:
+    LLM_MODEL: openrouter/qwen/qwen3-coder-next
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends git curl jq
+    - pip install --no-cache-dir taskill
+    - git config --global user.email "taskill@ci"
+    - git config --global user.name  "taskill"
+  script:
+    - git fetch --unshallow || true
+    - taskill status --json
+    - taskill run --json | tee taskill-result.json
+    - |
+      if git diff --quiet README.md CHANGELOG.md TODO.md; then
+        echo "Nothing to commit"; exit 0
+      fi
+      BRANCH="chore/taskill-${CI_PIPELINE_ID}"
+      git checkout -b "$BRANCH"
+      git add README.md CHANGELOG.md TODO.md
+      git commit -m "docs: taskill update"
+      # Push using the project access token
+      git push "https://oauth2:${GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" "$BRANCH"
+      # Open MR via API
+      curl --fail --silent \
+        --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+        --data "source_branch=${BRANCH}" \
+        --data "target_branch=${CI_DEFAULT_BRANCH}" \
+        --data "title=docs: taskill scheduled update" \
+        --data "remove_source_branch=true" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests"
+  artifacts:
+    paths:
+      - taskill-result.json
+    expire_in: 1 week

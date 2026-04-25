@@ -1,0 +1,17 @@
+[Unit]
+Description=taskill — docs hygiene runner
+Documentation=https://github.com/oqlos/taskill
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/github/your-project
+EnvironmentFile=%h/github/your-project/.env
+ExecStart=%h/.local/bin/taskill run
+Nice=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

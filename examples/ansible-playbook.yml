@@ -1,0 +1,52 @@
+# ansible-playbook -i inventory.ini examples/ansible-playbook.yml
+#
+# Required vars (vault-encrypted recommended):
+#   openrouter_api_key  — your OpenRouter key
+#   repos_root          — directory containing all repos (e.g. ~/github)
+#   llm_model           — defaults to openrouter/qwen/qwen3-coder-next
+
+- name: taskill — daily docs hygiene across all repos
+  hosts: dev_workstations
+  gather_facts: false
+  vars:
+    llm_model: "{{ llm_model | default('openrouter/qwen/qwen3-coder-next') }}"
+    repos_root: "{{ repos_root | default(ansible_env.HOME + '/github') }}"
+
+  tasks:
+    - name: Ensure taskill is installed
+      ansible.builtin.pip:
+        name: taskill
+        state: present
+        executable: pip3
+
+    - name: Discover repos containing taskill.yaml
+      ansible.builtin.find:
+        paths: "{{ repos_root }}"
+        patterns: taskill.yaml
+        recurse: true
+        depth: 4
+      register: taskill_configs
+
+    - name: Run taskill for each repo
+      ansible.builtin.shell:
+        cmd: taskill run --json
+        chdir: "{{ item.path | dirname }}"
+      environment:
+        OPENROUTER_API_KEY: "{{ openrouter_api_key }}"
+        LLM_MODEL: "{{ llm_model }}"
+      loop: "{{ taskill_configs.files }}"
+      loop_control:
+        label: "{{ item.path | dirname }}"
+      register: taskill_runs
+      # taskill exits 0 even when triggers don't fire — only fail on real errors
+      changed_when: "'\"ran\": true' in taskill_runs.stdout"
+      failed_when: taskill_runs.rc != 0 and 'thresholds not met' not in taskill_runs.stdout
+
+    - name: Summary report
+      ansible.builtin.debug:
+        msg: >
+          {{ taskill_runs.results
+             | selectattr('changed', 'true')
+             | map(attribute='item.path')
+             | map('dirname')
+             | list }}

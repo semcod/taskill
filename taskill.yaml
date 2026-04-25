@@ -1,0 +1,57 @@
+# taskill.yaml — daily project hygiene config
+# Run: taskill status   (preview)
+#      taskill run      (execute when triggers fire)
+#      taskill run --force --dry-run   (preview the actual output)
+
+# Files taskill manages
+files:
+  readme: README.md
+  changelog: CHANGELOG.md
+  todo: TODO.md
+  sumd: SUMD.md
+  sumr: SUMR.md
+
+# When should taskill run?  (OR semantics by default — any one true → run)
+triggers:
+  min_hours_since_last_run: 24
+  min_commits_since_last_run: 1
+  changed_files_threshold: 1
+  coverage_change_pct: 2.0      # absolute pp; null to disable
+  failed_tests_changed: true
+  watch_files: [SUMD.md, SUMR.md]
+  require_all: false            # set true for AND semantics
+
+# Provider chain — first one that succeeds wins.
+providers:
+  - name: windsurf_mcp
+    enabled: true
+    options:
+      endpoint: stdio
+      command: ["windsurf", "mcp", "serve"]
+      tool_name: complete
+  - name: openrouter
+    enabled: true
+    options:
+      base_url: https://openrouter.ai/api/v1
+      temperature: 0.2
+      max_tokens: 4096
+      timeout: 120
+  - name: algorithmic
+    enabled: true     # always-on safety net; keep this on
+
+# Optional: reuse other tools in your stack (loose coupling — subprocess calls)
+reuse:
+  pyqual: true
+  llx: false
+  prefact: false
+
+# Where state lives (tracks last run, last sha, last coverage…)
+state_file: .taskill/state.json
+
+# CI/VCS integrations — placeholder for the v0.2 refactor
+integrations:
+  github: {}
+  gitlab: {}
+  ansible: {}
+
+dry_run: false

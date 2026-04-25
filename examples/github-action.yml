@@ -1,0 +1,51 @@
+name: taskill — daily docs hygiene
+
+on:
+  schedule:
+    - cron: "0 6 * * *"     # daily at 06:00 UTC
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  taskill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # taskill needs full git history
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install taskill
+        run: pip install taskill
+
+      - name: Run taskill
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          LLM_MODEL: openrouter/qwen/qwen3-coder-next
+        run: |
+          taskill status --json | tee taskill-status.json
+          taskill run --json | tee taskill-result.json
+
+      - name: Open PR if files changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "docs: taskill update"
+          title: "docs: taskill scheduled update"
+          body: |
+            Automated docs sync — produced by `taskill run`.
+
+            See `taskill-result.json` for the per-provider summary.
+          branch: chore/taskill-${{ github.run_number }}
+          delete-branch: true
+          add-paths: |
+            README.md
+            CHANGELOG.md
+            TODO.md
