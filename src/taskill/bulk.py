@@ -243,6 +243,7 @@ def _should_skip_repo(repo: Path, cfg: TaskillConfig) -> tuple[bool, str]:
     
     # If no previous state, don't skip
     if not state.last_todo_hash and not state.last_readme_hash:
+        log.debug("%s: no previous hash state", repo.name)
         return False, ""
     
     # Check current hashes
@@ -251,6 +252,12 @@ def _should_skip_repo(repo: Path, cfg: TaskillConfig) -> tuple[bool, str]:
     
     current_todo_hash = _file_hash(todo_path)
     current_readme_hash = _file_hash(readme_path)
+    
+    log.debug(
+        "%s: last_todo_hash=%s, current_todo_hash=%s, last_readme_hash=%s, current_readme_hash=%s",
+        repo.name, state.last_todo_hash, current_todo_hash,
+        state.last_readme_hash, current_readme_hash
+    )
     
     # If hashes match, skip
     if state.last_todo_hash == current_todo_hash and state.last_readme_hash == current_readme_hash:

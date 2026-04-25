@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 import click
+import yaml
 from rich.console import Console
 from rich.table import Table
 
@@ -88,11 +89,42 @@ def _print_run_result(result) -> None:
             console.print(f"  [dim]- {e}[/dim]")
 
 
+def _format_output(data: dict, output_format: str) -> str:
+    """Format output data according to specified format.
+
+    Supported formats:
+    - table: Rich table (not applicable here, handled separately)
+    - json: JSON format
+    - yaml: YAML format
+    - markdown: YAML wrapped in markdown code block
+    """
+    fmt = output_format.lower()
+
+    # Handle legacy --json flag
+    if fmt == "json":
+        return json.dumps(data, indent=2, default=str)
+
+    if fmt == "yaml":
+        return yaml.safe_dump(data, indent=2, default_flow_style=False, sort_keys=False)
+
+    if fmt == "markdown":
+        yaml_content = yaml.safe_dump(data, indent=2, default_flow_style=False, sort_keys=False)
+        return f"```yaml\n{yaml_content}```"
+
+    return json.dumps(data, indent=2, default=str)
+
+
 @main.command()
 @click.argument("directory", required=False, default=".")
 @click.option("--force", is_flag=True, help="Run even if triggers say no")
 @click.option("--dry-run", is_flag=True, help="Don't write files or persist state")
-@click.option("--json", "as_json", is_flag=True, help="Output result as JSON")
+@click.option("--json", "as_json", is_flag=True, help="Output result as JSON (deprecated: use --format json)")
+@click.option(
+    "--format", "output_format",
+    type=click.Choice(["table", "json", "yaml", "markdown"], case_sensitive=False),
+    default="table",
+    help="Output format: table (default), json, yaml, or markdown (yaml in codeblock)",
+)
 @click.option(
     "--manifest", "-m", "manifests", multiple=True,
     help="Filter: require specific manifest file (repeatable). E.g. -m pyproject.toml -m package.json",
@@ -124,6 +156,7 @@ def run(
     force: bool,
     dry_run: bool,
     as_json: bool,
+    output_format: str,
     manifests: tuple[str, ...],
     languages: tuple[str, ...],
     extensions: tuple[str, ...],
@@ -145,6 +178,9 @@ def run(
     """
     project_root = Path(directory).resolve()
 
+    # Handle legacy --json flag (override format if --json was used)
+    effective_format = "json" if as_json else output_format
+
     # Check if any filters are specified
     has_filters = any([manifests, languages, extensions, name_filters])
 
@@ -156,8 +192,8 @@ def run(
         tk = Taskill(config=cfg)
         result = tk.run(force=force)
 
-        if as_json:
-            click.echo(json.dumps(result.as_dict(), indent=2))
+        if effective_format != "table":
+            click.echo(_format_output(result.as_dict(), effective_format))
             sys.exit(0 if result.ran or not result.errors else 1)
 
         _print_run_result(result)
@@ -223,7 +259,7 @@ def run(
             result = tk.run(force=force)
             results[repo] = result
 
-            if as_json:
+            if effective_format != "table":
                 continue
 
             console.print(f"\n[bold cyan]{repo.name}:[/bold cyan]")
@@ -231,15 +267,16 @@ def run(
 
         except Exception as e:
             errors.append((repo, str(e)))
-            console.print(f"\n[red]Error in {repo.name}:[/red] {e}")
+            if effective_format == "table":
+                console.print(f"\n[red]Error in {repo.name}:[/red] {e}")
 
-    if as_json:
+    if effective_format != "table":
         output = {
             "repos": {str(r): res.as_dict() for r, res in results.items()},
             "skipped": [{"path": str(p), "reason": r} for p, r in skipped],
             "errors": [{"path": str(p), "error": e} for p, e in errors],
         }
-        click.echo(json.dumps(output, indent=2, default=str))
+        click.echo(_format_output(output, effective_format))
 
     if errors:
         sys.exit(1)
@@ -247,9 +284,15 @@ def run(
 
 @main.command()
 @click.argument("directory", required=False, default=".")
-@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON (deprecated: use --format json)")
+@click.option(
+    "--format", "output_format",
+    type=click.Choice(["table", "json", "yaml", "markdown"], case_sensitive=False),
+    default="table",
+    help="Output format: table (default), json, yaml, or markdown (yaml in codeblock)",
+)
 @click.pass_context
-def status(ctx: click.Context, directory: str, as_json: bool) -> None:
+def status(ctx: click.Context, directory: str, as_json: bool, output_format: str) -> None:
     """Show what taskill would do without running it.
 
     DIRECTORY is the target project directory (default: current directory).
@@ -259,8 +302,11 @@ def status(ctx: click.Context, directory: str, as_json: bool) -> None:
     tk = Taskill(config=cfg)
     info = tk.status()
 
-    if as_json:
-        click.echo(json.dumps(info, indent=2, default=str))
+    # Handle legacy --json flag
+    effective_format = "json" if as_json else output_format
+
+    if effective_format != "table":
+        click.echo(_format_output(info, effective_format))
         return
 
     table = Table(title="taskill status", show_header=True, header_style="bold cyan")
