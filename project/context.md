@@ -4,17 +4,17 @@
 
 - **Project**: /home/tom/github/semcod/taskill
 - **Primary Language**: python
-- **Languages**: python: 18, yaml: 12, shell: 3, yml: 3, toml: 1
+- **Languages**: python: 18, yaml: 12, yml: 3, txt: 2, shell: 2
 - **Analysis Mode**: static
-- **Total Functions**: 171
+- **Total Functions**: 172
 - **Total Classes**: 22
 - **Modules**: 38
-- **Entry Points**: 141
+- **Entry Points**: 142
 
 ## Architecture by Module
 
 ### project.map.toon
-- **Functions**: 101
+- **Functions**: 102
 - **File**: `map.toon.yaml`
 
 ### src.taskill.core
@@ -124,14 +124,6 @@ across many self-hosted project
 ### src.taskill.providers.openrouter.OpenRouterProvider.generate
 - **Calls**: os.getenv, src.taskill.providers.openrouter._normalize_model, self.options.get, self.options.get, self._parse_json_loosely, GeneratedDocs, ProviderError, os.getenv
 
-### src.taskill.bulk.bulk_run
-> Run taskill across all repos found under `root`.
-
-Args:
-    root: Parent directory containing one or more repos
-    shared_config: Optional path to sh
-- **Calls**: None.resolve, isinstance, src.taskill.bulk.find_repos, log.info, BulkResult, result.skipped.extend, len, log.info
-
 ### src.taskill.cli.status
 > Show what taskill would do without running it.
 - **Calls**: main.command, click.option, src.taskill.config.load_config, Taskill, tk.status, Table, table.add_column, table.add_column
@@ -189,12 +181,12 @@ Falls back to built-in registry if entry points are not available
 > Reset TODO.md to an empty header. Use after a release.
 - **Calls**: main.command, click.option, click.confirmation_option, src.taskill.updaters.todo.empty_todo, console.print, Path
 
+### src.taskill.bulk.BulkResult.as_dict
+- **Calls**: str, str, r.as_dict, str, str, self.per_repo.items
+
 ### src.taskill.providers.openrouter.OpenRouterProvider._parse_json_loosely
 > Be forgiving: strip ```json fences, extract first {...} block.
 - **Calls**: text.strip, re.sub, re.search, json.loads, json.loads, m.group
-
-### src.taskill.bulk.BulkResult.as_dict
-- **Calls**: str, str, r.as_dict, str, str, self.per_repo.items
 
 ### src.taskill.updaters.todo.TodoUpdater.apply
 > Apply todo updates from generated docs.
@@ -225,6 +217,9 @@ Falls back to built-in registry if entry points are not available
 ### src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available
 - **Calls**: bool, src.taskill.providers.windsurf_mcp._mcp_lib_present, src.taskill.providers.windsurf_mcp._candidate_endpoints
 
+### src.taskill.state.TaskillState.stamp
+- **Calls**: None.isoformat, datetime.now
+
 ## Process Flows
 
 Key execution flows identified:
@@ -252,40 +247,39 @@ generate [src.taskill.providers.windsurf_mcp.WindsurfMcpProvider]
 _update_todo [src.taskill.updaters.todo.TodoUpdater]
 ```
 
-### Flow 5: bulk_run
-```
-bulk_run [src.taskill.bulk]
-  └─> find_repos
-      └─> _scan
-```
-
-### Flow 6: status
+### Flow 5: status
 ```
 status [src.taskill.cli]
   └─ →> load_config
 ```
 
-### Flow 7: _update_changelog
+### Flow 6: _update_changelog
 ```
 _update_changelog [src.taskill.updaters.changelog.ChangelogUpdater]
 ```
 
-### Flow 8: _find_completed_todos
+### Flow 7: _find_completed_todos
 ```
 _find_completed_todos [src.taskill.providers.algorithmic.AlgorithmicProvider]
 ```
 
-### Flow 9: init
+### Flow 8: init
 ```
 init [src.taskill.cli]
 ```
 
-### Flow 10: _apply
+### Flow 9: _apply
 ```
 _apply [src.taskill.core.Taskill]
   └─ →> update_changelog
   └─ →> update_todo
   └─ →> update_readme
+```
+
+### Flow 10: _update_readme
+```
+_update_readme [src.taskill.updaters.readme.ReadmeUpdater]
+  └─ →> render_status_block
 ```
 
 ## Key Classes
@@ -294,15 +288,15 @@ _apply [src.taskill.core.Taskill]
 - **Methods**: 8
 - **Key Methods**: src.taskill.core.Taskill.__init__, src.taskill.core.Taskill.run, src.taskill.core.Taskill.status, src.taskill.core.Taskill._snapshot, src.taskill.core.Taskill._build_context, src.taskill.core.Taskill._maybe_pyqual_report, src.taskill.core.Taskill._apply, src.taskill.core.Taskill._update_state
 
-### src.taskill.providers.algorithmic.AlgorithmicProvider
-- **Methods**: 5
-- **Key Methods**: src.taskill.providers.algorithmic.AlgorithmicProvider.is_available, src.taskill.providers.algorithmic.AlgorithmicProvider.generate, src.taskill.providers.algorithmic.AlgorithmicProvider._format_commit, src.taskill.providers.algorithmic.AlgorithmicProvider._find_completed_todos, src.taskill.providers.algorithmic.AlgorithmicProvider._extract_new_todos
-- **Inherits**: Provider
-
 ### src.taskill.bulk.BulkResult
 > Aggregate result of running taskill across multiple repos.
 - **Methods**: 5
 - **Key Methods**: src.taskill.bulk.BulkResult.total_repos, src.taskill.bulk.BulkResult.ran_count, src.taskill.bulk.BulkResult.changed_count, src.taskill.bulk.BulkResult.as_dict, src.taskill.bulk.BulkResult.summary
+
+### src.taskill.providers.algorithmic.AlgorithmicProvider
+- **Methods**: 5
+- **Key Methods**: src.taskill.providers.algorithmic.AlgorithmicProvider.is_available, src.taskill.providers.algorithmic.AlgorithmicProvider.generate, src.taskill.providers.algorithmic.AlgorithmicProvider._format_commit, src.taskill.providers.algorithmic.AlgorithmicProvider._find_completed_todos, src.taskill.providers.algorithmic.AlgorithmicProvider._extract_new_todos
+- **Inherits**: Provider
 
 ### src.taskill.providers.base.Provider
 > Abstract provider — produces docs from a project snapshot.
@@ -443,16 +437,16 @@ Functions exposed as public API (no underscore prefix):
 - `src.taskill.state.load_state` - 6 calls
 - `src.taskill.cli.main` - 6 calls
 - `src.taskill.cli.clean_todo` - 6 calls
-- `src.taskill.updaters.changelog.release_unreleased` - 6 calls
 - `src.taskill.bulk.BulkResult.as_dict` - 6 calls
+- `src.taskill.updaters.changelog.release_unreleased` - 6 calls
+- `src.taskill.bulk.find_repos` - 5 calls
 - `src.taskill.updaters.readme.render_status_block` - 5 calls
 - `src.taskill.updaters.todo.TodoUpdater.apply` - 5 calls
 - `src.taskill.providers.base.build_user_prompt` - 5 calls
-- `src.taskill.bulk.find_repos` - 5 calls
 - `src.taskill.state.save_state` - 4 calls
 - `src.taskill.git_state.file_hash` - 4 calls
-- `src.taskill.providers.build_chain` - 4 calls
 - `src.taskill.bulk.resolve_repo_config` - 4 calls
+- `src.taskill.providers.build_chain` - 4 calls
 - `src.taskill.core.TaskillResult.as_dict` - 3 calls
 - `src.taskill.core.Taskill.status` - 3 calls
 - `src.taskill.updaters.readme.ReadmeUpdater.apply` - 3 calls
@@ -460,8 +454,8 @@ Functions exposed as public API (no underscore prefix):
 - `src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available` - 3 calls
 - `src.taskill.state.TaskillState.stamp` - 2 calls
 - `src.taskill.git_state.changed_files_since` - 2 calls
+- `src.taskill.bulk.BulkResult.summary` - 2 calls
 - `src.taskill.updaters.readme.update_readme` - 2 calls
-- `src.taskill.updaters.changelog.update_changelog` - 2 calls
 
 ## System Interactions
 
@@ -486,11 +480,6 @@ graph TD
     _update_todo --> read_text
     generate --> getenv
     generate --> _normalize_model
-    bulk_run --> resolve
-    bulk_run --> isinstance
-    bulk_run --> find_repos
-    bulk_run --> info
-    bulk_run --> BulkResult
     status --> command
     status --> option
     status --> load_config
@@ -499,6 +488,11 @@ graph TD
     generate --> defaultdict
     generate --> _find_completed_todo
     generate --> _extract_new_todos
+    generate --> len
+    run --> _snapshot
+    run --> evaluate
+    run --> build_chain
+    run --> _build_context
 ```
 
 ## Reverse Engineering Guidelines

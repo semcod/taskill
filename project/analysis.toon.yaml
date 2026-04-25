@@ -1,18 +1,18 @@
-# code2llm | 38f 5234L | python:18,yaml:12,shell:3,yml:3,toml:1,txt:1 | 2026-04-25
-# CC̄=2.0 | critical:5/171 | dups:0 | cycles:1
+# code2llm | 38f 5318L | python:18,yaml:12,yml:3,txt:2,shell:2,toml:1 | 2026-04-25
+# CC̄=2.0 | critical:5/172 | dups:0 | cycles:1
 
 HEALTH[5]:
   🟡 CC    run CC=16 (limit:15)
   🟡 CC    bulk_run_cmd CC=17 (limit:15)
   🟡 CC    evaluate CC=21 (limit:15)
-  🟡 CC    _update_todo CC=21 (limit:15)
   🟡 CC    bulk_run CC=17 (limit:15)
+  🟡 CC    _update_todo CC=21 (limit:15)
 
 REFACTOR[2]:
   1. split 5 high-CC methods  (CC>15)
   2. break 1 circular dependencies
 
-PIPELINES[37]:
+PIPELINES[36]:
   [1] Src [stamp]: stamp
       PURITY: 100% pure
   [2] Src [main]: main → _setup_logging
@@ -27,7 +27,7 @@ PIPELINES[37]:
 LAYERS:
   src/                            CC̄=4.7    ←in:0  →out:0
   │ !! cli                        347L  0C    8m  CC=17     ←0
-  │ !! bulk                       249L  1C    7m  CC=17     ←0
+  │ !! bulk                       249L  1C    7m  CC=17     ←1
   │ core                       211L  2C    9m  CC=11     ←0
   │ config                     170L  4C    1m  CC=8      ←3
   │ algorithmic                155L  1C    5m  CC=10     ←0
@@ -46,12 +46,12 @@ LAYERS:
   │ __init__                    30L  0C    0m  CC=0.0    ←0
   │
   project/                        CC̄=0.0    ←in:0  →out:0
-  │ !! calls.yaml                 620L  0C    0m  CC=0.0    ←0
-  │ map.toon.yaml              208L  0C   98m  CC=0.0    ←1
+  │ !! calls.yaml                 622L  0C    0m  CC=0.0    ←0
+  │ map.toon.yaml              209L  0C   99m  CC=0.0    ←0
   │ calls.toon.yaml            142L  0C    0m  CC=0.0    ←0
-  │ analysis.toon.yaml          87L  0C    0m  CC=0.0    ←0
+  │ analysis.toon.yaml          85L  0C    0m  CC=0.0    ←0
+  │ evolution.toon.yaml         59L  0C    0m  CC=0.0    ←0
   │ project.toon.yaml           56L  0C    0m  CC=0.0    ←0
-  │ evolution.toon.yaml         55L  0C    0m  CC=0.0    ←0
   │ prompt.txt                  47L  0C    0m  CC=0.0    ←0
   │ duplication.toon.yaml       34L  0C    0m  CC=0.0    ←0
   │
@@ -61,9 +61,9 @@ LAYERS:
   │ pyproject.toml              97L  0C    0m  CC=0.0    ←0
   │ daily_update.sh             93L  0C    0m  CC=0.0    ←0
   │ prefact.yaml                91L  0C    0m  CC=0.0    ←0
+  │ tree.txt                    80L  0C    0m  CC=0.0    ←0
   │ taskill.yaml                57L  0C    0m  CC=0.0    ←0
   │ project.sh                  47L  0C    0m  CC=0.0    ←0
-  │ tree.sh                      1L  0C    0m  CC=0.0    ←0
   │
   examples/                       CC̄=0.0    ←in:0  →out:0
   │ ansible-playbook.yml        52L  0C    0m  CC=0.0    ←0
@@ -74,11 +74,7 @@ LAYERS:
   │ generated-cli-tests.testql.toon.yaml    12L  0C    0m  CC=0.0    ←0
   │
 
-COUPLING:
-               project.map  src.taskill
-  project.map           ──           ←1
-  src.taskill            1           ──
-  CYCLES: 1
+COUPLING: no cross-package imports detected
 
 EXTERNAL:
   validation: run `vallm batch .` → validation.toon

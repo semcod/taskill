@@ -1,4 +1,4 @@
-# code2llm/evolution | 171 func | 18f | 2026-04-25
+# code2llm/evolution | 172 func | 18f | 2026-04-25
 
 NEXT[5] (ranked by impact):
   [1] !  SPLIT-FUNC      TodoUpdater._update_todo  CC=21  fan=20

@@ -13,13 +13,13 @@ flowchart TD
         src__taskill__cli__release["release"]
         src__taskill__cli__bulk_run_cmd["bulk_run_cmd"]
         src__taskill__cli__clean_todo["clean_todo"]
-        src__taskill__git_state___run["_run"]
-        src__taskill__git_state__head_sha["head_sha"]
-        src__taskill__git_state__collect_snapshot["collect_snapshot"]
         src__taskill__triggers__TriggerEvaluation__summary["summary"]
         src__taskill__triggers__evaluate{{evaluate CC=21}}
         src__taskill__core__TaskillResult__as_dict["as_dict"]
-        ...["+128 more"]
+        src__taskill__core__Taskill__run["run"]
+        src__taskill__core__Taskill__status["status"]
+        src__taskill__core__Taskill___snapshot["_snapshot"]
+        ...["+129 more"]
     end
 
     class src__taskill__state__TaskillState__stamp,src__taskill__cli___setup_logging,src__taskill__cli__main,src__taskill__cli__run,src__taskill__cli__status,src__taskill__cli__init,src__taskill__cli__release,src__taskill__cli__bulk_run_cmd,src__taskill__cli__clean_todo,src__taskill__triggers__TriggerEvaluation__summary entry

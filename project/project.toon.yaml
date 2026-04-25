@@ -1,4 +1,4 @@
-# taskill | 171 func | 18f | 9121L | python | 2026-04-25
+# taskill | 172 func | 18f | 9234L | python | 2026-04-25
 
 HEALTH:
   CC̄=2.0  critical=10 (limit:10)  dup=0  cycles=1
@@ -9,20 +9,20 @@ ALERTS[20]:
   !!  cc_exceeded      evaluate = 21 (limit:15)
   !!  cc_exceeded      TodoUpdater._update_todo = 21 (limit:15)
   !!  high_fan_out     bulk_run_cmd = 19 (limit:10)
-  !!  high_fan_out     WindsurfMcpProvider.generate = 19 (limit:10)
   !!  high_fan_out     bulk_run = 19 (limit:10)
+  !!  high_fan_out     WindsurfMcpProvider.generate = 19 (limit:10)
   !!  high_fan_out     load_config = 17 (limit:10)
   !!  high_fan_out     run = 16 (limit:10)
   !   cc_exceeded      bulk_run_cmd = 17 (limit:15)
 
 MODULES[38] (top by size):
-  M[project/calls.yaml] 620L C:0 F:0 CC↑0 D:0 (yaml)
+  M[project/calls.yaml] 622L C:0 F:0 CC↑0 D:0 (yaml)
   M[planfile.yaml] 617L C:0 F:0 CC↑0 D:0 (yaml)
   M[goal.yaml] 513L C:0 F:0 CC↑0 D:0 (yaml)
   M[src/taskill/cli.py] 347L C:0 F:8 CC↑17 D:0 (python)
-  M[src/taskill/bulk.py] 249L C:1 F:7 CC↑17 D:0 (python)
+  M[src/taskill/bulk.py] 249L C:1 F:7 CC↑17 D:1 (python)
   M[src/taskill/core.py] 211L C:2 F:9 CC↑11 D:0 (python)
-  M[project/map.toon.yaml] 208L C:0 F:98 CC↑0 D:1 (yaml)
+  M[project/map.toon.yaml] 209L C:0 F:99 CC↑0 D:0 (yaml)
   M[src/taskill/config.py] 170L C:4 F:1 CC↑8 D:3 (python)
   M[src/taskill/providers/algorithmic.py] 155L C:1 F:5 CC↑10 D:0 (python)
   M[src/taskill/git_state.py] 147L C:2 F:8 CC↑7 D:2 (python)
@@ -31,7 +31,7 @@ MODULES[38] (top by size):
   M[src/taskill/updaters/changelog.py] 119L C:1 F:4 CC↑12 D:2 (python)
   M[src/taskill/providers/openrouter.py] 114L C:1 F:4 CC↑6 D:0 (python)
   M[src/taskill/updaters/todo.py] 113L C:1 F:4 CC↑21 D:2 (python)
-  LANGS: python:18/yaml:12/shell:3/yml:3/txt:1/toml:1
+  LANGS: python:18/yaml:12/yml:3/shell:2/txt:2/toml:1
 
 HOTSPOTS[10]:
   ★ ChangelogUpdater._update_changelog fan=20  // Append entries under [Unreleased]. Returns True if the file changed.
@@ -39,18 +39,18 @@ HOTSPOTS[10]:
   ★ bulk_run_cmd fan=19  // Run taskill across all git repos under a directory.
 
 Useful for fleet-wide hygie
-  ★ WindsurfMcpProvider.generate fan=19  // Orchestrates 19 calls
   ★ bulk_run fan=19  // Run taskill across all repos found under `root`.
 
 Args:
     root: Parent directo
+  ★ WindsurfMcpProvider.generate fan=19  // Orchestrates 19 calls
 
 REFACTOR[12]:
   [1] H/H Split god module goal.yaml (513L, 0 classes)
   [2] H/H Split god module planfile.yaml (617L, 0 classes)
-  [3] H/H Split god module project/calls.yaml (620L, 0 classes)
+  [3] H/H Split god module project/calls.yaml (622L, 0 classes)
   [4] M/L Split run (CC=16)
   [5] M/L Split bulk_run_cmd (CC=17)
 
 EVOLUTION:
-  2026-04-25 CC̄=2.0 crit=10 9121L // Automated analysis
+  2026-04-25 CC̄=2.0 crit=10 9234L // Automated analysis
