@@ -1,4 +1,4 @@
-# code2llm | 38f 5564L | python:18,yaml:12,yml:3,txt:2,shell:2,toml:1 | 2026-04-25
+# code2llm | 38f 5571L | python:18,yaml:12,yml:3,txt:2,shell:2,toml:1 | 2026-04-25
 # CC̄=1.8 | critical:0/200 | dups:0 | cycles:1
 
 HEALTH[0]: ok
@@ -6,16 +6,16 @@ HEALTH[0]: ok
 REFACTOR[1]:
   1. break 1 circular dependencies
 
-PIPELINES[45]:
+PIPELINES[38]:
   [1] Src [stamp]: stamp
       PURITY: 100% pure
-  [2] Src [as_dict]: as_dict
+  [2] Src [main]: main → _setup_logging
       PURITY: 100% pure
-  [3] Src [summary]: summary
+  [3] Src [run]: run → load_config
       PURITY: 100% pure
-  [4] Src [apply]: apply
+  [4] Src [status]: status → load_config
       PURITY: 100% pure
-  [5] Src [_update_changelog]: _update_changelog
+  [5] Src [init]: init
       PURITY: 100% pure
 
 LAYERS:
@@ -26,12 +26,12 @@ LAYERS:
   │ config                     170L  4C    1m  CC=8      ←3
   │ algorithmic                155L  1C    5m  CC=10     ←0
   │ git_state                  147L  2C    8m  CC=7      ←2
-  │ triggers                   135L  1C    9m  CC=5      ←0
+  │ triggers                   135L  1C    9m  CC=5      ←1
   │ windsurf_mcp               133L  1C    4m  CC=7      ←0
-  │ todo                       131L  1C    7m  CC=8      ←0
+  │ todo                       131L  1C    7m  CC=8      ←2
   │ base                       126L  3C    6m  CC=9      ←2
   │ changelog                  119L  1C    4m  CC=12     ←2
-  │ readme                      98L  1C    4m  CC=6      ←0
+  │ readme                      98L  1C    4m  CC=6      ←1
   │ openrouter                  96L  1C    3m  CC=6      ←0
   │ __init__                    75L  0C    2m  CC=6      ←1
   │ __init__                    54L  0C    1m  CC=6      ←0
@@ -40,11 +40,11 @@ LAYERS:
   │ __init__                    30L  0C    0m  CC=0.0    ←0
   │
   project/                        CC̄=0.0    ←in:0  →out:0
-  │ !! calls.yaml                 774L  0C    0m  CC=0.0    ←0
-  │ map.toon.yaml              222L  0C  112m  CC=0.0    ←5
-  │ calls.toon.yaml            170L  0C    0m  CC=0.0    ←0
+  │ !! calls.yaml                 779L  0C    0m  CC=0.0    ←0
+  │ map.toon.yaml              222L  0C  112m  CC=0.0    ←0
+  │ calls.toon.yaml            169L  0C    0m  CC=0.0    ←0
   │ analysis.toon.yaml          81L  0C    0m  CC=0.0    ←0
-  │ project.toon.yaml           53L  0C    0m  CC=0.0    ←0
+  │ project.toon.yaml           56L  0C    0m  CC=0.0    ←0
   │ prompt.txt                  47L  0C    0m  CC=0.0    ←0
   │ evolution.toon.yaml         39L  0C    0m  CC=0.0    ←0
   │ duplication.toon.yaml       34L  0C    0m  CC=0.0    ←0
@@ -68,13 +68,7 @@ LAYERS:
   │ generated-cli-tests.testql.toon.yaml    12L  0C    0m  CC=0.0    ←0
   │
 
-COUPLING:
-               project.map  src.taskill
-  project.map           ──          ←11  hub
-  src.taskill           11           ──  !! fan-out
-  CYCLES: 1
-  HUB: project.map/ (fan-in=11)
-  SMELL: src.taskill/ fan-out=11 → split needed
+COUPLING: no cross-package imports detected
 
 EXTERNAL:
   validation: run `vallm batch .` → validation.toon

@@ -17,14 +17,14 @@
 - **Functions**: 115
 - **File**: `map.toon.yaml`
 
+### src.taskill.cli
+- **Functions**: 10
+- **File**: `cli.py`
+
 ### src.taskill.bulk
 - **Functions**: 10
 - **Classes**: 1
 - **File**: `bulk.py`
-
-### src.taskill.cli
-- **Functions**: 10
-- **File**: `cli.py`
 
 ### src.taskill.triggers
 - **Functions**: 9
@@ -56,6 +56,11 @@
 - **Classes**: 1
 - **File**: `algorithmic.py`
 
+### src.taskill.updaters.readme
+- **Functions**: 4
+- **Classes**: 1
+- **File**: `readme.py`
+
 ### src.taskill.updaters.changelog
 - **Functions**: 4
 - **Classes**: 1
@@ -65,11 +70,6 @@
 - **Functions**: 4
 - **Classes**: 1
 - **File**: `windsurf_mcp.py`
-
-### src.taskill.updaters.readme
-- **Functions**: 4
-- **Classes**: 1
-- **File**: `readme.py`
 
 ### src.taskill.state
 - **Functions**: 3
@@ -81,14 +81,14 @@
 - **Classes**: 1
 - **File**: `openrouter.py`
 
-### src.taskill.providers
-- **Functions**: 2
-- **File**: `__init__.py`
-
 ### src.taskill.updaters.base
 - **Functions**: 2
 - **Classes**: 2
 - **File**: `base.py`
+
+### src.taskill.providers
+- **Functions**: 2
+- **File**: `__init__.py`
 
 ### src.taskill.config
 - **Functions**: 1
@@ -104,10 +104,10 @@
 Main execution flows into the system:
 
 ### src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate
-- **Calls**: project.map.toon._candidate_endpoints, self.options.get, src.taskill.providers.base.parse_json_loosely, GeneratedDocs, project.map.toon._mcp_lib_present, ProviderError, ProviderError, ProviderError
+- **Calls**: src.taskill.providers.windsurf_mcp._candidate_endpoints, self.options.get, src.taskill.providers.base.parse_json_loosely, GeneratedDocs, src.taskill.providers.windsurf_mcp._mcp_lib_present, ProviderError, ProviderError, ProviderError
 
 ### src.taskill.providers.openrouter.OpenRouterProvider.generate
-- **Calls**: os.getenv, project.map.toon._normalize_model, self.options.get, self.options.get, src.taskill.providers.base.parse_json_loosely, GeneratedDocs, ProviderError, os.getenv
+- **Calls**: os.getenv, src.taskill.providers.openrouter._normalize_model, self.options.get, self.options.get, src.taskill.providers.base.parse_json_loosely, GeneratedDocs, ProviderError, os.getenv
 
 ### src.taskill.cli.status
 > Show what taskill would do without running it.
@@ -116,19 +116,19 @@ Main execution flows into the system:
 ### src.taskill.providers.algorithmic.AlgorithmicProvider.generate
 - **Calls**: defaultdict, self._find_completed_todos, self._extract_new_todos, len, GeneratedDocs, context.get, self._format_commit, entries.append
 
-### src.taskill.updaters.changelog.ChangelogUpdater._update_changelog
-> Append entries under [Unreleased]. Returns True if the file changed.
-- **Calls**: path.exists, re.compile, pattern.search, m.group, set, path.write_text, path.read_text, original.startswith
-
-### src.taskill.core.Taskill.run
-- **Calls**: self._snapshot, project.map.toon.evaluate, src.taskill.providers.build_chain, self._build_context, TaskillResult, log.info, TaskillResult, TaskillResult
-
 ### src.taskill.cli.bulk_run_cmd
 > Run taskill across all git repos under a directory.
 
 Useful for fleet-wide hygiene: keep README/CHANGELOG/TODO in sync
 across many self-hosted project
 - **Calls**: main.command, click.option, click.option, click.option, click.option, click.option, click.option, click.option
+
+### src.taskill.core.Taskill.run
+- **Calls**: self._snapshot, src.taskill.triggers.evaluate, src.taskill.providers.build_chain, self._build_context, TaskillResult, log.info, TaskillResult, TaskillResult
+
+### src.taskill.updaters.changelog.ChangelogUpdater._update_changelog
+> Append entries under [Unreleased]. Returns True if the file changed.
+- **Calls**: path.exists, re.compile, pattern.search, m.group, set, path.write_text, path.read_text, original.startswith
 
 ### src.taskill.providers.algorithmic.AlgorithmicProvider._find_completed_todos
 > Return TODO lines that look completed.
@@ -150,20 +150,17 @@ Two signals:
 - **Calls**: main.command, click.option, Path, Path, yml.write_text, console.print, console.print, console.print
 
 ### src.taskill.core.Taskill._apply
-- **Calls**: src.taskill.updaters.changelog.update_changelog, project.map.toon.update_todo, project.map.toon.update_readme, changed.append, changed.append, changed.append, str, str
+- **Calls**: src.taskill.updaters.changelog.update_changelog, src.taskill.updaters.todo.update_todo, src.taskill.updaters.readme.update_readme, changed.append, changed.append, changed.append, str, str
 
 ### src.taskill.updaters.todo.TodoUpdater._update_todo
 > Remove completed_lines from TODO and append new_items. Returns True on change.
 - **Calls**: path.exists, original.splitlines, self._partition_lines, self._dedup_new_items, self._assemble_output, path.write_text, path.read_text, line.rstrip
 
+### src.taskill.updaters.readme.ReadmeUpdater._update_readme
+- **Calls**: src.taskill.updaters.readme.render_status_block, path.read_text, path.write_text, path.exists, path.write_text, re.compile, pattern.sub, re.escape
+
 ### src.taskill.providers.algorithmic.AlgorithmicProvider._extract_new_todos
 - **Calls**: re.compile, set, pat.finditer, None.rstrip, seen.add, new.append, text.lower, text.lower
-
-### src.taskill.triggers.evaluate
-- **Calls**: src.taskill.triggers._check_time, src.taskill.triggers._check_commits, src.taskill.triggers._check_changed_files, src.taskill.triggers._check_coverage, src.taskill.triggers._check_failed_tests, src.taskill.triggers._check_sumd, src.taskill.triggers._check_watched_files, TriggerEvaluation
-
-### src.taskill.updaters.readme.ReadmeUpdater._update_readme
-- **Calls**: project.map.toon.render_status_block, path.read_text, path.write_text, path.exists, path.write_text, re.compile, pattern.sub, re.escape
 
 ### src.taskill.core.Taskill._build_context
 - **Calls**: self.config.reuse.get, _read, _read, _read, self._maybe_pyqual_report, self.config.files.get, p.exists, p.read_text
@@ -179,19 +176,16 @@ Falls back to built-in registry if entry points are not available
 (e.g., during development before
 - **Calls**: registry.setdefault, registry.setdefault, registry.setdefault, importlib.metadata.entry_points, ep.load, isinstance, issubclass
 
-### src.taskill.providers.windsurf_mcp._candidate_endpoints
-- **Calls**: options.get, os.getenv, Path.home, cands.append, cands.append, sock.exists, cands.append
-
-### src.taskill.bulk.BulkResult.as_dict
-- **Calls**: str, str, r.as_dict, str, str, self.per_repo.items
-
 ### src.taskill.cli.main
 > taskill — keep README/CHANGELOG/TODO honest.
 - **Calls**: click.group, click.version_option, click.option, click.option, src.taskill.cli._setup_logging, ctx.ensure_object
 
 ### src.taskill.cli.clean_todo
 > Reset TODO.md to an empty header. Use after a release.
-- **Calls**: main.command, click.option, click.confirmation_option, project.map.toon.empty_todo, console.print, Path
+- **Calls**: main.command, click.option, click.confirmation_option, src.taskill.updaters.todo.empty_todo, console.print, Path
+
+### src.taskill.bulk.BulkResult.as_dict
+- **Calls**: str, str, r.as_dict, str, str, self.per_repo.items
 
 ### src.taskill.updaters.todo.TodoUpdater.apply
 > Apply todo updates from generated docs.
@@ -200,8 +194,23 @@ Falls back to built-in registry if entry points are not available
 ### src.taskill.updaters.todo.TodoUpdater._partition_lines
 - **Calls**: None.startswith, archived.append, kept.append, line.rstrip, line.strip
 
-### src.taskill.updaters.readme.render_status_block
-- **Calls**: None.strftime, None.join, str, datetime.now, len
+### src.taskill.core.TaskillResult.as_dict
+- **Calls**: len, len, len
+
+### src.taskill.core.Taskill.status
+> Inspect current trigger state without running anything.
+- **Calls**: self._snapshot, src.taskill.triggers.evaluate, len
+
+### src.taskill.core.Taskill._maybe_pyqual_report
+> Run `pyqual report --json` if pyqual is on PATH. Tolerate failure.
+- **Calls**: subprocess.run, res.stdout.strip, json.loads
+
+### src.taskill.core.Taskill._update_state
+- **Calls**: self.state.stamp, p.exists, p.stat
+
+### src.taskill.updaters.readme.ReadmeUpdater.apply
+> Apply readme updates from generated docs.
+- **Calls**: docs.get, self._update_readme, UpdateResult
 
 ### src.taskill.updaters.changelog.ChangelogUpdater.apply
 > Apply changelog updates from generated docs.
@@ -209,13 +218,6 @@ Falls back to built-in registry if entry points are not available
 
 ### src.taskill.updaters.todo.TodoUpdater._dedup_new_items
 - **Calls**: line.strip, line.strip, item.strip
-
-### src.taskill.core.TaskillResult.as_dict
-- **Calls**: len, len, len
-
-### src.taskill.core.Taskill.status
-> Inspect current trigger state without running anything.
-- **Calls**: self._snapshot, project.map.toon.evaluate, len
 
 ## Process Flows
 
@@ -235,22 +237,24 @@ status [src.taskill.cli]
   └─ →> load_config
 ```
 
-### Flow 3: _update_changelog
+### Flow 3: bulk_run_cmd
 ```
-_update_changelog [src.taskill.updaters.changelog.ChangelogUpdater]
+bulk_run_cmd [src.taskill.cli]
 ```
 
 ### Flow 4: run
 ```
 run [src.taskill.core.Taskill]
   └─ →> evaluate
+      └─> _check_time
+      └─> _check_commits
   └─ →> build_chain
       └─> discover_providers
 ```
 
-### Flow 5: bulk_run_cmd
+### Flow 5: _update_changelog
 ```
-bulk_run_cmd [src.taskill.cli]
+_update_changelog [src.taskill.updaters.changelog.ChangelogUpdater]
 ```
 
 ### Flow 6: _find_completed_todos
@@ -292,16 +296,16 @@ _update_todo [src.taskill.updaters.todo.TodoUpdater]
 - **Methods**: 5
 - **Key Methods**: src.taskill.bulk.BulkResult.total_repos, src.taskill.bulk.BulkResult.ran_count, src.taskill.bulk.BulkResult.changed_count, src.taskill.bulk.BulkResult.as_dict, src.taskill.bulk.BulkResult.summary
 
-### src.taskill.providers.algorithmic.AlgorithmicProvider
-- **Methods**: 5
-- **Key Methods**: src.taskill.providers.algorithmic.AlgorithmicProvider.is_available, src.taskill.providers.algorithmic.AlgorithmicProvider.generate, src.taskill.providers.algorithmic.AlgorithmicProvider._format_commit, src.taskill.providers.algorithmic.AlgorithmicProvider._find_completed_todos, src.taskill.providers.algorithmic.AlgorithmicProvider._extract_new_todos
-- **Inherits**: Provider
-
 ### src.taskill.updaters.todo.TodoUpdater
 > Updater for TODO.md files.
 - **Methods**: 5
 - **Key Methods**: src.taskill.updaters.todo.TodoUpdater.apply, src.taskill.updaters.todo.TodoUpdater._partition_lines, src.taskill.updaters.todo.TodoUpdater._dedup_new_items, src.taskill.updaters.todo.TodoUpdater._assemble_output, src.taskill.updaters.todo.TodoUpdater._update_todo
 - **Inherits**: DocumentUpdater
+
+### src.taskill.providers.algorithmic.AlgorithmicProvider
+- **Methods**: 5
+- **Key Methods**: src.taskill.providers.algorithmic.AlgorithmicProvider.is_available, src.taskill.providers.algorithmic.AlgorithmicProvider.generate, src.taskill.providers.algorithmic.AlgorithmicProvider._format_commit, src.taskill.providers.algorithmic.AlgorithmicProvider._find_completed_todos, src.taskill.providers.algorithmic.AlgorithmicProvider._extract_new_todos
+- **Inherits**: Provider
 
 ### src.taskill.providers.base.Provider
 > Abstract provider — produces docs from a project snapshot.
@@ -321,22 +325,6 @@ _update_todo [src.taskill.updaters.todo.TodoUpdater]
 - **Methods**: 2
 - **Key Methods**: src.taskill.git_state.Commit.conventional_type, src.taskill.git_state.Commit.is_breaking
 
-### src.taskill.updaters.changelog.ChangelogUpdater
-> Updater for CHANGELOG.md files.
-- **Methods**: 2
-- **Key Methods**: src.taskill.updaters.changelog.ChangelogUpdater.apply, src.taskill.updaters.changelog.ChangelogUpdater._update_changelog
-- **Inherits**: DocumentUpdater
-
-### src.taskill.providers.openrouter.OpenRouterProvider
-- **Methods**: 2
-- **Key Methods**: src.taskill.providers.openrouter.OpenRouterProvider.is_available, src.taskill.providers.openrouter.OpenRouterProvider.generate
-- **Inherits**: Provider
-
-### src.taskill.providers.windsurf_mcp.WindsurfMcpProvider
-- **Methods**: 2
-- **Key Methods**: src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available, src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate
-- **Inherits**: Provider
-
 ### src.taskill.updaters.readme.ReadmeUpdater
 > Updater for README.md files.
 - **Methods**: 2
@@ -349,10 +337,21 @@ _update_todo [src.taskill.updaters.todo.TodoUpdater]
 - **Key Methods**: src.taskill.updaters.base.DocumentUpdater.__init__, src.taskill.updaters.base.DocumentUpdater.apply
 - **Inherits**: ABC
 
-### src.taskill.providers.base.GeneratedDocs
-> What every provider returns.
-- **Methods**: 1
-- **Key Methods**: src.taskill.providers.base.GeneratedDocs.__post_init__
+### src.taskill.updaters.changelog.ChangelogUpdater
+> Updater for CHANGELOG.md files.
+- **Methods**: 2
+- **Key Methods**: src.taskill.updaters.changelog.ChangelogUpdater.apply, src.taskill.updaters.changelog.ChangelogUpdater._update_changelog
+- **Inherits**: DocumentUpdater
+
+### src.taskill.providers.windsurf_mcp.WindsurfMcpProvider
+- **Methods**: 2
+- **Key Methods**: src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available, src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate
+- **Inherits**: Provider
+
+### src.taskill.providers.openrouter.OpenRouterProvider
+- **Methods**: 2
+- **Key Methods**: src.taskill.providers.openrouter.OpenRouterProvider.is_available, src.taskill.providers.openrouter.OpenRouterProvider.generate
+- **Inherits**: Provider
 
 ### src.taskill.triggers.TriggerEvaluation
 - **Methods**: 1
@@ -361,6 +360,11 @@ _update_todo [src.taskill.updaters.todo.TodoUpdater]
 ### src.taskill.core.TaskillResult
 - **Methods**: 1
 - **Key Methods**: src.taskill.core.TaskillResult.as_dict
+
+### src.taskill.providers.base.GeneratedDocs
+> What every provider returns.
+- **Methods**: 1
+- **Key Methods**: src.taskill.providers.base.GeneratedDocs.__post_init__
 
 ### src.taskill.config.Triggers
 > Conditions that must be met to run an update.
@@ -422,38 +426,38 @@ Functions exposed as public API (no underscore prefix):
 - `src.taskill.providers.openrouter.OpenRouterProvider.generate` - 27 calls
 - `src.taskill.cli.status` - 25 calls
 - `src.taskill.providers.algorithmic.AlgorithmicProvider.generate` - 21 calls
-- `src.taskill.core.Taskill.run` - 20 calls
 - `src.taskill.cli.bulk_run_cmd` - 20 calls
+- `src.taskill.core.Taskill.run` - 20 calls
 - `src.taskill.bulk.bulk_run` - 14 calls
-- `src.taskill.git_state.collect_snapshot` - 13 calls
 - `src.taskill.cli.run` - 13 calls
 - `src.taskill.cli.init` - 13 calls
+- `src.taskill.git_state.collect_snapshot` - 13 calls
 - `src.taskill.git_state.read_coverage` - 11 calls
 - `src.taskill.triggers.evaluate` - 10 calls
+- `src.taskill.cli.release` - 8 calls
 - `src.taskill.git_state.commits_since` - 8 calls
 - `src.taskill.git_state.read_failed_tests` - 8 calls
-- `src.taskill.cli.release` - 8 calls
-- `src.taskill.providers.discover_providers` - 7 calls
 - `src.taskill.updaters.discover_updaters` - 7 calls
+- `src.taskill.providers.discover_providers` - 7 calls
 - `src.taskill.state.load_state` - 6 calls
+- `src.taskill.cli.main` - 6 calls
+- `src.taskill.cli.clean_todo` - 6 calls
 - `src.taskill.bulk.BulkResult.as_dict` - 6 calls
 - `src.taskill.updaters.changelog.release_unreleased` - 6 calls
 - `src.taskill.providers.base.parse_json_loosely` - 6 calls
-- `src.taskill.cli.main` - 6 calls
-- `src.taskill.cli.clean_todo` - 6 calls
 - `src.taskill.bulk.find_repos` - 5 calls
-- `src.taskill.providers.base.build_user_prompt` - 5 calls
-- `src.taskill.updaters.todo.TodoUpdater.apply` - 5 calls
 - `src.taskill.updaters.readme.render_status_block` - 5 calls
+- `src.taskill.updaters.todo.TodoUpdater.apply` - 5 calls
+- `src.taskill.providers.base.build_user_prompt` - 5 calls
 - `src.taskill.state.save_state` - 4 calls
 - `src.taskill.git_state.file_hash` - 4 calls
 - `src.taskill.bulk.resolve_repo_config` - 4 calls
 - `src.taskill.providers.build_chain` - 4 calls
-- `src.taskill.updaters.changelog.ChangelogUpdater.apply` - 3 calls
 - `src.taskill.core.TaskillResult.as_dict` - 3 calls
 - `src.taskill.core.Taskill.status` - 3 calls
-- `src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available` - 3 calls
 - `src.taskill.updaters.readme.ReadmeUpdater.apply` - 3 calls
+- `src.taskill.updaters.changelog.ChangelogUpdater.apply` - 3 calls
+- `src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available` - 3 calls
 - `src.taskill.state.TaskillState.stamp` - 2 calls
 - `src.taskill.git_state.changed_files_since` - 2 calls
 - `src.taskill.bulk.BulkResult.summary` - 2 calls
@@ -480,18 +484,18 @@ graph TD
     generate --> _find_completed_todo
     generate --> _extract_new_todos
     generate --> len
-    _update_changelog --> exists
-    _update_changelog --> compile
-    _update_changelog --> search
-    _update_changelog --> group
-    _update_changelog --> set
+    bulk_run_cmd --> command
+    bulk_run_cmd --> option
     run --> _snapshot
     run --> evaluate
     run --> build_chain
     run --> _build_context
     run --> TaskillResult
-    bulk_run_cmd --> command
-    bulk_run_cmd --> option
+    _update_changelog --> exists
+    _update_changelog --> compile
+    _update_changelog --> search
+    _update_changelog --> group
+    _update_changelog --> set
     _find_completed_todo --> splitlines
     _find_completed_todo --> rstrip
 ```

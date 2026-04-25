@@ -6,20 +6,20 @@ flowchart TD
     subgraph Core
         src__taskill__config__load_config("load_config CC=8")
         src__taskill__state__TaskillState__stamp["stamp"]
-        src__taskill__bulk__BulkResult__as_dict["as_dict"]
-        src__taskill__bulk__BulkResult__summary["summary"]
-        src__taskill__bulk__resolve_repo_config["resolve_repo_config"]
-        src__taskill__bulk___run_single_repo["_run_single_repo"]
-        src__taskill__bulk__bulk_run["bulk_run"]
-        src__taskill__updaters__changelog__ChangelogUpdater__apply["apply"]
-        src__taskill__updaters__changelog__ChangelogUpdater___update_changelog["_update_changelog"]
-        src__taskill__providers__base__GeneratedDocs____post_init__["__post_init__"]
-        src__taskill__providers__base__Provider__is_available["is_available"]
-        src__taskill__providers__base__Provider__generate["generate"]
-        src__taskill__providers__algorithmic__AlgorithmicProvider__is_available["is_available"]
-        src__taskill__providers__algorithmic__AlgorithmicProvider__generate["generate"]
-        src__taskill__providers__algorithmic__AlgorithmicProvider___format_commit["_format_commit"]
+        src__taskill__cli___setup_logging["_setup_logging"]
+        src__taskill__cli__main["main"]
+        src__taskill__cli___print_run_result["_print_run_result"]
+        src__taskill__cli__run["run"]
+        src__taskill__cli__status["status"]
+        src__taskill__cli__init["init"]
+        src__taskill__cli__release["release"]
+        src__taskill__cli___print_bulk_table["_print_bulk_table"]
+        src__taskill__cli__bulk_run_cmd["bulk_run_cmd"]
+        src__taskill__cli__clean_todo["clean_todo"]
+        src__taskill__triggers__TriggerEvaluation__summary["summary"]
+        src__taskill__core__TaskillResult__as_dict["as_dict"]
+        src__taskill__core__Taskill__run["run"]
         ...["+146 more"]
     end
 
-    class src__taskill__state__TaskillState__stamp,src__taskill__bulk__BulkResult__as_dict,src__taskill__bulk__BulkResult__summary,src__taskill__updaters__changelog__ChangelogUpdater__apply,src__taskill__updaters__changelog__ChangelogUpdater___update_changelog,src__taskill__providers__base__GeneratedDocs____post_init__,src__taskill__providers__base__Provider__is_available,src__taskill__providers__base__Provider__generate,src__taskill__providers__algorithmic__AlgorithmicProvider__is_available,src__taskill__providers__algorithmic__AlgorithmicProvider__generate entry
+    class src__taskill__state__TaskillState__stamp,src__taskill__cli___setup_logging,src__taskill__cli__main,src__taskill__cli___print_run_result,src__taskill__cli__run,src__taskill__cli__status,src__taskill__cli__init,src__taskill__cli__release,src__taskill__cli___print_bulk_table,src__taskill__cli__bulk_run_cmd entry
