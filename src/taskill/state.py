@@ -14,6 +14,8 @@ class TaskillState:
     last_coverage_pct: float | None = None
     last_failed_tests: int | None = None
     last_sumd_hash: str | None = None
+    last_todo_hash: str | None = None
+    last_readme_hash: str | None = None
     file_mtimes: dict[str, float] = field(default_factory=dict)
 
     @property

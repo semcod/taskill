@@ -84,6 +84,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - refactor(docs): CLI interface improvements
 - docs: update README and CHANGELOG to reflect CLI changes
 
+## [0.1.12] - 2026-04-25
+
+### Docs
+- Update README.md
+
+### Other
+- Update taskill.yaml
+
 ## [0.1.11] - 2026-04-25
 
 ### Docs

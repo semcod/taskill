@@ -12,7 +12,7 @@ Provider chain (first match wins):
 3. Algorithmic    (deterministic fallback: conventional commits + heuristics)
 """
 
-__version__ = "0.1.11"
+__version__ = "0.1.12"
 
 from taskill.bulk import BulkResult, bulk_run, find_repos
 from taskill.config import TaskillConfig, load_config

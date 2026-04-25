@@ -19,6 +19,7 @@ Usage:
 """
 from __future__ import annotations
 
+import hashlib
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -26,6 +27,7 @@ from typing import Any
 
 from taskill.config import TaskillConfig, load_config
 from taskill.core import Taskill, TaskillResult
+from taskill.state import load_state
 
 log = logging.getLogger("taskill.bulk")
 
@@ -224,6 +226,39 @@ def _run_single_repo(
     return tk.run(force=force)
 
 
+def _file_hash(path: Path) -> str | None:
+    """Compute SHA256 hash of a file (first 16 chars)."""
+    if not path.exists():
+        return None
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+
+
+def _should_skip_repo(repo: Path, cfg: TaskillConfig) -> tuple[bool, str]:
+    """Check if repo should be skipped based on TODO/README hash unchanged.
+    
+    Returns (should_skip, reason).
+    """
+    state_path = repo / cfg.state_file
+    state = load_state(state_path)
+    
+    # If no previous state, don't skip
+    if not state.last_todo_hash and not state.last_readme_hash:
+        return False, ""
+    
+    # Check current hashes
+    todo_path = repo / cfg.files.get("todo", "TODO.md")
+    readme_path = repo / cfg.files.get("readme", "README.md")
+    
+    current_todo_hash = _file_hash(todo_path)
+    current_readme_hash = _file_hash(readme_path)
+    
+    # If hashes match, skip
+    if state.last_todo_hash == current_todo_hash and state.last_readme_hash == current_readme_hash:
+        return True, "TODO and README hashes unchanged"
+    
+    return False, ""
+
+
 def bulk_run(
     root: Path,
     shared_config: Path | TaskillConfig | None = None,
@@ -265,6 +300,16 @@ def bulk_run(
 
     for repo in repos:
         try:
+            cfg = resolve_repo_config(repo, shared_cfg)
+            
+            # Quick skip: if hashes unchanged and not forced, skip
+            if not force:
+                should_skip, skip_reason = _should_skip_repo(repo, cfg)
+                if should_skip:
+                    result.skipped.append((repo, skip_reason))
+                    log.info("%s: skipped (%s)", repo.name, skip_reason)
+                    continue
+            
             repo_result = _run_single_repo(repo, shared_cfg, force, dry_run)
             result.per_repo[repo] = repo_result
             log.info(

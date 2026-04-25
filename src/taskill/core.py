@@ -205,6 +205,8 @@ class Taskill:
         self.state.last_coverage_pct = snapshot.coverage_pct
         self.state.last_failed_tests = snapshot.failed_tests
         self.state.last_sumd_hash = snapshot.sumd_hash
+        self.state.last_todo_hash = snapshot.todo_hash
+        self.state.last_readme_hash = snapshot.readme_hash
         for rel in self.config.triggers.watch_files:
             p = self.config.project_root / rel
             if p.exists():

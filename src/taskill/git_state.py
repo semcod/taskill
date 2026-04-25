@@ -43,6 +43,8 @@ class ProjectSnapshot:
     sumd_hash: str | None = None
     sumd_text: str | None = None
     sumr_text: str | None = None
+    todo_hash: str | None = None
+    readme_hash: str | None = None
 
 
 SUBPROCESS_TIMEOUT = 30
@@ -140,6 +142,8 @@ def collect_snapshot(
 ) -> ProjectSnapshot:
     sumd_path = project_root / files.get("sumd", "SUMD.md")
     sumr_path = project_root / files.get("sumr", "SUMR.md")
+    todo_path = project_root / files.get("todo", "TODO.md")
+    readme_path = project_root / files.get("readme", "README.md")
 
     return ProjectSnapshot(
         head_sha=head_sha(project_root),
@@ -150,4 +154,6 @@ def collect_snapshot(
         sumd_hash=file_hash(sumd_path),
         sumd_text=sumd_path.read_text(encoding="utf-8") if sumd_path.exists() else None,
         sumr_text=sumr_path.read_text(encoding="utf-8") if sumr_path.exists() else None,
+        todo_hash=file_hash(todo_path),
+        readme_hash=file_hash(readme_path),
     )

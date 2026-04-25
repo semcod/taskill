@@ -24,7 +24,7 @@ triggers:
 # Provider chain — first one that succeeds wins.
 providers:
   - name: windsurf_mcp
-    enabled: true
+    enabled: false
     options:
       endpoint: stdio
       command: ["windsurf", "mcp", "serve"]
