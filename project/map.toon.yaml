@@ -1,0 +1,175 @@
+# taskill | 26f 2554L | python:23,shell:2,less:1 | 2026-04-25
+# stats: 76 func | 21 cls | 26 mod | CC̄=3.7 | critical:3 | cycles:0
+# alerts[5]: CC evaluate=21; CC run=16; CC status=11; CC build_user_prompt=9; CC load_config=8
+# hotspots[5]: run fan=16; status fan=12; load_config fan=12; collect_snapshot fan=10; evaluate fan=10
+# evolution: baseline
+# Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
+M[26]:
+  app.doql.less,29
+  project.sh,47
+  src/taskill/__init__.py,21
+  src/taskill/cli.py,254
+  src/taskill/config.py,171
+  src/taskill/core.py,212
+  src/taskill/git_state.py,148
+  src/taskill/providers/__init__.py,76
+  src/taskill/providers/algorithmic.py,156
+  src/taskill/providers/base.py,106
+  src/taskill/providers/openrouter.py,115
+  src/taskill/providers/windsurf_mcp.py,136
+  src/taskill/state.py,43
+  src/taskill/triggers.py,95
+  src/taskill/updaters/__init__.py,60
+  src/taskill/updaters/base.py,45
+  src/taskill/updaters/changelog.py,120
+  src/taskill/updaters/readme.py,100
+  src/taskill/updaters/todo.py,114
+  tests/__init__.py,1
+  tests/test_algorithmic.py,94
+  tests/test_config.py,61
+  tests/test_providers.py,77
+  tests/test_triggers.py,119
+  tests/test_updaters.py,152
+  tree.sh,2
+D:
+  src/taskill/__init__.py:
+  src/taskill/cli.py:
+    e: _setup_logging,main,run,status,init,release,clean_todo
+    _setup_logging(verbose)
+    main(ctx;verbose;config)
+    run(ctx;force;dry_run;as_json)
+    status(ctx;as_json)
+    init(force)
+    release(version;changelog)
+    clean_todo(todo)
+  src/taskill/config.py:
+    e: load_config,Triggers,ProviderConfig,IntegrationConfig,TaskillConfig
+    Triggers:  # Conditions that must be met to run an update.
+    ProviderConfig:  # Single provider configuration.
+    IntegrationConfig:  # Optional CI / VCS / orchestrator integration.
+    TaskillConfig: env_model(0),env_api_key(0)
+    load_config(path;project_root)
+  src/taskill/core.py:
+    e: TaskillResult,Taskill
+    TaskillResult: as_dict(0)
+    Taskill: __init__(2),run(1),status(0),_snapshot(0),_build_context(1),_maybe_pyqual_report(0),_apply(2),_update_state(1)
+  src/taskill/git_state.py:
+    e: _run,head_sha,commits_since,changed_files_since,read_coverage,read_failed_tests,file_hash,collect_snapshot,Commit,ProjectSnapshot
+    Commit: conventional_type(0),is_breaking(0)
+    ProjectSnapshot:
+    _run(cmd;cwd)
+    head_sha(project_root)
+    commits_since(project_root;since_sha)
+    changed_files_since(project_root;since_sha)
+    read_coverage(project_root)
+    read_failed_tests(project_root)
+    file_hash(path)
+    collect_snapshot(project_root;files;last_commit_sha)
+  src/taskill/providers/__init__.py:
+    e: discover_providers,build_chain
+    discover_providers()
+    build_chain(provider_configs)
+  src/taskill/providers/algorithmic.py:
+    e: AlgorithmicProvider
+    AlgorithmicProvider: is_available(0),generate(1),_format_commit(1),_find_completed_todos(2),_extract_new_todos(1)
+  src/taskill/providers/base.py:
+    e: build_user_prompt,ProviderError,GeneratedDocs,Provider
+    ProviderError:  # Provider failed — chain falls through to next provider.
+    GeneratedDocs: __post_init__(0)  # What every provider returns.
+    Provider: __init__(1),is_available(0),generate(1)  # Abstract provider — produces docs from a project snapshot.
+    build_user_prompt(context)
+  src/taskill/providers/openrouter.py:
+    e: _normalize_model,OpenRouterProvider
+    OpenRouterProvider: is_available(0),generate(1),_parse_json_loosely(1)
+    _normalize_model(model)
+  src/taskill/providers/windsurf_mcp.py:
+    e: _mcp_lib_present,_candidate_endpoints,WindsurfMcpProvider
+    WindsurfMcpProvider: is_available(0),generate(1)
+    _mcp_lib_present()
+    _candidate_endpoints(options)
+  src/taskill/state.py:
+    e: load_state,save_state,TaskillState
+    TaskillState: last_run_dt(0),stamp(0)
+    load_state(path)
+    save_state(path;state)
+  src/taskill/triggers.py:
+    e: evaluate,TriggerEvaluation
+    TriggerEvaluation: summary(0)
+    evaluate(triggers;state;snapshot;project_root)
+  src/taskill/updaters/__init__.py:
+    e: discover_updaters
+    discover_updaters()
+  src/taskill/updaters/base.py:
+    e: UpdateResult,DocumentUpdater
+    UpdateResult:  # What every updater returns.
+    DocumentUpdater: __init__(1),apply(3)  # Abstract updater — applies changes to a document file.
+  src/taskill/updaters/changelog.py:
+    e: update_changelog,release_unreleased,ChangelogUpdater
+    ChangelogUpdater: apply(3),_update_changelog(2)  # Updater for CHANGELOG.md files.
+    update_changelog(path;entries)
+    release_unreleased(path;version;today)
+  src/taskill/updaters/readme.py:
+    e: render_status_block,update_readme,ReadmeUpdater
+    ReadmeUpdater: apply(3),_update_readme(3)  # Updater for README.md files.
+    render_status_block(snapshot;summary)
+    update_readme(path;snapshot;summary)
+  src/taskill/updaters/todo.py:
+    e: update_todo,empty_todo,TodoUpdater
+    TodoUpdater: apply(3),_update_todo(3)  # Updater for TODO.md files.
+    update_todo(path;completed_lines;new_items)
+    empty_todo(path;header)
+  tests/__init__.py:
+  tests/test_algorithmic.py:
+    e: _commit,_snap,test_groups_commits_by_conventional_type,test_breaking_change_surfaces_first,test_detects_explicit_checkbox_completion,test_detects_completion_via_token_overlap,test_extracts_new_todos_from_commit_bodies,test_empty_input_is_safe,test_always_available
+    _commit(subject;body)
+    _snap(commits)
+    test_groups_commits_by_conventional_type()
+    test_breaking_change_surfaces_first()
+    test_detects_explicit_checkbox_completion()
+    test_detects_completion_via_token_overlap()
+    test_extracts_new_todos_from_commit_bodies()
+    test_empty_input_is_safe()
+    test_always_available()
+  tests/test_config.py:
+    e: test_missing_yaml_returns_defaults,test_yaml_overrides_defaults,test_dotenv_loaded_from_project_root,test_process_env_overrides_dotenv,test_files_config_merges_with_defaults
+    test_missing_yaml_returns_defaults(tmp_path)
+    test_yaml_overrides_defaults(tmp_path)
+    test_dotenv_loaded_from_project_root(tmp_path;monkeypatch)
+    test_process_env_overrides_dotenv(tmp_path;monkeypatch)
+    test_files_config_merges_with_defaults(tmp_path)
+  tests/test_providers.py:
+    e: test_discover_providers_returns_builtins,test_build_chain_with_enabled_providers,test_build_chain_with_unknown_provider,test_build_chain_preserves_order,test_build_chain_empty_config,test_build_chain_all_disabled
+    test_discover_providers_returns_builtins()
+    test_build_chain_with_enabled_providers()
+    test_build_chain_with_unknown_provider()
+    test_build_chain_preserves_order()
+    test_build_chain_empty_config()
+    test_build_chain_all_disabled()
+  tests/test_triggers.py:
+    e: _snap,_commit,test_first_run_always_triggers,test_recent_run_skips_when_no_commits,test_commits_above_threshold_triggers,test_coverage_delta_triggers,test_coverage_within_threshold_does_not_trigger,test_sumd_change_triggers,test_require_all_with_partial_match_does_not_trigger,test_watched_file_mtime_triggers
+    _snap()
+    _commit(subject)
+    test_first_run_always_triggers(tmp_path)
+    test_recent_run_skips_when_no_commits(tmp_path)
+    test_commits_above_threshold_triggers(tmp_path)
+    test_coverage_delta_triggers(tmp_path)
+    test_coverage_within_threshold_does_not_trigger(tmp_path)
+    test_sumd_change_triggers(tmp_path)
+    test_require_all_with_partial_match_does_not_trigger(tmp_path)
+    test_watched_file_mtime_triggers(tmp_path)
+  tests/test_updaters.py:
+    e: test_changelog_creates_file_with_entries,test_changelog_appends_to_unreleased,test_changelog_dedupes_existing_entries,test_changelog_empty_entries_no_op,test_release_promotes_unreleased,test_todo_archives_completed,test_todo_appends_new_under_discovered,test_todo_dedupes_new_items,test_todo_no_change_no_write,test_empty_todo_resets,_snap,test_readme_inserts_status_when_no_markers,test_readme_replaces_only_marker_block,test_readme_creates_file_when_missing
+    test_changelog_creates_file_with_entries(tmp_path)
+    test_changelog_appends_to_unreleased(tmp_path)
+    test_changelog_dedupes_existing_entries(tmp_path)
+    test_changelog_empty_entries_no_op(tmp_path)
+    test_release_promotes_unreleased(tmp_path)
+    test_todo_archives_completed(tmp_path)
+    test_todo_appends_new_under_discovered(tmp_path)
+    test_todo_dedupes_new_items(tmp_path)
+    test_todo_no_change_no_write(tmp_path)
+    test_empty_todo_resets(tmp_path)
+    _snap()
+    test_readme_inserts_status_when_no_markers(tmp_path)
+    test_readme_replaces_only_marker_block(tmp_path)
+    test_readme_creates_file_when_missing(tmp_path)

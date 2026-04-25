@@ -1,0 +1,34 @@
+# redup/duplication | 1 groups | 17f 1955L | 2026-04-25
+
+SUMMARY:
+  files_scanned: 17
+  total_lines:   1955
+  dup_groups:    1
+  dup_fragments: 2
+  saved_lines:   29
+  scan_ms:       5752
+
+HOTSPOTS[2] (files with most duplication):
+  src/taskill/providers/__init__.py  dup=29L  groups=1  frags=1  (1.5%)
+  src/taskill/updaters/__init__.py  dup=29L  groups=1  frags=1  (1.5%)
+
+DUPLICATES[1] (ranked by impact):
+  [e7fb8feab50f19ae]   STRU  discover_providers  L=29 N=2 saved=29 sim=1.00
+      src/taskill/providers/__init__.py:33-61  (discover_providers)
+      src/taskill/updaters/__init__.py:31-59  (discover_updaters)
+
+REFACTOR[1] (ranked by priority):
+  [1] ○ extract_function   → src/taskill/utils/discover_providers.py
+      WHY: 2 occurrences of 29-line block across 2 files — saves 29 lines
+      FILES: src/taskill/providers/__init__.py, src/taskill/updaters/__init__.py
+
+QUICK_WINS[1] (low risk, high savings — do first):
+  [1] extract_function   saved=29L  → src/taskill/utils/discover_providers.py
+      FILES: __init__.py, __init__.py
+
+EFFORT_ESTIMATE (total ≈ 1.0h):
+  medium discover_providers                  saved=29L  ~58min
+
+METRICS-TARGET:
+  dup_groups:  1 → 0
+  saved_lines: 29 lines recoverable

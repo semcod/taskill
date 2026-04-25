@@ -1,23 +1,31 @@
-# pyqual
+# taskill
 
-Declarative quality gate loops for AI-assisted development
+Daily project hygiene: keep README / CHANGELOG / TODO in sync with reality. LLM-first, algorithmic fallback.
 
 ## Contents
 
 - [Metadata](#metadata)
 - [Architecture](#architecture)
+- [Interfaces](#interfaces)
+- [Configuration](#configuration)
 - [Dependencies](#dependencies)
-- [Source Map](#source-map)
+- [Deployment](#deployment)
+- [Environment Variables (`.env.example`)](#environment-variables-envexample)
+- [Release Management (`goal.yaml`)](#release-management-goalyaml)
+- [Code Analysis](#code-analysis)
+- [Call Graph](#call-graph)
+- [Test Contracts](#test-contracts)
 - [Intent](#intent)
 
 ## Metadata
 
-- **name**: `pyqual`
-- **version**: `0.1.143`
-- **python_requires**: `>=3.13`
-- **license**: MIT
+- **name**: `taskill`
+- **version**: `0.1.1`
+- **python_requires**: `>=3.10`
+- **license**: Apache-2.0
+- **ai_model**: `openrouter/qwen/qwen3-coder-next`
 - **ecosystem**: SUMD + DOQL + testql + taskfile
-- **generated_from**: pyproject.toml, Taskfile.yml, Makefile, src/
+- **generated_from**: pyproject.toml, testql(1), app.doql.less, goal.yaml, .env.example, project/(2 analysis files)
 
 ## Architecture
 
@@ -25,55 +33,457 @@ Declarative quality gate loops for AI-assisted development
 SUMD (description) → DOQL/source (code) → taskfile (automation) → testql (verification)
 ```
 
-## Source Map
+### DOQL Application Declaration (`app.doql.less`)
 
-- dashboard/node_modules/flatted/python/flatted.py
-- dashboard/api/main.py
-- dashboard/constants.py
-- conftest.py
-- examples/custom_gates/metric_history.py
-- examples/custom_gates/composite_gates.py
-- examples/custom_gates/dynamic_thresholds.py
-- examples/custom_gates/composite_simple.py
-- examples/custom_plugins/performance_collector.py
-- examples/custom_plugins/code_health_collector.py
-- examples/integration_example.py
-- examples/basic/sync_if_fail.py
-- examples/basic/minimal.py
-- examples/basic/check_gates.py
-- examples/basic/run_pipeline.py
-- examples/multi_gate_pipeline/run_pipeline.py
-- examples/ticket_workflow/sync_tickets.py
-- tests/test_release_validation.py
-- tests/test_bulk_run.py
-- tests/test_validation.py
-- tests/test_secrets_collector.py
-- tests/test_pipeline_stages.py
-- tests/test_report.py
-- tests/test_report_badges.py
-- tests/test_profiles.py
-- tests/test_tickets.py
-- tests/test_report_helpers.py
-- tests/test_pyqual.py
-- tests/test_github_actions.py
-- tests/test_bulk_init_pkg/conftest.py
-- tests/test_bulk_init_pkg/test_fingerprint.py
-- tests/test_bulk_init_pkg/test_fixtures.py
-- tests/test_bulk_init_pkg/__init__.py
-- tests/test_bulk_init_pkg/test_yaml_generation.py
-- tests/test_bulk_init_pkg/test_heuristics.py
-- tests/__init__.py
-- tests/test_config.py
-- tests/test_report_readme.py
-- tests/test_cli_run_helpers.py
-- tests/test_report_project_badges.py
-- tests/test_profiles_module.py
-- tests/report_helpers.py
-- tests/test_report_generate.py
-- tests/test_runtime_errors.py
-- tests/test_bulk_init.py
-- tests/test_report_quality_badges.py
-- tests/pipeline_test.py
-- tests/test_llx_mcp.py
-- tests/config_test.py
-- tests/test_report_collect.py
+```less markpact:doql path=app.doql.less
+// LESS format — define @variables here as needed
+
+app {
+  name: taskill;
+  version: 0.1.1;
+}
+
+dependencies {
+  runtime: "pyyaml>=6.0, python-dotenv>=1.0, httpx>=0.27, click>=8.1, rich>=13.7, goal>=2.1.0, costs>=0.1.20, pfix>=0.1.60";
+  dev: "pytest>=7.0, pytest-asyncio>=0.21, ruff>=0.1, mypy>=1.5, goal>=2.1.0, costs>=0.1.20, pfix>=0.1.60";
+}
+
+interface[type="cli"] {
+  framework: click;
+}
+interface[type="cli"] page[name="taskill"] {
+
+}
+
+deploy {
+  target: pip;
+}
+
+environment[name="local"] {
+  runtime: python;
+  env_file: .env;
+  python_version: >=3.10;
+}
+```
+
+## Interfaces
+
+### CLI Entry Points
+
+- `taskill`
+
+### testql Scenarios
+
+#### `testql-scenarios/generated-cli-tests.testql.toon.yaml`
+
+```toon markpact:testql path=testql-scenarios/generated-cli-tests.testql.toon.yaml
+# SCENARIO: CLI Command Tests
+# TYPE: cli
+# GENERATED: true
+
+CONFIG[2]{key, value}:
+  cli_command, python -mtaskill
+  timeout_ms, 10000
+
+LOG[3]{message}:
+  "Test CLI help command"
+  "Test CLI version command"
+  "Test CLI main workflow"
+```
+
+## Configuration
+
+```yaml
+project:
+  name: taskill
+  version: 0.1.1
+  env: local
+```
+
+## Dependencies
+
+### Runtime
+
+```text markpact:deps python
+pyyaml>=6.0
+python-dotenv>=1.0
+httpx>=0.27
+click>=8.1
+rich>=13.7
+goal>=2.1.0
+costs>=0.1.20
+pfix>=0.1.60
+```
+
+### Development
+
+```text markpact:deps python scope=dev
+pytest>=7.0
+pytest-asyncio>=0.21
+ruff>=0.1
+mypy>=1.5
+goal>=2.1.0
+costs>=0.1.20
+pfix>=0.1.60
+```
+
+## Deployment
+
+```bash markpact:run
+pip install taskill
+
+# development install
+pip install -e .[dev]
+```
+
+## Environment Variables (`.env.example`)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENROUTER_API_KEY` | `*(not set)*` |  |
+| `LLM_MODEL` | `openrouter/qwen/qwen3-coder-next` | (taskill auto-strips the openrouter/ prefix for the OpenRouter REST API) |
+
+## Release Management (`goal.yaml`)
+
+- **versioning**: `semver`
+- **commits**: `conventional` scope=`taskill`
+- **changelog**: `keep-a-changelog`
+- **build strategies**: `python`, `nodejs`, `rust`
+- **version files**: `pyproject.toml:version`, `src/taskill/__init__.py:__version__`
+
+## Code Analysis
+
+### `project/map.toon.yaml`
+
+```toon markpact:analysis path=project/map.toon.yaml
+# taskill | 26f 2554L | python:23,shell:2,less:1 | 2026-04-25
+# stats: 76 func | 21 cls | 26 mod | CC̄=3.7 | critical:3 | cycles:0
+# alerts[5]: CC evaluate=21; CC run=16; CC status=11; CC build_user_prompt=9; CC load_config=8
+# hotspots[5]: run fan=16; status fan=12; load_config fan=12; collect_snapshot fan=10; evaluate fan=10
+# evolution: baseline
+# Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
+M[26]:
+  app.doql.less,29
+  project.sh,47
+  src/taskill/__init__.py,21
+  src/taskill/cli.py,254
+  src/taskill/config.py,171
+  src/taskill/core.py,212
+  src/taskill/git_state.py,148
+  src/taskill/providers/__init__.py,76
+  src/taskill/providers/algorithmic.py,156
+  src/taskill/providers/base.py,106
+  src/taskill/providers/openrouter.py,115
+  src/taskill/providers/windsurf_mcp.py,136
+  src/taskill/state.py,43
+  src/taskill/triggers.py,95
+  src/taskill/updaters/__init__.py,60
+  src/taskill/updaters/base.py,45
+  src/taskill/updaters/changelog.py,120
+  src/taskill/updaters/readme.py,100
+  src/taskill/updaters/todo.py,114
+  tests/__init__.py,1
+  tests/test_algorithmic.py,94
+  tests/test_config.py,61
+  tests/test_providers.py,77
+  tests/test_triggers.py,119
+  tests/test_updaters.py,152
+  tree.sh,2
+D:
+  src/taskill/__init__.py:
+  src/taskill/cli.py:
+    e: _setup_logging,main,run,status,init,release,clean_todo
+    _setup_logging(verbose)
+    main(ctx;verbose;config)
+    run(ctx;force;dry_run;as_json)
+    status(ctx;as_json)
+    init(force)
+    release(version;changelog)
+    clean_todo(todo)
+  src/taskill/config.py:
+    e: load_config,Triggers,ProviderConfig,IntegrationConfig,TaskillConfig
+    Triggers:  # Conditions that must be met to run an update.
+    ProviderConfig:  # Single provider configuration.
+    IntegrationConfig:  # Optional CI / VCS / orchestrator integration.
+    TaskillConfig: env_model(0),env_api_key(0)
+    load_config(path;project_root)
+  src/taskill/core.py:
+    e: TaskillResult,Taskill
+    TaskillResult: as_dict(0)
+    Taskill: __init__(2),run(1),status(0),_snapshot(0),_build_context(1),_maybe_pyqual_report(0),_apply(2),_update_state(1)
+  src/taskill/git_state.py:
+    e: _run,head_sha,commits_since,changed_files_since,read_coverage,read_failed_tests,file_hash,collect_snapshot,Commit,ProjectSnapshot
+    Commit: conventional_type(0),is_breaking(0)
+    ProjectSnapshot:
+    _run(cmd;cwd)
+    head_sha(project_root)
+    commits_since(project_root;since_sha)
+    changed_files_since(project_root;since_sha)
+    read_coverage(project_root)
+    read_failed_tests(project_root)
+    file_hash(path)
+    collect_snapshot(project_root;files;last_commit_sha)
+  src/taskill/providers/__init__.py:
+    e: discover_providers,build_chain
+    discover_providers()
+    build_chain(provider_configs)
+  src/taskill/providers/algorithmic.py:
+    e: AlgorithmicProvider
+    AlgorithmicProvider: is_available(0),generate(1),_format_commit(1),_find_completed_todos(2),_extract_new_todos(1)
+  src/taskill/providers/base.py:
+    e: build_user_prompt,ProviderError,GeneratedDocs,Provider
+    ProviderError:  # Provider failed — chain falls through to next provider.
+    GeneratedDocs: __post_init__(0)  # What every provider returns.
+    Provider: __init__(1),is_available(0),generate(1)  # Abstract provider — produces docs from a project snapshot.
+    build_user_prompt(context)
+  src/taskill/providers/openrouter.py:
+    e: _normalize_model,OpenRouterProvider
+    OpenRouterProvider: is_available(0),generate(1),_parse_json_loosely(1)
+    _normalize_model(model)
+  src/taskill/providers/windsurf_mcp.py:
+    e: _mcp_lib_present,_candidate_endpoints,WindsurfMcpProvider
+    WindsurfMcpProvider: is_available(0),generate(1)
+    _mcp_lib_present()
+    _candidate_endpoints(options)
+  src/taskill/state.py:
+    e: load_state,save_state,TaskillState
+    TaskillState: last_run_dt(0),stamp(0)
+    load_state(path)
+    save_state(path;state)
+  src/taskill/triggers.py:
+    e: evaluate,TriggerEvaluation
+    TriggerEvaluation: summary(0)
+    evaluate(triggers;state;snapshot;project_root)
+  src/taskill/updaters/__init__.py:
+    e: discover_updaters
+    discover_updaters()
+  src/taskill/updaters/base.py:
+    e: UpdateResult,DocumentUpdater
+    UpdateResult:  # What every updater returns.
+    DocumentUpdater: __init__(1),apply(3)  # Abstract updater — applies changes to a document file.
+  src/taskill/updaters/changelog.py:
+    e: update_changelog,release_unreleased,ChangelogUpdater
+    ChangelogUpdater: apply(3),_update_changelog(2)  # Updater for CHANGELOG.md files.
+    update_changelog(path;entries)
+    release_unreleased(path;version;today)
+  src/taskill/updaters/readme.py:
+    e: render_status_block,update_readme,ReadmeUpdater
+    ReadmeUpdater: apply(3),_update_readme(3)  # Updater for README.md files.
+    render_status_block(snapshot;summary)
+    update_readme(path;snapshot;summary)
+  src/taskill/updaters/todo.py:
+    e: update_todo,empty_todo,TodoUpdater
+    TodoUpdater: apply(3),_update_todo(3)  # Updater for TODO.md files.
+    update_todo(path;completed_lines;new_items)
+    empty_todo(path;header)
+  tests/__init__.py:
+  tests/test_algorithmic.py:
+    e: _commit,_snap,test_groups_commits_by_conventional_type,test_breaking_change_surfaces_first,test_detects_explicit_checkbox_completion,test_detects_completion_via_token_overlap,test_extracts_new_todos_from_commit_bodies,test_empty_input_is_safe,test_always_available
+    _commit(subject;body)
+    _snap(commits)
+    test_groups_commits_by_conventional_type()
+    test_breaking_change_surfaces_first()
+    test_detects_explicit_checkbox_completion()
+    test_detects_completion_via_token_overlap()
+    test_extracts_new_todos_from_commit_bodies()
+    test_empty_input_is_safe()
+    test_always_available()
+  tests/test_config.py:
+    e: test_missing_yaml_returns_defaults,test_yaml_overrides_defaults,test_dotenv_loaded_from_project_root,test_process_env_overrides_dotenv,test_files_config_merges_with_defaults
+    test_missing_yaml_returns_defaults(tmp_path)
+    test_yaml_overrides_defaults(tmp_path)
+    test_dotenv_loaded_from_project_root(tmp_path;monkeypatch)
+    test_process_env_overrides_dotenv(tmp_path;monkeypatch)
+    test_files_config_merges_with_defaults(tmp_path)
+  tests/test_providers.py:
+    e: test_discover_providers_returns_builtins,test_build_chain_with_enabled_providers,test_build_chain_with_unknown_provider,test_build_chain_preserves_order,test_build_chain_empty_config,test_build_chain_all_disabled
+    test_discover_providers_returns_builtins()
+    test_build_chain_with_enabled_providers()
+    test_build_chain_with_unknown_provider()
+    test_build_chain_preserves_order()
+    test_build_chain_empty_config()
+    test_build_chain_all_disabled()
+  tests/test_triggers.py:
+    e: _snap,_commit,test_first_run_always_triggers,test_recent_run_skips_when_no_commits,test_commits_above_threshold_triggers,test_coverage_delta_triggers,test_coverage_within_threshold_does_not_trigger,test_sumd_change_triggers,test_require_all_with_partial_match_does_not_trigger,test_watched_file_mtime_triggers
+    _snap()
+    _commit(subject)
+    test_first_run_always_triggers(tmp_path)
+    test_recent_run_skips_when_no_commits(tmp_path)
+    test_commits_above_threshold_triggers(tmp_path)
+    test_coverage_delta_triggers(tmp_path)
+    test_coverage_within_threshold_does_not_trigger(tmp_path)
+    test_sumd_change_triggers(tmp_path)
+    test_require_all_with_partial_match_does_not_trigger(tmp_path)
+    test_watched_file_mtime_triggers(tmp_path)
+  tests/test_updaters.py:
+    e: test_changelog_creates_file_with_entries,test_changelog_appends_to_unreleased,test_changelog_dedupes_existing_entries,test_changelog_empty_entries_no_op,test_release_promotes_unreleased,test_todo_archives_completed,test_todo_appends_new_under_discovered,test_todo_dedupes_new_items,test_todo_no_change_no_write,test_empty_todo_resets,_snap,test_readme_inserts_status_when_no_markers,test_readme_replaces_only_marker_block,test_readme_creates_file_when_missing
+    test_changelog_creates_file_with_entries(tmp_path)
+    test_changelog_appends_to_unreleased(tmp_path)
+    test_changelog_dedupes_existing_entries(tmp_path)
+    test_changelog_empty_entries_no_op(tmp_path)
+    test_release_promotes_unreleased(tmp_path)
+    test_todo_archives_completed(tmp_path)
+    test_todo_appends_new_under_discovered(tmp_path)
+    test_todo_dedupes_new_items(tmp_path)
+    test_todo_no_change_no_write(tmp_path)
+    test_empty_todo_resets(tmp_path)
+    _snap()
+    test_readme_inserts_status_when_no_markers(tmp_path)
+    test_readme_replaces_only_marker_block(tmp_path)
+    test_readme_creates_file_when_missing(tmp_path)
+```
+
+## Call Graph
+
+*34 nodes · 28 edges · 12 modules · CC̄=4.3*
+
+### Hubs (by degree)
+
+| Function | CC | in | out | total |
+|----------|----|----|-----|-------|
+| `load_config` *(in src.taskill.config)* | 8 | 3 | 35 | **38** |
+| `run` *(in src.taskill.cli)* | 16 ⚠ | 0 | 32 | **32** |
+| `generate` *(in src.taskill.providers.windsurf_mcp.WindsurfMcpProvider)* | 7 | 0 | 32 | **32** |
+| `generate` *(in src.taskill.providers.openrouter.OpenRouterProvider)* | 6 | 0 | 27 | **27** |
+| `evaluate` *(in src.taskill.triggers)* | 21 ⚠ | 2 | 23 | **25** |
+| `status` *(in src.taskill.cli)* | 11 ⚠ | 0 | 25 | **25** |
+| `run` *(in src.taskill.core.Taskill)* | 11 ⚠ | 0 | 20 | **20** |
+| `collect_snapshot` *(in src.taskill.git_state)* | 3 | 1 | 13 | **14** |
+
+```toon markpact:analysis path=project/calls.toon.yaml
+# code2llm call graph | /home/tom/github/semcod/taskill
+# nodes: 34 | edges: 28 | modules: 12
+# CC̄=4.3
+
+HUBS[20]:
+  src.taskill.config.load_config
+    CC=8  in:3  out:35  total:38
+  src.taskill.cli.run
+    CC=16  in:0  out:32  total:32
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate
+    CC=7  in:0  out:32  total:32
+  src.taskill.providers.openrouter.OpenRouterProvider.generate
+    CC=6  in:0  out:27  total:27
+  src.taskill.triggers.evaluate
+    CC=21  in:2  out:23  total:25
+  src.taskill.cli.status
+    CC=11  in:0  out:25  total:25
+  src.taskill.core.Taskill.run
+    CC=11  in:0  out:20  total:20
+  src.taskill.git_state.collect_snapshot
+    CC=3  in:1  out:13  total:14
+  src.taskill.updaters.readme.update_readme
+    CC=6  in:1  out:11  total:12
+  src.taskill.git_state.read_coverage
+    CC=7  in:1  out:11  total:12
+  src.taskill.core.Taskill._apply
+    CC=4  in:0  out:12  total:12
+  src.taskill.git_state.read_failed_tests
+    CC=5  in:1  out:8  total:9
+  src.taskill.providers.windsurf_mcp._candidate_endpoints
+    CC=5  in:2  out:7  total:9
+  src.taskill.git_state.commits_since
+    CC=7  in:1  out:8  total:9
+  src.taskill.providers.discover_providers
+    CC=6  in:1  out:7  total:8
+  src.taskill.cli.release
+    CC=2  in:0  out:8  total:8
+  src.taskill.state.load_state
+    CC=3  in:1  out:6  total:7
+  src.taskill.updaters.changelog.release_unreleased
+    CC=4  in:1  out:6  total:7
+  src.taskill.updaters.readme.render_status_block
+    CC=6  in:1  out:5  total:6
+  src.taskill.git_state._run
+    CC=2  in:4  out:2  total:6
+
+MODULES:
+  src.taskill.cli  [6 funcs]
+    _setup_logging  CC=2  out:1
+    clean_todo  CC=1  out:6
+    main  CC=1  out:6
+    release  CC=2  out:8
+    run  CC=16  out:32
+    status  CC=11  out:25
+  src.taskill.config  [1 funcs]
+    load_config  CC=8  out:35
+  src.taskill.core  [5 funcs]
+    __init__  CC=2  out:2
+    _apply  CC=4  out:12
+    _snapshot  CC=1  out:1
+    run  CC=11  out:20
+    status  CC=1  out:3
+  src.taskill.git_state  [8 funcs]
+    _run  CC=2  out:2
+    changed_files_since  CC=4  out:2
+    collect_snapshot  CC=3  out:13
+    commits_since  CC=7  out:8
+    file_hash  CC=2  out:4
+    head_sha  CC=2  out:1
+    read_coverage  CC=7  out:11
+    read_failed_tests  CC=5  out:8
+  src.taskill.providers  [2 funcs]
+    build_chain  CC=4  out:4
+    discover_providers  CC=6  out:7
+  src.taskill.providers.openrouter  [2 funcs]
+    generate  CC=6  out:27
+    _normalize_model  CC=2  out:2
+  src.taskill.providers.windsurf_mcp  [4 funcs]
+    generate  CC=7  out:32
+    is_available  CC=2  out:3
+    _candidate_endpoints  CC=5  out:7
+    _mcp_lib_present  CC=2  out:0
+  src.taskill.state  [1 funcs]
+    load_state  CC=3  out:6
+  src.taskill.triggers  [1 funcs]
+    evaluate  CC=21  out:23
+  src.taskill.updaters.changelog  [1 funcs]
+    release_unreleased  CC=4  out:6
+  src.taskill.updaters.readme  [2 funcs]
+    render_status_block  CC=6  out:5
+    update_readme  CC=6  out:11
+  src.taskill.updaters.todo  [1 funcs]
+    empty_todo  CC=1  out:1
+
+EDGES:
+  src.taskill.providers.build_chain → src.taskill.providers.discover_providers
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → src.taskill.providers.windsurf_mcp._mcp_lib_present
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → src.taskill.providers.windsurf_mcp._candidate_endpoints
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.windsurf_mcp._candidate_endpoints
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.windsurf_mcp._mcp_lib_present
+  src.taskill.providers.openrouter.OpenRouterProvider.generate → src.taskill.providers.openrouter._normalize_model
+  src.taskill.git_state.head_sha → src.taskill.git_state._run
+  src.taskill.git_state.commits_since → src.taskill.git_state._run
+  src.taskill.git_state.changed_files_since → src.taskill.git_state._run
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.head_sha
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.commits_since
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.changed_files_since
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.read_coverage
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.read_failed_tests
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.file_hash
+  src.taskill.updaters.readme.update_readme → src.taskill.updaters.readme.render_status_block
+  src.taskill.core.Taskill.__init__ → src.taskill.state.load_state
+  src.taskill.core.Taskill.__init__ → src.taskill.config.load_config
+  src.taskill.core.Taskill.run → src.taskill.triggers.evaluate
+  src.taskill.core.Taskill.run → src.taskill.providers.build_chain
+  src.taskill.core.Taskill.status → src.taskill.triggers.evaluate
+  src.taskill.core.Taskill._snapshot → src.taskill.git_state.collect_snapshot
+  src.taskill.core.Taskill._apply → src.taskill.updaters.readme.update_readme
+  src.taskill.cli.main → src.taskill.cli._setup_logging
+  src.taskill.cli.run → src.taskill.config.load_config
+  src.taskill.cli.status → src.taskill.config.load_config
+  src.taskill.cli.release → src.taskill.updaters.changelog.release_unreleased
+  src.taskill.cli.clean_todo → src.taskill.updaters.todo.empty_todo
+```
+
+## Test Contracts
+
+*Scenarios as contract signatures — what the system guarantees.*
+
+### Cli (1)
+
+**`CLI Command Tests`**
+
+## Intent
+
+Daily project hygiene: keep README / CHANGELOG / TODO in sync with reality. LLM-first, algorithmic fallback.

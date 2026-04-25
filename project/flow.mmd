@@ -1,0 +1,25 @@
+flowchart TD
+
+    %% Entry points (blue)
+    classDef entry fill:#4dabf7,stroke:#1971c2,color:#fff
+
+    subgraph Core
+        src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available["is_available"]
+        src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate["generate"]
+        src__taskill__providers__openrouter__OpenRouterProvider__is_available["is_available"]
+        src__taskill__providers__openrouter__OpenRouterProvider__generate["generate"]
+        src__taskill__providers__openrouter__OpenRouterProvider___parse_json_loosely["_parse_json_loosely"]
+        src__taskill__providers__algorithmic__AlgorithmicProvider__is_available["is_available"]
+        src__taskill__providers__algorithmic__AlgorithmicProvider__generate["generate"]
+        src__taskill__providers__algorithmic__AlgorithmicProvider___format_commit["_format_commit"]
+        src__taskill__providers__algorithmic__AlgorithmicProvider___find_completed_todos["_find_completed_todos"]
+        src__taskill__providers__algorithmic__AlgorithmicProvider___extract_new_todos["_extract_new_todos"]
+        src__taskill__git_state___run["_run"]
+        src__taskill__git_state__head_sha["head_sha"]
+        src__taskill__git_state__collect_snapshot["collect_snapshot"]
+        src__taskill__state__TaskillState__stamp["stamp"]
+        src__taskill__providers__base__GeneratedDocs____post_init__["__post_init__"]
+        ...["+24 more"]
+    end
+
+    class src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available,src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate,src__taskill__providers__openrouter__OpenRouterProvider__is_available,src__taskill__providers__openrouter__OpenRouterProvider__generate,src__taskill__providers__openrouter__OpenRouterProvider___parse_json_loosely,src__taskill__providers__algorithmic__AlgorithmicProvider__is_available,src__taskill__providers__algorithmic__AlgorithmicProvider__generate,src__taskill__providers__algorithmic__AlgorithmicProvider___format_commit,src__taskill__providers__algorithmic__AlgorithmicProvider___find_completed_todos,src__taskill__providers__algorithmic__AlgorithmicProvider___extract_new_todos entry

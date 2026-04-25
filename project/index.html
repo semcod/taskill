@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>code2llm Analysis Results</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --border: #475569;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --warning: #eab308;
+            --error: #ef4444;
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f8fafc;
+                --surface: #ffffff;
+                --surface-hover: #f1f5f9;
+                --border: #e2e8f0;
+                --text: #1e293b;
+                --text-muted: #64748b;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .search {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            color: var(--text);
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        .search input:focus {
+            border-color: var(--accent);
+        }
+
+        .search input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .file-group {
+            margin-bottom: 1rem;
+        }
+
+        .file-group-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            padding: 0.5rem 0.75rem;
+            font-weight: 600;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem 0.75rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            margin-bottom: 0.125rem;
+        }
+
+        .file-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .file-item.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .file-item.active .file-meta {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .file-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-size {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        /* Content */
+        .content {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .content-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .content-title h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            background: var(--surface-hover);
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: var(--border);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .content-body {
+            flex: 1;
+            overflow: auto;
+            padding: 1.5rem;
+        }
+
+        /* Welcome */
+        .welcome {
+            max-width: 800px;
+        }
+
+        .welcome h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .welcome p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Content Display */
+        pre {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+        }
+
+        .markdown-content {
+            line-height: 1.7;
+        }
+
+        .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .markdown-content h1 {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .markdown-content p {
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content code {
+            background: var(--surface);
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+        }
+
+        .markdown-content pre code {
+            background: transparent;
+            padding: 0;
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content li {
+            margin-bottom: 0.25rem;
+        }
+
+        .markdown-content blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+            margin-left: 0;
+            color: var(--text-muted);
+        }
+
+        .markdown-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content th,
+        .markdown-content td {
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .markdown-content th {
+            background: var(--surface);
+        }
+
+        .markdown-content img {
+            max-width: 100%;
+            border-radius: 0.5rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        /* Mermaid */
+        .mermaid-content {
+            background: var(--surface);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .mermaid-content pre {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Image Preview */
+        .image-preview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background: var(--surface);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .sidebar.open {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 100;
+            }
+
+            .file-size {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="header">
+                <h1>🔍 code2llm</h1>
+                <p>Analysis Results Browser</p>
+            </div>
+            <div class="search">
+                <input type="text" id="search" placeholder="Search files..." oninput="filterFiles(this.value)">
+            </div>
+            <div class="file-list" id="fileList">
+                <!-- Files will be rendered here -->
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="content-header">
+                <div class="content-title">
+                    <span id="contentIcon">📁</span>
+                    <h2 id="contentTitle">Welcome</h2>
+                </div>
+                <div class="content-actions" id="contentActions">
+                    <!-- Actions will be rendered here -->
+                </div>
+            </div>
+            <div class="content-body" id="contentBody">
+                <div class="welcome">
+                    <h2>Analysis Results</h2>
+                    <p>Select a file from the sidebar to view its contents. This interface works on GitHub Pages without any server required.</p>
+                    <div class="stats-grid" id="statsGrid">
+                        <!-- Stats will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize mermaid
+        mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+
+        const files = [{"name": "calls.png", "rel_path": "calls.png", "path": "calls.png", "size": "59.7KB", "icon": "🖼️", "type": "image", "type_name": "Image", "content": "[Binary file]", "is_subdir": false}, {"name": "compact_flow.png", "rel_path": "compact_flow.png", "path": "compact_flow.png", "size": "2.4KB", "icon": "🖼️", "type": "image", "type_name": "Image", "content": "[Binary file]", "is_subdir": false}, {"name": "flow.png", "rel_path": "flow.png", "path": "flow.png", "size": "18.1KB", "icon": "🖼️", "type": "image", "type_name": "Image", "content": "[Binary file]", "is_subdir": false}, {"name": "README.md", "rel_path": "README.md", "path": "README.md", "size": "9.3KB", "icon": "📝", "type": "markdown", "type_name": "Markdown", "content": "# code2llm - Generated Analysis Files\n\nThis directory contains the complete analysis of your project generated by `code2llm`. Each file serves a specific purpose for understanding, refactoring, and documenting your codebase.\n\n## 📁 Generated Files Overview\n\nWhen you run `code2llm ./ -f all`, the following files are created:\n\n### 🎯 Core Analysis Files\n\n| File | Format | Purpose | Key Insights |\n|------|--------|---------|--------------|\n| `evolution.toon.yaml` | **YAML** | **📋 Refactoring queue** - Prioritized improvements | 0 refactoring actions needed |\n| `map.toon.yaml` | **YAML** | **🗺️ Structural map + project header** - Modules, imports, exports, signatures, stats, alerts, hotspots, trend | Project architecture overview |\n\n### 🤖 LLM-Ready Documentation\n\n| File | Format | Purpose | Use Case |\n|------|--------|---------|----------|\n| `prompt.txt` | **Text** | **📝 Ready-to-send prompt** - Lists all files with instructions | Attach to LLM conversation as context guide |\n| `context.md` | **Markdown** | **📖 LLM narrative** - Architecture summary | Paste into ChatGPT/Claude for code analysis |\n\n### 📊 Visualizations\n\n| File | Format | Purpose | Description |\n|------|--------|---------|-------------|\n| `flow.mmd` | **Mermaid** | **🔄 Control flow diagram** | Function call paths with complexity styling |\n| `calls.mmd` | **Mermaid** | **📞 Call graph** | Function dependencies (edges only) |\n| `compact_flow.mmd` | **Mermaid** | **📦 Module overview** | Aggregated module-level view |\n\n## 🚀 Quick Start Commands\n\n### Basic Analysis\n```bash\n# Quick health check (TOON format only)\ncode2llm ./ -f toon\n\n# Generate all formats (what created these files)\ncode2llm ./ -f all\n\n# LLM-ready context only\ncode2llm ./ -f context\n```\n\n### Performance Options\n```bash\n# Fast analysis for large projects\ncode2llm ./ -f toon --strategy quick\n\n# Memory-limited analysis\ncode2llm ./ -f all --max-memory 500\n\n# Skip PNG generation (faster)\ncode2llm ./ -f all --no-png\n```\n\n### Refactoring Focus\n```bash\n# Get refactoring recommendations\ncode2llm ./ -f evolution\n\n# Focus on specific code smells\ncode2llm ./ -f toon --refactor --smell god_function\n\n# Data flow analysis\ncode2llm ./ -f flow --data-flow\n```\n\n## 📖 Understanding Each File\n\n### `analysis.toon` - Health Diagnostics\n**Purpose**: Quick overview of code health issues\n**Key sections**:\n- **HEALTH**: Critical issues (🔴) and warnings (🟡)\n- **REFACTOR**: Prioritized refactoring actions\n- **COUPLING**: Module dependencies and potential cycles\n- **LAYERS**: Package complexity metrics\n- **FUNCTIONS**: High-complexity functions (CC ≥ 10)\n- **CLASSES**: Complex classes needing attention\n\n**Example usage**:\n```bash\n# View health issues\ncat analysis.toon | head -30\n\n# Check refactoring priorities\ngrep \"REFACTOR\" analysis.toon\n```\n\n### `evolution.toon.yaml` - Refactoring Queue\n**Purpose**: Step-by-step refactoring plan\n**Key sections**:\n- **NEXT**: Immediate actions to take\n- **RISKS**: Potential breaking changes\n- **METRICS-TARGET**: Success criteria\n\n**Example usage**:\n```bash\n# Get refactoring plan\ncat evolution.toon.yaml\n\n# Track progress\ngrep \"NEXT\" evolution.toon.yaml\n```\n\n### `flow.toon` - Legacy Data Flow Analysis\n**Purpose**: Understand data movement through the system (legacy / explicit opt-in)\n**Key sections**:\n- **PIPELINES**: Data processing chains\n- **CONTRACTS**: Function input/output contracts\n- **SIDE_EFFECTS**: Functions with external impacts\n\n**Example usage**:\n```bash\n# Find data pipelines\ngrep \"PIPELINES\" flow.toon\n\n# Identify side effects\ngrep \"SIDE_EFFECTS\" flow.toon\n```\n\n### `map.toon.yaml` - Structural Map + Project Header\n**Purpose**: High-level architecture overview plus compact project header\n**Key sections**:\n- **MODULES**: All modules with basic stats\n- **IMPORTS**: Dependency relationships\n- **EXPORTS**: Public API surface and signatures\n- **HEADER**: Stats, alerts, hotspots, evolution trend\n\n**Example usage**:\n```bash\n# See project structure\ncat map.toon.yaml | head -50\n\n# Find public APIs\ngrep \"SIGNATURES\" map.toon.yaml\n```\n\n### `project.toon.yaml` - Compact Analysis View\n**Purpose**: Compact module view generated from project.yaml data\n**Status**: Legacy view generated on demand from unified project.yaml\n\n**Example usage**:\n```bash\n# View compact project structure\ncat project.toon.yaml | head -30\n\n# Find largest files\ngrep -E \"^  .*[0-9]{3,}$\" project.toon.yaml | sort -t',' -k2 -n -r | head -10\n```\n\n### `prompt.txt` - Ready-to-Send LLM Prompt\n**Purpose**: Pre-formatted prompt listing all generated files for LLM conversation\n**Generation**: Written when `code2llm` runs with a source path and requests `-f all` (including `--no-chunk`) or `code2logic`\n**Contents**:\n- **Files section**: Lists all existing generated files with descriptions, including `project.toon.yaml` when generated by `-f all`\n- **Source files section**: Highlights important source files such as `cli_exports/orchestrator.py`\n- **Missing section**: Shows which files weren't generated (if any)\n- **Task section**: Refactoring brief with concrete execution instructions, not just analysis\n- **Priority Order section**: State-dependent refactoring priorities, starting with blockers and then architecture cleanup\n- **Requirements section**: Guidelines for suggested changes\n\n**Example usage**:\n```bash\n# View the prompt\ncat prompt.txt\n\n# Copy to clipboard and paste into ChatGPT/Claude\ncat prompt.txt | pbcopy  # macOS\ncat prompt.txt | xclip -sel clip  # Linux\n```\n\n### `context.md` - LLM Narrative\n**Purpose**: Ready-to-paste context for AI assistants\n**Key sections**:\n- **Overview**: Project statistics\n- **Architecture**: Module breakdown\n- **Entry Points**: Public interfaces\n- **Patterns**: Design patterns detected\n\n**Example usage**:\n```bash\n# Copy to clipboard for LLM\ncat context.md | pbcopy  # macOS\ncat context.md | xclip -sel clip  # Linux\n\n# Use with Claude/ChatGPT for code analysis\n```\n\n### Visualization Files (`*.mmd`, `*.png`)\n**Purpose**: Visual understanding of code structure\n**Files**:\n- `flow.mmd` - Detailed control flow with complexity colors\n- `calls.mmd` - Simple call graph\n- `compact_flow.mmd` - High-level module view\n- `*.png` - Pre-rendered images\n\n**Example usage**:\n```bash\n# View diagrams\nopen flow.png  # macOS\nxdg-open flow.png  # Linux\n\n# Edit in Mermaid Live Editor\n# Copy content of .mmd files to https://mermaid.live\n```\n\n## 🔍 Common Analysis Patterns\n\n### 1. Code Health Assessment\n```bash\n# Quick health check\ncode2llm ./ -f toon\ncat analysis.toon | grep -E \"(HEALTH|REFACTOR)\"\n```\n\n### 2. Refactoring Planning\n```bash\n# Get refactoring queue\ncode2llm ./ -f evolution\ncat evolution.toon.yaml\n\n# Focus on specific issues\ncode2llm ./ -f toon --refactor --smell god_function\n```\n\n### 3. LLM Assistance\n```bash\n# Generate context for AI\ncode2llm ./ -f context\ncat context.md\n\n# Use with Claude: \"Based on this context, help me refactor the god modules\"\n```\n\n### 4. Team Documentation\n```bash\n# Generate all docs for team\ncode2llm ./ -f all -o ./docs/\n\n# Create visual diagrams\nopen docs/flow.png\n```\n\n## 📊 Interpreting Metrics\n\n### Complexity Metrics (CC)\n- **🔴 Critical (≥5.0)**: Immediate refactoring needed\n- **🟠 High (3.0-4.9)**: Consider refactoring\n- **🟡 Medium (1.5-2.9)**: Monitor complexity\n- **🟢 Low (0.1-1.4)**: Acceptable\n- **⚪ Basic (0.0)**: Simple functions\n\n### Module Health\n- **GOD Module**: Too large (>500 lines, >20 methods)\n- **HUB**: High fan-out (calls many modules)\n- **FAN-IN**: High incoming dependencies\n- **CYCLES**: Circular dependencies\n\n### Data Flow Indicators\n- **PIPELINE**: Sequential data processing\n- **CONTRACT**: Clear input/output specification\n- **SIDE_EFFECT**: External state modification\n\n## 🛠️ Integration Examples\n\n### CI/CD Pipeline\n```bash\n#!/bin/bash\n# Analyze code quality in CI\ncode2llm ./ -f toon -o ./analysis\nif grep -q \"🔴 GOD\" ./analysis/analysis.toon; then\n    echo \"❌ God modules detected\"\n    exit 1\nfi\n```\n\n### Pre-commit Hook\n```bash\n#!/bin/sh\n# .git/hooks/pre-commit\ncode2llm ./ -f toon -o ./temp_analysis\nif grep -q \"🔴\" ./temp_analysis/analysis.toon; then\n    echo \"⚠️  Critical issues found. Review before committing.\"\nfi\nrm -rf ./temp_analysis\n```\n\n### Documentation Generation\n```bash\n# Generate docs for README\ncode2llm ./ -f context -o ./docs/\necho \"## Architecture\" >> README.md\ncat docs/context.md >> README.md\n```\n\n## 📚 Next Steps\n\n1. **Review `analysis.toon`** - Identify critical issues\n2. **Check `evolution.toon.yaml`** - Plan refactoring priorities\n3. **Use `context.md`** - Get LLM assistance for complex changes\n4. **Reference visualizations** - Understand system architecture\n5. **Track progress** - Re-run analysis after changes\n\n## 🔧 Advanced Usage\n\n### Custom Analysis\n```bash\n# Deep analysis with all insights\ncode2llm ./ -m hybrid -f all --max-depth 15 -v\n\n# Performance-optimized\ncode2llm ./ -m static -f toon --strategy quick\n\n# Refactoring-focused\ncode2llm ./ -f toon,evolution --refactor\n```\n\n### Output Customization\n```bash\n# Separate output directories\ncode2llm ./ -f all -o ./analysis-$(date +%Y%m%d)\n\n# Split YAML into multiple files\ncode2llm ./ -f yaml --split-output\n\n# Separate orphaned functions\ncode2llm ./ -f yaml --separate-orphans\n```\n\n---\n\n**Generated by**: `code2llm ./ -f all --readme`  \n**Analysis Date**: 2026-04-25  \n**Total Functions**: 60  \n**Total Classes**: 20  \n**Modules**: 25  \n\nFor more information about code2llm, visit: https://github.com/tom-sapletta/code2llm\n", "is_subdir": false}, {"name": "context.md", "rel_path": "context.md", "path": "context.md", "size": "16.1KB", "icon": "📝", "type": "markdown", "type_name": "Markdown", "content": "# System Architecture Analysis\n\n## Overview\n\n- **Project**: /home/tom/github/semcod/taskill\n- **Primary Language**: python\n- **Languages**: python: 17, yml: 3, shell: 2, yaml: 2, toml: 1\n- **Analysis Mode**: static\n- **Total Functions**: 60\n- **Total Classes**: 20\n- **Modules**: 25\n- **Entry Points**: 37\n\n## Architecture by Module\n\n### src.taskill.core\n- **Functions**: 9\n- **Classes**: 2\n- **File**: `core.py`\n\n### src.taskill.git_state\n- **Functions**: 8\n- **Classes**: 2\n- **File**: `git_state.py`\n\n### src.taskill.cli\n- **Functions**: 7\n- **File**: `cli.py`\n\n### src.taskill.providers.algorithmic\n- **Functions**: 5\n- **Classes**: 1\n- **File**: `algorithmic.py`\n\n### src.taskill.providers.base\n- **Functions**: 5\n- **Classes**: 3\n- **File**: `base.py`\n\n### src.taskill.providers.windsurf_mcp\n- **Functions**: 4\n- **Classes**: 1\n- **File**: `windsurf_mcp.py`\n\n### src.taskill.providers.openrouter\n- **Functions**: 4\n- **Classes**: 1\n- **File**: `openrouter.py`\n\n### src.taskill.state\n- **Functions**: 3\n- **Classes**: 1\n- **File**: `state.py`\n\n### src.taskill.updaters.todo\n- **Functions**: 3\n- **Classes**: 1\n- **File**: `todo.py`\n\n### src.taskill.updaters.changelog\n- **Functions**: 3\n- **Classes**: 1\n- **File**: `changelog.py`\n\n### src.taskill.providers\n- **Functions**: 2\n- **File**: `__init__.py`\n\n### src.taskill.updaters.readme\n- **Functions**: 2\n- **File**: `readme.py`\n\n### src.taskill.triggers\n- **Functions**: 2\n- **Classes**: 1\n- **File**: `triggers.py`\n\n### src.taskill.updaters.base\n- **Functions**: 2\n- **Classes**: 2\n- **File**: `base.py`\n\n### src.taskill.config\n- **Functions**: 1\n- **Classes**: 4\n- **File**: `config.py`\n\n## Key Entry Points\n\nMain execution flows into the system:\n\n### src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate\n- **Calls**: src.taskill.providers.windsurf_mcp._candidate_endpoints, self.options.get, OpenRouterProvider._parse_json_loosely, GeneratedDocs, src.taskill.providers.windsurf_mcp._mcp_lib_present, ProviderError, ProviderError, ProviderError\n\n### src.taskill.cli.run\n> Execute the update pipeline.\n- **Calls**: main.command, click.option, click.option, click.option, src.taskill.config.load_config, Taskill, tk.run, console.print\n\n### src.taskill.providers.openrouter.OpenRouterProvider.generate\n- **Calls**: os.getenv, src.taskill.providers.openrouter._normalize_model, self.options.get, self.options.get, self._parse_json_loosely, GeneratedDocs, ProviderError, os.getenv\n\n### src.taskill.cli.status\n> Show what taskill would do without running it.\n- **Calls**: main.command, click.option, src.taskill.config.load_config, Taskill, tk.status, Table, table.add_column, table.add_column\n\n### src.taskill.providers.algorithmic.AlgorithmicProvider.generate\n- **Calls**: defaultdict, self._find_completed_todos, self._extract_new_todos, len, GeneratedDocs, context.get, self._format_commit, entries.append\n\n### src.taskill.core.Taskill.run\n- **Calls**: self._snapshot, src.taskill.triggers.evaluate, src.taskill.providers.build_chain, self._build_context, TaskillResult, log.info, TaskillResult, TaskillResult\n\n### src.taskill.updaters.changelog.ChangelogUpdater._update_changelog\n> Append entries under [Unreleased]. Returns True if the file changed.\n- **Calls**: path.exists, re.compile, pattern.search, m.group, set, path.write_text, path.read_text, original.startswith\n\n### src.taskill.providers.algorithmic.AlgorithmicProvider._find_completed_todos\n> Return TODO lines that look completed.\n\nTwo signals:\n1. Line starts with `- [x]` or `* [x]`  → explicitly checked off.\n2. Line content has high token \n- **Calls**: todo_text.splitlines, raw_line.rstrip, re.match, re.match, None.lower, set, line.strip, completed.append\n\n### src.taskill.cli.init\n> Generate a starter taskill.yaml + .env.example in the current directory.\n- **Calls**: main.command, click.option, Path, Path, yml.write_text, console.print, console.print, console.print\n\n### src.taskill.core.Taskill._apply\n- **Calls**: update_changelog, update_todo, src.taskill.updaters.readme.update_readme, changed.append, changed.append, changed.append, str, str\n\n### src.taskill.providers.algorithmic.AlgorithmicProvider._extract_new_todos\n- **Calls**: re.compile, set, pat.finditer, None.rstrip, seen.add, new.append, text.lower, text.lower\n\n### src.taskill.core.Taskill._build_context\n- **Calls**: self.config.reuse.get, _read, _read, _read, self._maybe_pyqual_report, self.config.files.get, p.exists, p.read_text\n\n### src.taskill.cli.release\n> Promote [Unreleased] section to a versioned [VERSION] heading.\n- **Calls**: main.command, click.argument, click.option, Path, src.taskill.updaters.changelog.release_unreleased, console.print, console.print, sys.exit\n\n### src.taskill.providers.openrouter.OpenRouterProvider._parse_json_loosely\n> Be forgiving: strip ```json fences, extract first {...} block.\n- **Calls**: text.strip, re.sub, re.search, json.loads, json.loads, m.group\n\n### src.taskill.cli.main\n> taskill — keep README/CHANGELOG/TODO honest.\n- **Calls**: click.group, click.version_option, click.option, click.option, src.taskill.cli._setup_logging, ctx.ensure_object\n\n### src.taskill.cli.clean_todo\n> Reset TODO.md to an empty header. Use after a release.\n- **Calls**: main.command, click.option, click.confirmation_option, src.taskill.updaters.todo.empty_todo, console.print, Path\n\n### src.taskill.updaters.todo.TodoUpdater.apply\n> Apply todo updates from generated docs.\n- **Calls**: docs.get, docs.get, self.options.get, self._update_todo, UpdateResult\n\n### src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available\n- **Calls**: bool, src.taskill.providers.windsurf_mcp._mcp_lib_present, src.taskill.providers.windsurf_mcp._candidate_endpoints\n\n### src.taskill.core.TaskillResult.as_dict\n- **Calls**: len, len, len\n\n### src.taskill.core.Taskill.status\n> Inspect current trigger state without running anything.\n- **Calls**: self._snapshot, src.taskill.triggers.evaluate, len\n\n### src.taskill.core.Taskill._maybe_pyqual_report\n> Run `pyqual report --json` if pyqual is on PATH. Tolerate failure.\n- **Calls**: subprocess.run, res.stdout.strip, json.loads\n\n### src.taskill.core.Taskill._update_state\n- **Calls**: self.state.stamp, p.exists, p.stat\n\n### src.taskill.updaters.changelog.ChangelogUpdater.apply\n> Apply changelog updates from generated docs.\n- **Calls**: docs.get, self._update_changelog, UpdateResult\n\n### src.taskill.providers.openrouter.OpenRouterProvider.is_available\n- **Calls**: bool, os.getenv\n\n### src.taskill.state.TaskillState.stamp\n- **Calls**: None.isoformat, datetime.now\n\n### src.taskill.core.Taskill.__init__\n- **Calls**: src.taskill.state.load_state, src.taskill.config.load_config\n\n### src.taskill.providers.algorithmic.AlgorithmicProvider._format_commit\n- **Calls**: re.sub\n\n### src.taskill.core.Taskill._snapshot\n- **Calls**: src.taskill.git_state.collect_snapshot\n\n### src.taskill.triggers.TriggerEvaluation.summary\n- **Calls**: None.join\n\n### src.taskill.providers.algorithmic.AlgorithmicProvider.is_available\n\n## Process Flows\n\nKey execution flows identified:\n\n### Flow 1: generate\n```\ngenerate [src.taskill.providers.windsurf_mcp.WindsurfMcpProvider]\n  └─ →> _candidate_endpoints\n  └─ →> _mcp_lib_present\n```\n\n### Flow 2: run\n```\nrun [src.taskill.cli]\n  └─ →> load_config\n```\n\n### Flow 3: status\n```\nstatus [src.taskill.cli]\n  └─ →> load_config\n```\n\n### Flow 4: _update_changelog\n```\n_update_changelog [src.taskill.updaters.changelog.ChangelogUpdater]\n```\n\n### Flow 5: _find_completed_todos\n```\n_find_completed_todos [src.taskill.providers.algorithmic.AlgorithmicProvider]\n```\n\n### Flow 6: init\n```\ninit [src.taskill.cli]\n```\n\n### Flow 7: _apply\n```\n_apply [src.taskill.core.Taskill]\n  └─ →> update_readme\n      └─> render_status_block\n```\n\n### Flow 8: _extract_new_todos\n```\n_extract_new_todos [src.taskill.providers.algorithmic.AlgorithmicProvider]\n```\n\n### Flow 9: _build_context\n```\n_build_context [src.taskill.core.Taskill]\n```\n\n### Flow 10: release\n```\nrelease [src.taskill.cli]\n  └─ →> release_unreleased\n```\n\n## Key Classes\n\n### src.taskill.core.Taskill\n- **Methods**: 8\n- **Key Methods**: src.taskill.core.Taskill.__init__, src.taskill.core.Taskill.run, src.taskill.core.Taskill.status, src.taskill.core.Taskill._snapshot, src.taskill.core.Taskill._build_context, src.taskill.core.Taskill._maybe_pyqual_report, src.taskill.core.Taskill._apply, src.taskill.core.Taskill._update_state\n\n### src.taskill.providers.algorithmic.AlgorithmicProvider\n- **Methods**: 5\n- **Key Methods**: src.taskill.providers.algorithmic.AlgorithmicProvider.is_available, src.taskill.providers.algorithmic.AlgorithmicProvider.generate, src.taskill.providers.algorithmic.AlgorithmicProvider._format_commit, src.taskill.providers.algorithmic.AlgorithmicProvider._find_completed_todos, src.taskill.providers.algorithmic.AlgorithmicProvider._extract_new_todos\n- **Inherits**: Provider\n\n### src.taskill.providers.openrouter.OpenRouterProvider\n- **Methods**: 3\n- **Key Methods**: src.taskill.providers.openrouter.OpenRouterProvider.is_available, src.taskill.providers.openrouter.OpenRouterProvider.generate, src.taskill.providers.openrouter.OpenRouterProvider._parse_json_loosely\n- **Inherits**: Provider\n\n### src.taskill.providers.base.Provider\n> Abstract provider — produces docs from a project snapshot.\n- **Methods**: 3\n- **Key Methods**: src.taskill.providers.base.Provider.__init__, src.taskill.providers.base.Provider.is_available, src.taskill.providers.base.Provider.generate\n- **Inherits**: ABC\n\n### src.taskill.providers.windsurf_mcp.WindsurfMcpProvider\n- **Methods**: 2\n- **Key Methods**: src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available, src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate\n- **Inherits**: Provider\n\n### src.taskill.git_state.Commit\n- **Methods**: 2\n- **Key Methods**: src.taskill.git_state.Commit.conventional_type, src.taskill.git_state.Commit.is_breaking\n\n### src.taskill.state.TaskillState\n- **Methods**: 2\n- **Key Methods**: src.taskill.state.TaskillState.last_run_dt, src.taskill.state.TaskillState.stamp\n\n### src.taskill.config.TaskillConfig\n- **Methods**: 2\n- **Key Methods**: src.taskill.config.TaskillConfig.env_model, src.taskill.config.TaskillConfig.env_api_key\n\n### src.taskill.updaters.base.DocumentUpdater\n> Abstract updater — applies changes to a document file.\n- **Methods**: 2\n- **Key Methods**: src.taskill.updaters.base.DocumentUpdater.__init__, src.taskill.updaters.base.DocumentUpdater.apply\n- **Inherits**: ABC\n\n### src.taskill.updaters.todo.TodoUpdater\n> Updater for TODO.md files.\n- **Methods**: 2\n- **Key Methods**: src.taskill.updaters.todo.TodoUpdater.apply, src.taskill.updaters.todo.TodoUpdater._update_todo\n- **Inherits**: DocumentUpdater\n\n### src.taskill.updaters.changelog.ChangelogUpdater\n> Updater for CHANGELOG.md files.\n- **Methods**: 2\n- **Key Methods**: src.taskill.updaters.changelog.ChangelogUpdater.apply, src.taskill.updaters.changelog.ChangelogUpdater._update_changelog\n- **Inherits**: DocumentUpdater\n\n### src.taskill.providers.base.GeneratedDocs\n> What every provider returns.\n- **Methods**: 1\n- **Key Methods**: src.taskill.providers.base.GeneratedDocs.__post_init__\n\n### src.taskill.core.TaskillResult\n- **Methods**: 1\n- **Key Methods**: src.taskill.core.TaskillResult.as_dict\n\n### src.taskill.triggers.TriggerEvaluation\n- **Methods**: 1\n- **Key Methods**: src.taskill.triggers.TriggerEvaluation.summary\n\n### src.taskill.git_state.ProjectSnapshot\n- **Methods**: 0\n\n### src.taskill.providers.base.ProviderError\n> Provider failed — chain falls through to next provider.\n- **Methods**: 0\n- **Inherits**: Exception\n\n### src.taskill.config.Triggers\n> Conditions that must be met to run an update.\n\nAll thresholds are OR-ed by default (any one true → r\n- **Methods**: 0\n\n### src.taskill.config.ProviderConfig\n> Single provider configuration.\n- **Methods**: 0\n\n### src.taskill.config.IntegrationConfig\n> Optional CI / VCS / orchestrator integration.\n- **Methods**: 0\n\n### src.taskill.updaters.base.UpdateResult\n> What every updater returns.\n- **Methods**: 0\n\n## Data Transformation Functions\n\nKey functions that process and transform data:\n\n### src.taskill.providers.openrouter.OpenRouterProvider._parse_json_loosely\n> Be forgiving: strip ```json fences, extract first {...} block.\n- **Output to**: text.strip, re.sub, re.search, json.loads, json.loads\n\n### src.taskill.providers.algorithmic.AlgorithmicProvider._format_commit\n- **Output to**: re.sub\n\n## Behavioral Patterns\n\n### state_machine_Commit\n- **Type**: state_machine\n- **Confidence**: 0.70\n- **Functions**: src.taskill.git_state.Commit.conventional_type, src.taskill.git_state.Commit.is_breaking\n\n### state_machine_TaskillState\n- **Type**: state_machine\n- **Confidence**: 0.70\n- **Functions**: src.taskill.state.TaskillState.last_run_dt, src.taskill.state.TaskillState.stamp\n\n## Public API Surface\n\nFunctions exposed as public API (no underscore prefix):\n\n- `src.taskill.config.load_config` - 35 calls\n- `src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate` - 32 calls\n- `src.taskill.cli.run` - 32 calls\n- `src.taskill.providers.openrouter.OpenRouterProvider.generate` - 27 calls\n- `src.taskill.cli.status` - 25 calls\n- `src.taskill.triggers.evaluate` - 23 calls\n- `src.taskill.providers.algorithmic.AlgorithmicProvider.generate` - 21 calls\n- `src.taskill.core.Taskill.run` - 20 calls\n- `src.taskill.git_state.collect_snapshot` - 13 calls\n- `src.taskill.cli.init` - 13 calls\n- `src.taskill.git_state.read_coverage` - 11 calls\n- `src.taskill.updaters.readme.update_readme` - 11 calls\n- `src.taskill.git_state.commits_since` - 8 calls\n- `src.taskill.git_state.read_failed_tests` - 8 calls\n- `src.taskill.cli.release` - 8 calls\n- `src.taskill.providers.discover_providers` - 7 calls\n- `src.taskill.state.load_state` - 6 calls\n- `src.taskill.cli.main` - 6 calls\n- `src.taskill.cli.clean_todo` - 6 calls\n- `src.taskill.updaters.changelog.release_unreleased` - 6 calls\n- `src.taskill.updaters.readme.render_status_block` - 5 calls\n- `src.taskill.providers.base.build_user_prompt` - 5 calls\n- `src.taskill.updaters.todo.TodoUpdater.apply` - 5 calls\n- `src.taskill.providers.build_chain` - 4 calls\n- `src.taskill.git_state.file_hash` - 4 calls\n- `src.taskill.state.save_state` - 4 calls\n- `src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available` - 3 calls\n- `src.taskill.core.TaskillResult.as_dict` - 3 calls\n- `src.taskill.core.Taskill.status` - 3 calls\n- `src.taskill.updaters.changelog.ChangelogUpdater.apply` - 3 calls\n- `src.taskill.providers.openrouter.OpenRouterProvider.is_available` - 2 calls\n- `src.taskill.git_state.changed_files_since` - 2 calls\n- `src.taskill.state.TaskillState.stamp` - 2 calls\n- `src.taskill.git_state.head_sha` - 1 calls\n- `src.taskill.triggers.TriggerEvaluation.summary` - 1 calls\n- `src.taskill.updaters.todo.empty_todo` - 1 calls\n- `src.taskill.providers.algorithmic.AlgorithmicProvider.is_available` - 0 calls\n- `src.taskill.providers.base.Provider.is_available` - 0 calls\n- `src.taskill.providers.base.Provider.generate` - 0 calls\n- `src.taskill.updaters.base.DocumentUpdater.apply` - 0 calls\n\n## System Interactions\n\nHow components interact:\n\n```mermaid\ngraph TD\n    generate --> _candidate_endpoints\n    generate --> get\n    generate --> _parse_json_loosely\n    generate --> GeneratedDocs\n    generate --> _mcp_lib_present\n    run --> command\n    run --> option\n    run --> load_config\n    generate --> getenv\n    generate --> _normalize_model\n    status --> command\n    status --> option\n    status --> load_config\n    status --> Taskill\n    status --> status\n    generate --> defaultdict\n    generate --> _find_completed_todo\n    generate --> _extract_new_todos\n    generate --> len\n    run --> _snapshot\n    run --> evaluate\n    run --> build_chain\n    run --> _build_context\n    run --> TaskillResult\n    _update_changelog --> exists\n    _update_changelog --> compile\n    _update_changelog --> search\n    _update_changelog --> group\n    _update_changelog --> set\n    _find_completed_todo --> splitlines\n```\n\n## Reverse Engineering Guidelines\n\n1. **Entry Points**: Start analysis from the entry points listed above\n2. **Core Logic**: Focus on classes with many methods\n3. **Data Flow**: Follow data transformation functions\n4. **Process Flows**: Use the flow diagrams for execution paths\n5. **API Surface**: Public API functions reveal the interface\n\n## Context for LLM\n\nMaintain the identified architectural patterns and public API surface when suggesting changes.", "is_subdir": false}, {"name": "calls.mmd", "rel_path": "calls.mmd", "path": "calls.mmd", "size": "4.7KB", "icon": "📈", "type": "mermaid", "type_name": "Mermaid", "content": "flowchart LR\n    subgraph src__taskill\n        src__taskill__config__load_config[&quot;load_config&quot;]\n        src__taskill__git_state__file_hash[&quot;file_hash&quot;]\n        src__taskill__state__load_state[&quot;load_state&quot;]\n        src__taskill__cli___setup_logging[&quot;_setup_logging&quot;]\n        src__taskill__git_state__collect_snapshot[&quot;collect_snapshot&quot;]\n        src__taskill__providers__openrouter___normalize_model[&quot;_normalize_model&quot;]\n        src__taskill__core__Taskill__run[&quot;run&quot;]\n        src__taskill__core__Taskill___snapshot[&quot;_snapshot&quot;]\n        src__taskill__core__Taskill__status[&quot;status&quot;]\n        src__taskill__git_state__read_failed_tests[&quot;read_failed_tests&quot;]\n        src__taskill__cli__run[&quot;run&quot;]\n        src__taskill__updaters__readme__render_status_block[&quot;render_status_block&quot;]\n        src__taskill__providers__windsurf_mcp___mcp_lib_present[&quot;_mcp_lib_present&quot;]\n        src__taskill__git_state___run[&quot;_run&quot;]\n        src__taskill__updaters__changelog__release_unreleased[&quot;release_unreleased&quot;]\n        src__taskill__git_state__changed_files_since[&quot;changed_files_since&quot;]\n        src__taskill__providers__discover_providers[&quot;discover_providers&quot;]\n        src__taskill__cli__release[&quot;release&quot;]\n        src__taskill__providers__windsurf_mcp___candidate_endpoints[&quot;_candidate_endpoints&quot;]\n        src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available[&quot;is_available&quot;]\n        src__taskill__providers__openrouter__OpenRouterProvider__generate[&quot;generate&quot;]\n        src__taskill__triggers__evaluate[&quot;evaluate&quot;]\n        src__taskill__cli__main[&quot;main&quot;]\n        src__taskill__cli__clean_todo[&quot;clean_todo&quot;]\n        src__taskill__git_state__head_sha[&quot;head_sha&quot;]\n        src__taskill__providers__build_chain[&quot;build_chain&quot;]\n        src__taskill__updaters__readme__update_readme[&quot;update_readme&quot;]\n        src__taskill__cli__status[&quot;status&quot;]\n        src__taskill__git_state__commits_since[&quot;commits_since&quot;]\n        src__taskill__git_state__read_coverage[&quot;read_coverage&quot;]\n        src__taskill__core__Taskill____init__[&quot;__init__&quot;]\n        src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate[&quot;generate&quot;]\n        src__taskill__core__Taskill___apply[&quot;_apply&quot;]\n        src__taskill__updaters__todo__empty_todo[&quot;empty_todo&quot;]\n    end\n    src__taskill__providers__build_chain --&gt; src__taskill__providers__discover_providers\n    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available --&gt; src__taskill__providers__windsurf_mcp___mcp_lib_present\n    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available --&gt; src__taskill__providers__windsurf_mcp___candidate_endpoints\n    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --&gt; src__taskill__providers__windsurf_mcp___candidate_endpoints\n    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --&gt; src__taskill__providers__windsurf_mcp___mcp_lib_present\n    src__taskill__providers__openrouter__OpenRouterProvider__generate --&gt; src__taskill__providers__openrouter___normalize_model\n    src__taskill__git_state__head_sha --&gt; src__taskill__git_state___run\n    src__taskill__git_state__commits_since --&gt; src__taskill__git_state___run\n    src__taskill__git_state__changed_files_since --&gt; src__taskill__git_state___run\n    src__taskill__git_state__collect_snapshot --&gt; src__taskill__git_state__head_sha\n    src__taskill__git_state__collect_snapshot --&gt; src__taskill__git_state__commits_since\n    src__taskill__git_state__collect_snapshot --&gt; src__taskill__git_state__changed_files_since\n    src__taskill__git_state__collect_snapshot --&gt; src__taskill__git_state__read_coverage\n    src__taskill__git_state__collect_snapshot --&gt; src__taskill__git_state__read_failed_tests\n    src__taskill__git_state__collect_snapshot --&gt; src__taskill__git_state__file_hash\n    src__taskill__updaters__readme__update_readme --&gt; src__taskill__updaters__readme__render_status_block\n    src__taskill__core__Taskill____init__ --&gt; src__taskill__state__load_state\n    src__taskill__core__Taskill____init__ --&gt; src__taskill__config__load_config\n    src__taskill__core__Taskill__run --&gt; src__taskill__triggers__evaluate\n    src__taskill__core__Taskill__run --&gt; src__taskill__providers__build_chain\n    src__taskill__core__Taskill__status --&gt; src__taskill__triggers__evaluate\n    src__taskill__core__Taskill___snapshot --&gt; src__taskill__git_state__collect_snapshot\n    src__taskill__core__Taskill___apply --&gt; src__taskill__updaters__readme__update_readme\n    src__taskill__cli__main --&gt; src__taskill__cli___setup_logging\n    src__taskill__cli__run --&gt; src__taskill__config__load_config\n    src__taskill__cli__status --&gt; src__taskill__config__load_config\n    src__taskill__cli__release --&gt; src__taskill__updaters__changelog__release_unreleased\n    src__taskill__cli__clean_todo --&gt; src__taskill__updaters__todo__empty_todo\n", "is_subdir": false}, {"name": "compact_flow.mmd", "rel_path": "compact_flow.mmd", "path": "compact_flow.mmd", "size": "58B", "icon": "📈", "type": "mermaid", "type_name": "Mermaid", "content": "flowchart TD\n    src__taskill[&quot;src.taskill&lt;br/&gt;60 funcs&quot;]\n", "is_subdir": false}, {"name": "flow.mmd", "rel_path": "flow.mmd", "path": "flow.mmd", "size": "2.1KB", "icon": "📈", "type": "mermaid", "type_name": "Mermaid", "content": "flowchart TD\n\n    %% Entry points (blue)\n    classDef entry fill:#4dabf7,stroke:#1971c2,color:#fff\n\n    subgraph Core\n        src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available[&quot;is_available&quot;]\n        src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate[&quot;generate&quot;]\n        src__taskill__providers__openrouter__OpenRouterProvider__is_available[&quot;is_available&quot;]\n        src__taskill__providers__openrouter__OpenRouterProvider__generate[&quot;generate&quot;]\n        src__taskill__providers__openrouter__OpenRouterProvider___parse_json_loosely[&quot;_parse_json_loosely&quot;]\n        src__taskill__providers__algorithmic__AlgorithmicProvider__is_available[&quot;is_available&quot;]\n        src__taskill__providers__algorithmic__AlgorithmicProvider__generate[&quot;generate&quot;]\n        src__taskill__providers__algorithmic__AlgorithmicProvider___format_commit[&quot;_format_commit&quot;]\n        src__taskill__providers__algorithmic__AlgorithmicProvider___find_completed_todos[&quot;_find_completed_todos&quot;]\n        src__taskill__providers__algorithmic__AlgorithmicProvider___extract_new_todos[&quot;_extract_new_todos&quot;]\n        src__taskill__git_state___run[&quot;_run&quot;]\n        src__taskill__git_state__head_sha[&quot;head_sha&quot;]\n        src__taskill__git_state__collect_snapshot[&quot;collect_snapshot&quot;]\n        src__taskill__state__TaskillState__stamp[&quot;stamp&quot;]\n        src__taskill__providers__base__GeneratedDocs____post_init__[&quot;__post_init__&quot;]\n        ...[&quot;+24 more&quot;]\n    end\n\n    class src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available,src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate,src__taskill__providers__openrouter__OpenRouterProvider__is_available,src__taskill__providers__openrouter__OpenRouterProvider__generate,src__taskill__providers__openrouter__OpenRouterProvider___parse_json_loosely,src__taskill__providers__algorithmic__AlgorithmicProvider__is_available,src__taskill__providers__algorithmic__AlgorithmicProvider__generate,src__taskill__providers__algorithmic__AlgorithmicProvider___format_commit,src__taskill__providers__algorithmic__AlgorithmicProvider___find_completed_todos,src__taskill__providers__algorithmic__AlgorithmicProvider___extract_new_todos entry\n", "is_subdir": false}, {"name": "prompt.txt", "rel_path": "prompt.txt", "path": "prompt.txt", "size": "2.9KB", "icon": "📄", "type": "text", "type_name": "Text", "content": "You are an AI assistant helping me understand and improve a codebase.\nUse the attached/generated files as the authoritative context.\nYour goal is to refactor the project based on these files, not just summarize it.\n\nwe are in project path: taskill\n\nFiles for analysis:\n\nNote: project/validation.toon.yaml and project/duplication.toon.yaml are generated by external tools (vallm and redup)\n- analysis.toon.yaml  (Health diagnostics - complexity metrics, god modules, coupling issues, refactoring priorities) [2KB]\n- map.toon.yaml  (Structural map - files, sizes, imports, exports, signatures, project header) [4KB]\n- evolution.toon.yaml  (Refactoring queue - ranked actions by impact/effort, risks, metrics targets, history) [1KB]\n- project.toon.yaml  (Compact project overview - generated from project.yaml data) [2KB]\n- context.md  (LLM narrative - architecture summary and project context) [16KB]\n\nMissing files (not generated in this run):\n- README.md\n\nTask:\n- Treat this prompt as a refactoring brief: identify the highest-priority changes and prepare concrete edits.\n- Use the file set to decide whether the first pass should focus on correctness, duplication, complexity reduction, or architecture cleanup.\n- If you can safely implement the refactor, do it; otherwise give an exact file-by-file change plan and test plan.\n- Use analysis.toon.yaml to locate high-CC functions and god modules that should be split first.\n- Keep module boundaries intact and update imports/exports according to map.toon.yaml.\n- Use evolution.toon.yaml as the execution backlog and work from the top-ranked items.\n- Keep project.toon.yaml aligned with the refactored architecture.\n\nPriority Order:\nP1 — Split or simplify the highest-CC / god modules identified in analysis.toon.yaml.\nP1 — Preserve module boundaries and update imports/exports according to map.toon.yaml.\nP2 — Keep the compact project overview in project.toon.yaml aligned with the refactor.\nP2 — Execute the highest-impact items from evolution.toon.yaml in order of benefit/risk.\n\nFocus Areas for Analysis:\n1. **Code Health Analysis** - Review complexity metrics, god modules, coupling issues from analysis.toon.yaml\n2. **Structural Map** - Use map.toon.yaml to inspect imports, exports, signatures, and the project header\n3. **Refactoring Priorities** - Examine ranked refactoring actions and risk assessment from evolution.toon.yaml\n4. **Project Overview** - Review the compact project overview from project.toon.yaml\n\nAnalysis Strategy:\n- Start with analysis.toon.yaml for health metrics, then map.toon.yaml for structure and signatures\n- Review evolution.toon.yaml for action priorities and next steps\n- Compare the compact project overview in project.toon.yaml with the main analysis files\n\nConstraints:\n- Prefer minimal, incremental changes.\n- Maintain full backward compatibility.\n- Base recommendations on concrete metrics from the provided files.\n- If uncertain, ask clarifying questions.\n", "is_subdir": false}, {"name": "mermaid.export", "rel_path": "mermaid.export", "path": "mermaid.export", "size": "7.5KB", "icon": "📄", "type": "unknown", "type_name": "EXPORT", "content": "[Binary file]", "is_subdir": false}, {"name": "analysis.toon.yaml", "rel_path": "analysis.toon.yaml", "path": "analysis.toon.yaml", "size": "2.6KB", "icon": "⚙️", "type": "yaml", "type_name": "YAML", "content": "# code2llm | 25f 2730L | python:17,yml:3,shell:2,yaml:2,toml:1 | 2026-04-25\n# CC̄=4.3 | critical:2/60 | dups:0 | cycles:0\n\nHEALTH[2]:\n  🟡 CC    evaluate CC=21 (limit:15)\n  🟡 CC    run CC=16 (limit:15)\n\nREFACTOR[1]:\n  1. split 2 high-CC methods  (CC&gt;15)\n\nPIPELINES[29]:\n  [1] Src [is_available]: is_available → _mcp_lib_present\n      PURITY: 100% pure\n  [2] Src [generate]: generate → _candidate_endpoints\n      PURITY: 100% pure\n  [3] Src [is_available]: is_available\n      PURITY: 100% pure\n  [4] Src [generate]: generate → _normalize_model\n      PURITY: 100% pure\n  [5] Src [_parse_json_loosely]: _parse_json_loosely\n      PURITY: 100% pure\n\nLAYERS:\n  src/                            CC̄=4.3    ←in:0  →out:0\n  │ !! cli                        253L  0C    7m  CC=16     ←0\n  │ core                       211L  2C    9m  CC=11     ←0\n  │ config                     170L  4C    1m  CC=8      ←2\n  │ algorithmic                155L  1C    5m  CC=10     ←0\n  │ git_state                  147L  2C    8m  CC=7      ←2\n  │ windsurf_mcp               135L  1C    4m  CC=7      ←0\n  │ openrouter                 114L  1C    4m  CC=6      ←1\n  │ todo                       113L  1C    3m  CC=1      ←1\n  │ changelog                  112L  1C    3m  CC=12     ←1\n  │ base                       105L  3C    5m  CC=9      ←2\n  │ !! triggers                    94L  1C    2m  CC=21     ←1\n  │ __init__                    75L  0C    2m  CC=6      ←1\n  │ readme                      71L  0C    2m  CC=6      ←1\n  │ base                        44L  2C    2m  CC=2      ←0\n  │ state                       42L  1C    3m  CC=3      ←1\n  │ __init__                    20L  0C    0m  CC=0.0    ←0\n  │ __init__                     6L  0C    0m  CC=0.0    ←0\n  │\n  ./                              CC̄=0.0    ←in:0  →out:0\n  │ !! goal.yaml                  512L  0C    0m  CC=0.0    ←0\n  │ pyproject.toml              97L  0C    0m  CC=0.0    ←0\n  │ taskill.yaml                57L  0C    0m  CC=0.0    ←0\n  │ project.sh                  47L  0C    0m  CC=0.0    ←0\n  │ tree.sh                      1L  0C    0m  CC=0.0    ←0\n  │\n  examples/                       CC̄=0.0    ←in:0  →out:0\n  │ ansible-playbook.yml        52L  0C    0m  CC=0.0    ←0\n  │ github-action.yml           51L  0C    0m  CC=0.0    ←0\n  │ gitlab-ci.yml               46L  0C    0m  CC=0.0    ←0\n  │\n\nCOUPLING: no cross-package imports detected\n\nEXTERNAL:\n  validation: run `vallm batch .` → validation.toon\n  duplication: run `redup scan .` → duplication.toon\n", "is_subdir": false}, {"name": "calls.toon.yaml", "rel_path": "calls.toon.yaml", "path": "calls.toon.yaml", "size": "5.2KB", "icon": "⚙️", "type": "yaml", "type_name": "YAML", "content": "# code2llm call graph | /home/tom/github/semcod/taskill\n# nodes: 34 | edges: 28 | modules: 12\n# CC̄=4.3\n\nHUBS[20]:\n  src.taskill.config.load_config\n    CC=8  in:3  out:35  total:38\n  src.taskill.cli.run\n    CC=16  in:0  out:32  total:32\n  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate\n    CC=7  in:0  out:32  total:32\n  src.taskill.providers.openrouter.OpenRouterProvider.generate\n    CC=6  in:0  out:27  total:27\n  src.taskill.triggers.evaluate\n    CC=21  in:2  out:23  total:25\n  src.taskill.cli.status\n    CC=11  in:0  out:25  total:25\n  src.taskill.core.Taskill.run\n    CC=11  in:0  out:20  total:20\n  src.taskill.git_state.collect_snapshot\n    CC=3  in:1  out:13  total:14\n  src.taskill.updaters.readme.update_readme\n    CC=6  in:1  out:11  total:12\n  src.taskill.git_state.read_coverage\n    CC=7  in:1  out:11  total:12\n  src.taskill.core.Taskill._apply\n    CC=4  in:0  out:12  total:12\n  src.taskill.git_state.read_failed_tests\n    CC=5  in:1  out:8  total:9\n  src.taskill.providers.windsurf_mcp._candidate_endpoints\n    CC=5  in:2  out:7  total:9\n  src.taskill.git_state.commits_since\n    CC=7  in:1  out:8  total:9\n  src.taskill.providers.discover_providers\n    CC=6  in:1  out:7  total:8\n  src.taskill.cli.release\n    CC=2  in:0  out:8  total:8\n  src.taskill.state.load_state\n    CC=3  in:1  out:6  total:7\n  src.taskill.updaters.changelog.release_unreleased\n    CC=4  in:1  out:6  total:7\n  src.taskill.updaters.readme.render_status_block\n    CC=6  in:1  out:5  total:6\n  src.taskill.git_state._run\n    CC=2  in:4  out:2  total:6\n\nMODULES:\n  src.taskill.cli  [6 funcs]\n    _setup_logging  CC=2  out:1\n    clean_todo  CC=1  out:6\n    main  CC=1  out:6\n    release  CC=2  out:8\n    run  CC=16  out:32\n    status  CC=11  out:25\n  src.taskill.config  [1 funcs]\n    load_config  CC=8  out:35\n  src.taskill.core  [5 funcs]\n    __init__  CC=2  out:2\n    _apply  CC=4  out:12\n    _snapshot  CC=1  out:1\n    run  CC=11  out:20\n    status  CC=1  out:3\n  src.taskill.git_state  [8 funcs]\n    _run  CC=2  out:2\n    changed_files_since  CC=4  out:2\n    collect_snapshot  CC=3  out:13\n    commits_since  CC=7  out:8\n    file_hash  CC=2  out:4\n    head_sha  CC=2  out:1\n    read_coverage  CC=7  out:11\n    read_failed_tests  CC=5  out:8\n  src.taskill.providers  [2 funcs]\n    build_chain  CC=4  out:4\n    discover_providers  CC=6  out:7\n  src.taskill.providers.openrouter  [2 funcs]\n    generate  CC=6  out:27\n    _normalize_model  CC=2  out:2\n  src.taskill.providers.windsurf_mcp  [4 funcs]\n    generate  CC=7  out:32\n    is_available  CC=2  out:3\n    _candidate_endpoints  CC=5  out:7\n    _mcp_lib_present  CC=2  out:0\n  src.taskill.state  [1 funcs]\n    load_state  CC=3  out:6\n  src.taskill.triggers  [1 funcs]\n    evaluate  CC=21  out:23\n  src.taskill.updaters.changelog  [1 funcs]\n    release_unreleased  CC=4  out:6\n  src.taskill.updaters.readme  [2 funcs]\n    render_status_block  CC=6  out:5\n    update_readme  CC=6  out:11\n  src.taskill.updaters.todo  [1 funcs]\n    empty_todo  CC=1  out:1\n\nEDGES:\n  src.taskill.providers.build_chain → src.taskill.providers.discover_providers\n  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → src.taskill.providers.windsurf_mcp._mcp_lib_present\n  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → src.taskill.providers.windsurf_mcp._candidate_endpoints\n  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.windsurf_mcp._candidate_endpoints\n  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.windsurf_mcp._mcp_lib_present\n  src.taskill.providers.openrouter.OpenRouterProvider.generate → src.taskill.providers.openrouter._normalize_model\n  src.taskill.git_state.head_sha → src.taskill.git_state._run\n  src.taskill.git_state.commits_since → src.taskill.git_state._run\n  src.taskill.git_state.changed_files_since → src.taskill.git_state._run\n  src.taskill.git_state.collect_snapshot → src.taskill.git_state.head_sha\n  src.taskill.git_state.collect_snapshot → src.taskill.git_state.commits_since\n  src.taskill.git_state.collect_snapshot → src.taskill.git_state.changed_files_since\n  src.taskill.git_state.collect_snapshot → src.taskill.git_state.read_coverage\n  src.taskill.git_state.collect_snapshot → src.taskill.git_state.read_failed_tests\n  src.taskill.git_state.collect_snapshot → src.taskill.git_state.file_hash\n  src.taskill.updaters.readme.update_readme → src.taskill.updaters.readme.render_status_block\n  src.taskill.core.Taskill.__init__ → src.taskill.state.load_state\n  src.taskill.core.Taskill.__init__ → src.taskill.config.load_config\n  src.taskill.core.Taskill.run → src.taskill.triggers.evaluate\n  src.taskill.core.Taskill.run → src.taskill.providers.build_chain\n  src.taskill.core.Taskill.status → src.taskill.triggers.evaluate\n  src.taskill.core.Taskill._snapshot → src.taskill.git_state.collect_snapshot\n  src.taskill.core.Taskill._apply → src.taskill.updaters.readme.update_readme\n  src.taskill.cli.main → src.taskill.cli._setup_logging\n  src.taskill.cli.run → src.taskill.config.load_config\n  src.taskill.cli.status → src.taskill.config.load_config\n  src.taskill.cli.release → src.taskill.updaters.changelog.release_unreleased\n  src.taskill.cli.clean_todo → src.taskill.updaters.todo.empty_todo\n", "is_subdir": false}, {"name": "calls.yaml", "rel_path": "calls.yaml", "path": "calls.yaml", "size": "12.7KB", "icon": "⚙️", "type": "yaml", "type_name": "YAML", "content": "project: /home/tom/github/semcod/taskill\ngenerated_from: code2llm call graph analysis\nstats:\n  total_nodes: 34\n  total_edges: 28\n  modules_count: 12\nnodes:\n  src.taskill.config.load_config:\n    name: load_config\n    module: src.taskill.config\n    line: 103\n    cyclomatic_complexity: 8\n    calls_out: 35\n    calls_in: 3\n  src.taskill.git_state.file_hash:\n    name: file_hash\n    module: src.taskill.git_state\n    line: 124\n    cyclomatic_complexity: 2\n    calls_out: 4\n    calls_in: 1\n  src.taskill.state.load_state:\n    name: load_state\n    module: src.taskill.state\n    line: 29\n    cyclomatic_complexity: 3\n    calls_out: 6\n    calls_in: 1\n  src.taskill.cli._setup_logging:\n    name: _setup_logging\n    module: src.taskill.cli\n    line: 30\n    cyclomatic_complexity: 2\n    calls_out: 1\n    calls_in: 1\n  src.taskill.git_state.collect_snapshot:\n    name: collect_snapshot\n    module: src.taskill.git_state\n    line: 130\n    cyclomatic_complexity: 3\n    calls_out: 13\n    calls_in: 1\n  src.taskill.providers.openrouter._normalize_model:\n    name: _normalize_model\n    module: src.taskill.providers.openrouter\n    line: 27\n    cyclomatic_complexity: 2\n    calls_out: 2\n    calls_in: 1\n  src.taskill.core.Taskill.run:\n    name: run\n    module: src.taskill.core\n    line: 63\n    cyclomatic_complexity: 11\n    calls_out: 20\n    calls_in: 0\n  src.taskill.core.Taskill._snapshot:\n    name: _snapshot\n    module: src.taskill.core\n    line: 140\n    cyclomatic_complexity: 1\n    calls_out: 1\n    calls_in: 0\n  src.taskill.core.Taskill.status:\n    name: status\n    module: src.taskill.core\n    line: 123\n    cyclomatic_complexity: 1\n    calls_out: 3\n    calls_in: 0\n  src.taskill.git_state.read_failed_tests:\n    name: read_failed_tests\n    module: src.taskill.git_state\n    line: 111\n    cyclomatic_complexity: 5\n    calls_out: 8\n    calls_in: 1\n  src.taskill.cli.run:\n    name: run\n    module: src.taskill.cli\n    line: 59\n    cyclomatic_complexity: 16\n    calls_out: 32\n    calls_in: 0\n  src.taskill.updaters.readme.render_status_block:\n    name: render_status_block\n    module: src.taskill.updaters.readme\n    line: 24\n    cyclomatic_complexity: 6\n    calls_out: 5\n    calls_in: 1\n  src.taskill.providers.windsurf_mcp._mcp_lib_present:\n    name: _mcp_lib_present\n    module: src.taskill.providers.windsurf_mcp\n    line: 34\n    cyclomatic_complexity: 2\n    calls_out: 0\n    calls_in: 2\n  src.taskill.git_state._run:\n    name: _run\n    module: src.taskill.git_state\n    line: 45\n    cyclomatic_complexity: 2\n    calls_out: 2\n    calls_in: 4\n  src.taskill.updaters.changelog.release_unreleased:\n    name: release_unreleased\n    module: src.taskill.updaters.changelog\n    line: 98\n    cyclomatic_complexity: 4\n    calls_out: 6\n    calls_in: 1\n  src.taskill.git_state.changed_files_since:\n    name: changed_files_since\n    module: src.taskill.git_state\n    line: 83\n    cyclomatic_complexity: 4\n    calls_out: 2\n    calls_in: 1\n  src.taskill.providers.discover_providers:\n    name: discover_providers\n    module: src.taskill.providers\n    line: 33\n    cyclomatic_complexity: 6\n    calls_out: 7\n    calls_in: 1\n  src.taskill.cli.release:\n    name: release\n    module: src.taskill.cli\n    line: 157\n    cyclomatic_complexity: 2\n    calls_out: 8\n    calls_in: 0\n  src.taskill.providers.windsurf_mcp._candidate_endpoints:\n    name: _candidate_endpoints\n    module: src.taskill.providers.windsurf_mcp\n    line: 42\n    cyclomatic_complexity: 5\n    calls_out: 7\n    calls_in: 2\n  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available:\n    name: is_available\n    module: src.taskill.providers.windsurf_mcp\n    line: 61\n    cyclomatic_complexity: 2\n    calls_out: 3\n    calls_in: 0\n  src.taskill.providers.openrouter.OpenRouterProvider.generate:\n    name: generate\n    module: src.taskill.providers.openrouter\n    line: 39\n    cyclomatic_complexity: 6\n    calls_out: 27\n    calls_in: 0\n  src.taskill.triggers.evaluate:\n    name: evaluate\n    module: src.taskill.triggers\n    line: 25\n    cyclomatic_complexity: 21\n    calls_out: 23\n    calls_in: 2\n  src.taskill.cli.main:\n    name: main\n    module: src.taskill.cli\n    line: 47\n    cyclomatic_complexity: 1\n    calls_out: 6\n    calls_in: 0\n  src.taskill.cli.clean_todo:\n    name: clean_todo\n    module: src.taskill.cli\n    line: 170\n    cyclomatic_complexity: 1\n    calls_out: 6\n    calls_in: 0\n  src.taskill.git_state.head_sha:\n    name: head_sha\n    module: src.taskill.git_state\n    line: 55\n    cyclomatic_complexity: 2\n    calls_out: 1\n    calls_in: 1\n  src.taskill.providers.build_chain:\n    name: build_chain\n    module: src.taskill.providers\n    line: 64\n    cyclomatic_complexity: 4\n    calls_out: 4\n    calls_in: 1\n  src.taskill.updaters.readme.update_readme:\n    name: update_readme\n    module: src.taskill.updaters.readme\n    line: 52\n    cyclomatic_complexity: 6\n    calls_out: 11\n    calls_in: 1\n  src.taskill.cli.status:\n    name: status\n    module: src.taskill.cli\n    line: 100\n    cyclomatic_complexity: 11\n    calls_out: 25\n    calls_in: 0\n  src.taskill.git_state.commits_since:\n    name: commits_since\n    module: src.taskill.git_state\n    line: 60\n    cyclomatic_complexity: 7\n    calls_out: 8\n    calls_in: 1\n  src.taskill.git_state.read_coverage:\n    name: read_coverage\n    module: src.taskill.git_state\n    line: 90\n    cyclomatic_complexity: 7\n    calls_out: 11\n    calls_in: 1\n  src.taskill.core.Taskill.__init__:\n    name: __init__\n    module: src.taskill.core\n    line: 56\n    cyclomatic_complexity: 2\n    calls_out: 2\n    calls_in: 0\n  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate:\n    name: generate\n    module: src.taskill.providers.windsurf_mcp\n    line: 67\n    cyclomatic_complexity: 7\n    calls_out: 32\n    calls_in: 0\n  src.taskill.core.Taskill._apply:\n    name: _apply\n    module: src.taskill.core\n    line: 184\n    cyclomatic_complexity: 4\n    calls_out: 12\n    calls_in: 0\n  src.taskill.updaters.todo.empty_todo:\n    name: empty_todo\n    module: src.taskill.updaters.todo\n    line: 98\n    cyclomatic_complexity: 1\n    calls_out: 1\n    calls_in: 1\nedges:\n- caller: src.taskill.providers.build_chain\n  callee: src.taskill.providers.discover_providers\n  call_type: resolved\n- caller: src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available\n  callee: src.taskill.providers.windsurf_mcp._mcp_lib_present\n  call_type: resolved\n- caller: src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available\n  callee: src.taskill.providers.windsurf_mcp._candidate_endpoints\n  call_type: resolved\n- caller: src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate\n  callee: src.taskill.providers.windsurf_mcp._candidate_endpoints\n  call_type: resolved\n- caller: src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate\n  callee: src.taskill.providers.windsurf_mcp._mcp_lib_present\n  call_type: resolved\n- caller: src.taskill.providers.openrouter.OpenRouterProvider.generate\n  callee: src.taskill.providers.openrouter._normalize_model\n  call_type: resolved\n- caller: src.taskill.git_state.head_sha\n  callee: src.taskill.git_state._run\n  call_type: resolved\n- caller: src.taskill.git_state.commits_since\n  callee: src.taskill.git_state._run\n  call_type: resolved\n- caller: src.taskill.git_state.changed_files_since\n  callee: src.taskill.git_state._run\n  call_type: resolved\n- caller: src.taskill.git_state.collect_snapshot\n  callee: src.taskill.git_state.head_sha\n  call_type: resolved\n- caller: src.taskill.git_state.collect_snapshot\n  callee: src.taskill.git_state.commits_since\n  call_type: resolved\n- caller: src.taskill.git_state.collect_snapshot\n  callee: src.taskill.git_state.changed_files_since\n  call_type: resolved\n- caller: src.taskill.git_state.collect_snapshot\n  callee: src.taskill.git_state.read_coverage\n  call_type: resolved\n- caller: src.taskill.git_state.collect_snapshot\n  callee: src.taskill.git_state.read_failed_tests\n  call_type: resolved\n- caller: src.taskill.git_state.collect_snapshot\n  callee: src.taskill.git_state.file_hash\n  call_type: resolved\n- caller: src.taskill.updaters.readme.update_readme\n  callee: src.taskill.updaters.readme.render_status_block\n  call_type: resolved\n- caller: src.taskill.core.Taskill.__init__\n  callee: src.taskill.state.load_state\n  call_type: resolved\n- caller: src.taskill.core.Taskill.__init__\n  callee: src.taskill.config.load_config\n  call_type: resolved\n- caller: src.taskill.core.Taskill.run\n  callee: src.taskill.triggers.evaluate\n  call_type: resolved\n- caller: src.taskill.core.Taskill.run\n  callee: src.taskill.providers.build_chain\n  call_type: resolved\n- caller: src.taskill.core.Taskill.status\n  callee: src.taskill.triggers.evaluate\n  call_type: resolved\n- caller: src.taskill.core.Taskill._snapshot\n  callee: src.taskill.git_state.collect_snapshot\n  call_type: resolved\n- caller: src.taskill.core.Taskill._apply\n  callee: src.taskill.updaters.readme.update_readme\n  call_type: resolved\n- caller: src.taskill.cli.main\n  callee: src.taskill.cli._setup_logging\n  call_type: resolved\n- caller: src.taskill.cli.run\n  callee: src.taskill.config.load_config\n  call_type: resolved\n- caller: src.taskill.cli.status\n  callee: src.taskill.config.load_config\n  call_type: resolved\n- caller: src.taskill.cli.release\n  callee: src.taskill.updaters.changelog.release_unreleased\n  call_type: resolved\n- caller: src.taskill.cli.clean_todo\n  callee: src.taskill.updaters.todo.empty_todo\n  call_type: resolved\nmodules:\n  src.taskill.cli:\n  - src.taskill.cli._setup_logging\n  - src.taskill.cli.clean_todo\n  - src.taskill.cli.main\n  - src.taskill.cli.release\n  - src.taskill.cli.run\n  - src.taskill.cli.status\n  src.taskill.config:\n  - src.taskill.config.load_config\n  src.taskill.core:\n  - src.taskill.core.Taskill.__init__\n  - src.taskill.core.Taskill._apply\n  - src.taskill.core.Taskill._snapshot\n  - src.taskill.core.Taskill.run\n  - src.taskill.core.Taskill.status\n  src.taskill.git_state:\n  - src.taskill.git_state._run\n  - src.taskill.git_state.changed_files_since\n  - src.taskill.git_state.collect_snapshot\n  - src.taskill.git_state.commits_since\n  - src.taskill.git_state.file_hash\n  - src.taskill.git_state.head_sha\n  - src.taskill.git_state.read_coverage\n  - src.taskill.git_state.read_failed_tests\n  src.taskill.providers:\n  - src.taskill.providers.build_chain\n  - src.taskill.providers.discover_providers\n  src.taskill.providers.openrouter:\n  - src.taskill.providers.openrouter.OpenRouterProvider.generate\n  - src.taskill.providers.openrouter._normalize_model\n  src.taskill.providers.windsurf_mcp:\n  - src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate\n  - src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available\n  - src.taskill.providers.windsurf_mcp._candidate_endpoints\n  - src.taskill.providers.windsurf_mcp._mcp_lib_present\n  src.taskill.state:\n  - src.taskill.state.load_state\n  src.taskill.triggers:\n  - src.taskill.triggers.evaluate\n  src.taskill.updaters.changelog:\n  - src.taskill.updaters.changelog.release_unreleased\n  src.taskill.updaters.readme:\n  - src.taskill.updaters.readme.render_status_block\n  - src.taskill.updaters.readme.update_readme\n  src.taskill.updaters.todo:\n  - src.taskill.updaters.todo.empty_todo\nentry_points:\n- src.taskill.cli.clean_todo\n- src.taskill.cli.init\n- src.taskill.cli.main\n- src.taskill.cli.release\n- src.taskill.cli.run\n- src.taskill.cli.status\n- src.taskill.core.Taskill.__init__\n- src.taskill.core.Taskill._apply\n- src.taskill.core.Taskill._build_context\n- src.taskill.core.Taskill._maybe_pyqual_report\n- src.taskill.core.Taskill._snapshot\n- src.taskill.core.Taskill._update_state\n- src.taskill.core.Taskill.run\n- src.taskill.core.Taskill.status\n- src.taskill.core.TaskillResult.as_dict\n- src.taskill.providers.algorithmic.AlgorithmicProvider._extract_new_todos\n- src.taskill.providers.algorithmic.AlgorithmicProvider._find_completed_todos\n- src.taskill.providers.algorithmic.AlgorithmicProvider._format_commit\n- src.taskill.providers.algorithmic.AlgorithmicProvider.generate\n- src.taskill.providers.algorithmic.AlgorithmicProvider.is_available\n- src.taskill.providers.base.GeneratedDocs.__post_init__\n- src.taskill.providers.base.Provider.__init__\n- src.taskill.providers.base.Provider.generate\n- src.taskill.providers.base.Provider.is_available\n- src.taskill.providers.openrouter.OpenRouterProvider._parse_json_loosely\n- src.taskill.providers.openrouter.OpenRouterProvider.generate\n- src.taskill.providers.openrouter.OpenRouterProvider.is_available\n- src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate\n- src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available\n- src.taskill.state.TaskillState.stamp\n- src.taskill.triggers.TriggerEvaluation.summary\n- src.taskill.updaters.base.DocumentUpdater.__init__\n- src.taskill.updaters.base.DocumentUpdater.apply\n- src.taskill.updaters.changelog.ChangelogUpdater._update_changelog\n- src.taskill.updaters.changelog.ChangelogUpdater.apply\n- src.taskill.updaters.todo.TodoUpdater._update_todo\n- src.taskill.updaters.todo.TodoUpdater.apply\n", "is_subdir": false}, {"name": "evolution.toon.yaml", "rel_path": "evolution.toon.yaml", "path": "evolution.toon.yaml", "size": "1.6KB", "icon": "⚙️", "type": "yaml", "type_name": "YAML", "content": "# code2llm/evolution | 60 func | 15f | 2026-04-25\n\nNEXT[2] (ranked by impact):\n  [1] !  SPLIT-FUNC      run  CC=16  fan=16\n      WHY: CC=16 exceeds 15\n      EFFORT: ~1h  IMPACT: 256\n\n  [2] !  SPLIT-FUNC      evaluate  CC=21  fan=11\n      WHY: CC=21 exceeds 15\n      EFFORT: ~1h  IMPACT: 231\n\n\nRISKS[0]: none\n\nMETRICS-TARGET:\n  CC̄:          4.3 → ≤3.0\n  max-CC:      21 → ≤10\n  god-modules: 0 → 0\n  high-CC(≥15): 2 → ≤1\n  hub-types:   0 → ≤0\n\nPATTERNS (language parser shared logic):\n  _extract_declarations() in base.py — unified extraction for:\n    - TypeScript: interfaces, types, classes, functions, arrow funcs\n    - PHP: namespaces, traits, classes, functions, includes\n    - Ruby: modules, classes, methods, requires\n    - C++: classes, structs, functions, #includes\n    - C#: classes, interfaces, methods, usings\n    - Java: classes, interfaces, methods, imports\n    - Go: packages, functions, structs\n    - Rust: modules, functions, traits, use statements\n\n  Shared regex patterns per language:\n    - import: language-specific import/require/using patterns\n    - class: class/struct/trait declarations with inheritance\n    - function: function/method signatures with visibility\n    - brace_tracking: for C-family languages ({ })\n    - end_keyword_tracking: for Ruby (module/class/def...end)\n\n  Benefits:\n    - Consistent extraction logic across all languages\n    - Reduced code duplication (~70% reduction in parser LOC)\n    - Easier maintenance: fix once, apply everywhere\n    - Standardized FunctionInfo/ClassInfo models\n\nHISTORY:\n  (first run — no previous data)\n", "is_subdir": false}, {"name": "map.toon.yaml", "rel_path": "map.toon.yaml", "path": "map.toon.yaml", "size": "5.0KB", "icon": "⚙️", "type": "yaml", "type_name": "YAML", "content": "# taskill | 25f 2818L | shell:2,yaml:2,yml:3,toml:1,python:17 | 2026-04-25\n# stats: 60 func | 0 cls | 25 mod | CC̄=4.3 | critical:2 | cycles:0\n# alerts[5]: fan-out ChangelogUpdater._update_changelog=20; CC evaluate=21; fan-out WindsurfMcpProvider.generate=19; fan-out load_config=17; CC run=16\n# hotspots[5]: ChangelogUpdater._update_changelog fan=20; WindsurfMcpProvider.generate fan=19; load_config fan=17; run fan=16; Taskill.run fan=14\n# evolution: baseline\n# Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods\nM[25]:\n  examples/ansible-playbook.yml,52\n  examples/github-action.yml,51\n  examples/gitlab-ci.yml,46\n  goal.yaml,512\n  project.sh,47\n  pyproject.toml,97\n  src/taskill/__init__.py,20\n  src/taskill/cli.py,253\n  src/taskill/config.py,170\n  src/taskill/core.py,211\n  src/taskill/git_state.py,147\n  src/taskill/providers/__init__.py,75\n  src/taskill/providers/algorithmic.py,155\n  src/taskill/providers/base.py,105\n  src/taskill/providers/openrouter.py,114\n  src/taskill/providers/windsurf_mcp.py,135\n  src/taskill/state.py,42\n  src/taskill/triggers.py,94\n  src/taskill/updaters/__init__.py,59\n  src/taskill/updaters/base.py,44\n  src/taskill/updaters/changelog.py,119\n  src/taskill/updaters/readme.py,99\n  src/taskill/updaters/todo.py,113\n  taskill.yaml,57\n  tree.sh,1\nD:\n  src/taskill/triggers.py:\n    e: TriggerEvaluation,evaluate\n    TriggerEvaluation: summary(0)\n    evaluate(triggers;state;snapshot;project_root)\n  src/taskill/cli.py:\n    e: _setup_logging,main,run,status,init,release,clean_todo\n    _setup_logging(verbose)\n    main(ctx;verbose;config)\n    run(ctx;force;dry_run;as_json)\n    status(ctx;as_json)\n    init(force)\n    release(version;changelog)\n    clean_todo(todo)\n  src/taskill/updaters/changelog.py:\n    e: ChangelogUpdater,release_unreleased\n    ChangelogUpdater(DocumentUpdater): apply(3),_update_changelog(2)  # Updater for CHANGELOG.md files...\n    release_unreleased(path;version;today)\n  src/taskill/core.py:\n    e: TaskillResult,Taskill\n    TaskillResult: as_dict(0)\n    Taskill: __init__(2),run(1),status(0),_snapshot(0),_build_context(1),_maybe_pyqual_report(0),_apply(2),_update_state(1)\n  src/taskill/providers/algorithmic.py:\n    e: AlgorithmicProvider\n    AlgorithmicProvider(Provider): is_available(0),generate(1),_format_commit(0),_find_completed_todos(1),_extract_new_todos(0)\n  src/taskill/providers/base.py:\n    e: ProviderError,GeneratedDocs,Provider,build_user_prompt\n    ProviderError(Exception):  # Provider failed — chain falls through to next provider...\n    GeneratedDocs: __post_init__(0)  # What every provider returns...\n    Provider(ABC): __init__(1),is_available(0),generate(1)  # Abstract provider — produces docs from a project snapshot...\n    build_user_prompt(context)\n  src/taskill/config.py:\n    e: Triggers,ProviderConfig,IntegrationConfig,TaskillConfig,load_config\n    Triggers:  # Conditions that must be met to run an update.\n\nAll threshold...\n    ProviderConfig:  # Single provider configuration...\n    IntegrationConfig:  # Optional CI / VCS / orchestrator integration...\n    TaskillConfig:\n    load_config(path;project_root)\n  src/taskill/providers/windsurf_mcp.py:\n    e: WindsurfMcpProvider,_mcp_lib_present,_candidate_endpoints\n    WindsurfMcpProvider(Provider): is_available(0),generate(1)\n    _mcp_lib_present()\n    _candidate_endpoints(options)\n  src/taskill/git_state.py:\n    e: Commit,ProjectSnapshot,_run,head_sha,commits_since,changed_files_since,read_coverage,read_failed_tests,file_hash,collect_snapshot\n    Commit:\n    ProjectSnapshot:\n    _run(cmd;cwd)\n    head_sha(project_root)\n    commits_since(project_root;since_sha)\n    changed_files_since(project_root;since_sha)\n    read_coverage(project_root)\n    read_failed_tests(project_root)\n    file_hash(path)\n    collect_snapshot(project_root;files;last_commit_sha)\n  src/taskill/providers/__init__.py:\n    e: discover_providers,build_chain\n    discover_providers()\n    build_chain(provider_configs)\n  src/taskill/providers/openrouter.py:\n    e: OpenRouterProvider,_normalize_model\n    OpenRouterProvider(Provider): is_available(0),generate(1),_parse_json_loosely(0)\n    _normalize_model(model)\n  src/taskill/updaters/readme.py:\n    e: render_status_block,update_readme\n    render_status_block(snapshot;summary)\n    update_readme(path;snapshot;summary)\n  src/taskill/state.py:\n    e: TaskillState,load_state,save_state\n    TaskillState: stamp(0)\n    load_state(path)\n    save_state(path;state)\n  src/taskill/updaters/base.py:\n    e: UpdateResult,DocumentUpdater\n    UpdateResult:  # What every updater returns...\n    DocumentUpdater(ABC): __init__(1),apply(3)  # Abstract updater — applies changes to a document file...\n  src/taskill/updaters/todo.py:\n    e: TodoUpdater,empty_todo\n    TodoUpdater(DocumentUpdater): apply(3),_update_todo(3)  # Updater for TODO.md files...\n    empty_todo(path;header)\n  tree.sh:\n  taskill.yaml:\n  examples/ansible-playbook.yml:\n  examples/github-action.yml:\n  examples/gitlab-ci.yml:\n  goal.yaml:\n  project.sh:\n  pyproject.toml:\n  src/taskill/__init__.py:\n  src/taskill/updaters/__init__.py:\n", "is_subdir": false}, {"name": "project.toon.yaml", "rel_path": "project.toon.yaml", "path": "project.toon.yaml", "size": "2.4KB", "icon": "⚙️", "type": "yaml", "type_name": "YAML", "content": "# taskill | 60 func | 15f | 3823L | python | 2026-04-25\n\nHEALTH:\n  CC̄=4.3  critical=7 (limit:10)  dup=0  cycles=0\n\nALERTS[14]:\n  !!! high_fan_out     ChangelogUpdater._update_changelog = 20 (limit:10)\n  !!  cc_exceeded      evaluate = 21 (limit:15)\n  !!  high_fan_out     WindsurfMcpProvider.generate = 19 (limit:10)\n  !!  high_fan_out     load_config = 17 (limit:10)\n  !!  high_fan_out     run = 16 (limit:10)\n  !   cc_exceeded      run = 16 (limit:15)\n  !   high_fan_out     Taskill.run = 14 (limit:10)\n  !   high_fan_out     OpenRouterProvider.generate = 13 (limit:10)\n  !   high_fan_out     AlgorithmicProvider.generate = 13 (limit:10)\n  !   high_fan_out     collect_snapshot = 12 (limit:10)\n\nMODULES[25] (top by size):\n  M[goal.yaml] 512L C:0 F:0 CC↑0 D:0 (yaml)\n  M[src/taskill/cli.py] 253L C:0 F:7 CC↑16 D:0 (python)\n  M[src/taskill/core.py] 211L C:2 F:9 CC↑11 D:0 (python)\n  M[src/taskill/config.py] 170L C:4 F:1 CC↑8 D:2 (python)\n  M[src/taskill/providers/algorithmic.py] 155L C:1 F:5 CC↑10 D:0 (python)\n  M[src/taskill/git_state.py] 147L C:2 F:8 CC↑7 D:2 (python)\n  M[src/taskill/providers/windsurf_mcp.py] 135L C:1 F:4 CC↑7 D:0 (python)\n  M[src/taskill/providers/openrouter.py] 114L C:1 F:4 CC↑6 D:0 (python)\n  M[src/taskill/updaters/todo.py] 113L C:1 F:3 CC↑1 D:1 (python)\n  M[src/taskill/updaters/changelog.py] 112L C:1 F:3 CC↑12 D:1 (python)\n  M[src/taskill/providers/base.py] 105L C:3 F:5 CC↑9 D:2 (python)\n  M[pyproject.toml] 97L C:0 F:0 CC↑0 D:0 (toml)\n  M[src/taskill/triggers.py] 94L C:1 F:2 CC↑21 D:1 (python)\n  M[src/taskill/providers/__init__.py] 75L C:0 F:2 CC↑6 D:1 (python)\n  M[src/taskill/updaters/readme.py] 71L C:0 F:2 CC↑6 D:1 (python)\n  LANGS: python:17/yml:3/yaml:2/shell:2/toml:1\n\nHOTSPOTS[10]:\n  ★ ChangelogUpdater._update_changelog fan=20  // Append entries under [Unreleased]. Returns True if the file changed.\n  ★ WindsurfMcpProvider.generate fan=19  // Orchestrates 19 calls\n  ★ load_config fan=17  // Load config from YAML + .env. Missing YAML → defaults.\n\nResolution order for pro\n  ★ run fan=16  // Execute the update pipeline.\n  ★ Taskill.run fan=14  // Orchestrates 14 calls\n\nREFACTOR[6]:\n  [1] H/H Split god module goal.yaml (512L, 0 classes)\n  [2] M/L Split evaluate (CC=21)\n  [3] M/L Split run (CC=16)\n  [4] M/M Reduce ChangelogUpdater._update_changelog fan-out (currently 20)\n  [5] M/M Reduce WindsurfMcpProvider.generate fan-out (currently 19)\n\nEVOLUTION:\n  2026-04-25 CC̄=4.3 crit=7 3823L // Automated analysis\n", "is_subdir": false}];
+        let currentFile = null;
+
+        function renderFileList(filter = '') {
+            const list = document.getElementById('fileList');
+            const filtered = files.filter(f =>
+                f.name.toLowerCase().includes(filter.toLowerCase()) ||
+                f.path.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="empty-state">No files found</div>';
+                return;
+            }
+
+            // Group by type
+            const groups = {};
+            for (const file of filtered) {
+                const type = file.type_name;
+                if (!groups[type]) groups[type] = [];
+                groups[type].push(file);
+            }
+
+            let html = '';
+            for (const [typeName, groupFiles] of Object.entries(groups)) {
+                html += `
+                    <div class="file-group">
+                        <div class="file-group-title">${typeName} Files (${groupFiles.length})</div>
+                        ${groupFiles.map(f => `
+                            <div class="file-item ${currentFile?.name === f.name ? 'active' : ''}"
+                                 onclick="selectFile('${f.name}')">
+                                <span class="file-icon">${f.icon}</span>
+                                <div class="file-info">
+                                    <div class="file-name">${f.name}</div>
+                                    <div class="file-meta">${f.path}</div>
+                                </div>
+                                <span class="file-size">${f.size}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            list.innerHTML = html;
+        }
+
+        function selectFile(name) {
+            const file = files.find(f => f.name === name);
+            if (!file) return;
+
+            currentFile = file;
+
+            document.getElementById('contentIcon').textContent = file.icon;
+            document.getElementById('contentTitle').textContent = file.name;
+
+            // Actions
+            const actions = document.getElementById('contentActions');
+            actions.innerHTML = `
+                <a href="${file.rel_path}" download class="btn">⬇ Download</a>
+                <a href="${file.rel_path}" target="_blank" class="btn btn-primary">↗ Open Raw</a>
+            `;
+
+            // Content
+            const body = document.getElementById('contentBody');
+            if (file.type === 'markdown') {
+                // Render markdown as HTML using marked.js
+                body.innerHTML = `<div class="markdown-content">${marked.parse(file.content)}</div>`;
+            } else if (file.type === 'html') {
+                // For HTML files, show in iframe for safety
+                body.innerHTML = `<iframe src="${file.rel_path}" style="width:100%;height:100%;border:none;border-radius:0.5rem;"></iframe>`;
+            } else if (file.type === 'image') {
+                // For images, display the actual image
+                body.innerHTML = `<div class="image-preview"><img src="${file.rel_path}" alt="${file.name}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:0.5rem;"></div>`;
+            } else if (file.type === 'mermaid') {
+                // Render mermaid diagram
+                const diagramId = 'mermaid-diagram-' + Date.now();
+                body.innerHTML = `<div class="mermaid-content"><pre class="mermaid" id="${diagramId}">${file.content}</pre></div>`;
+                // Initialize mermaid on the new element
+                setTimeout(() => {
+                    mermaid.init(undefined, document.getElementById(diagramId));
+                }, 0);
+            } else if (file.type === 'json') {
+                try {
+                    const json = JSON.parse(file.content.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'));
+                    const formatted = JSON.stringify(json, null, 2);
+                    body.innerHTML = `<pre><code class="language-json">${formatted.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                    hljs.highlightElement(body.querySelector('code'));
+                } catch {
+                    body.innerHTML = `<pre>${file.content}</pre>`;
+                }
+            } else if (file.type === 'yaml') {
+                // YAML with syntax highlighting
+                body.innerHTML = `<pre><code class="language-yaml">${file.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                hljs.highlightElement(body.querySelector('code'));
+            } else if (file.type === 'toon') {
+                // TOON with simple highlighting (use ini as closest match for key: value format)
+                body.innerHTML = `<pre><code class="language-ini">${file.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                hljs.highlightElement(body.querySelector('code'));
+            } else if (file.type === 'code') {
+                // Code files with auto-highlighting
+                body.innerHTML = `<pre><code>${file.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                hljs.highlightElement(body.querySelector('code'));
+            } else {
+                body.innerHTML = `<pre>${file.content}</pre>`;
+            }
+
+            renderFileList(document.getElementById('search').value);
+        }
+
+        function filterFiles(query) {
+            renderFileList(query);
+        }
+
+        function renderStats() {
+            const stats = {};
+            for (const f of files) {
+                stats[f.type_name] = (stats[f.type_name] || 0) + 1;
+            }
+
+            const grid = document.getElementById('statsGrid');
+            grid.innerHTML = Object.entries(stats)
+                .sort((a, b) => b[1] - a[1])
+                .map(([type, count]) => `
+                    <div class="stat-card">
+                        <div class="stat-value">${count}</div>
+                        <div class="stat-label">${type}</div>
+                    </div>
+                `).join('');
+        }
+
+        // Initialize
+        renderStats();
+        renderFileList();
+
+        // Select first file if available
+        if (files.length > 0) {
+            selectFile(files[0].name);
+        }
+    </script>
+</body>
+</html>

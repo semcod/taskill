@@ -1,0 +1,123 @@
+# code2llm call graph | /home/tom/github/semcod/taskill
+# nodes: 34 | edges: 28 | modules: 12
+# CC̄=4.3
+
+HUBS[20]:
+  src.taskill.config.load_config
+    CC=8  in:3  out:35  total:38
+  src.taskill.cli.run
+    CC=16  in:0  out:32  total:32
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate
+    CC=7  in:0  out:32  total:32
+  src.taskill.providers.openrouter.OpenRouterProvider.generate
+    CC=6  in:0  out:27  total:27
+  src.taskill.triggers.evaluate
+    CC=21  in:2  out:23  total:25
+  src.taskill.cli.status
+    CC=11  in:0  out:25  total:25
+  src.taskill.core.Taskill.run
+    CC=11  in:0  out:20  total:20
+  src.taskill.git_state.collect_snapshot
+    CC=3  in:1  out:13  total:14
+  src.taskill.updaters.readme.update_readme
+    CC=6  in:1  out:11  total:12
+  src.taskill.git_state.read_coverage
+    CC=7  in:1  out:11  total:12
+  src.taskill.core.Taskill._apply
+    CC=4  in:0  out:12  total:12
+  src.taskill.git_state.read_failed_tests
+    CC=5  in:1  out:8  total:9
+  src.taskill.providers.windsurf_mcp._candidate_endpoints
+    CC=5  in:2  out:7  total:9
+  src.taskill.git_state.commits_since
+    CC=7  in:1  out:8  total:9
+  src.taskill.providers.discover_providers
+    CC=6  in:1  out:7  total:8
+  src.taskill.cli.release
+    CC=2  in:0  out:8  total:8
+  src.taskill.state.load_state
+    CC=3  in:1  out:6  total:7
+  src.taskill.updaters.changelog.release_unreleased
+    CC=4  in:1  out:6  total:7
+  src.taskill.updaters.readme.render_status_block
+    CC=6  in:1  out:5  total:6
+  src.taskill.git_state._run
+    CC=2  in:4  out:2  total:6
+
+MODULES:
+  src.taskill.cli  [6 funcs]
+    _setup_logging  CC=2  out:1
+    clean_todo  CC=1  out:6
+    main  CC=1  out:6
+    release  CC=2  out:8
+    run  CC=16  out:32
+    status  CC=11  out:25
+  src.taskill.config  [1 funcs]
+    load_config  CC=8  out:35
+  src.taskill.core  [5 funcs]
+    __init__  CC=2  out:2
+    _apply  CC=4  out:12
+    _snapshot  CC=1  out:1
+    run  CC=11  out:20
+    status  CC=1  out:3
+  src.taskill.git_state  [8 funcs]
+    _run  CC=2  out:2
+    changed_files_since  CC=4  out:2
+    collect_snapshot  CC=3  out:13
+    commits_since  CC=7  out:8
+    file_hash  CC=2  out:4
+    head_sha  CC=2  out:1
+    read_coverage  CC=7  out:11
+    read_failed_tests  CC=5  out:8
+  src.taskill.providers  [2 funcs]
+    build_chain  CC=4  out:4
+    discover_providers  CC=6  out:7
+  src.taskill.providers.openrouter  [2 funcs]
+    generate  CC=6  out:27
+    _normalize_model  CC=2  out:2
+  src.taskill.providers.windsurf_mcp  [4 funcs]
+    generate  CC=7  out:32
+    is_available  CC=2  out:3
+    _candidate_endpoints  CC=5  out:7
+    _mcp_lib_present  CC=2  out:0
+  src.taskill.state  [1 funcs]
+    load_state  CC=3  out:6
+  src.taskill.triggers  [1 funcs]
+    evaluate  CC=21  out:23
+  src.taskill.updaters.changelog  [1 funcs]
+    release_unreleased  CC=4  out:6
+  src.taskill.updaters.readme  [2 funcs]
+    render_status_block  CC=6  out:5
+    update_readme  CC=6  out:11
+  src.taskill.updaters.todo  [1 funcs]
+    empty_todo  CC=1  out:1
+
+EDGES:
+  src.taskill.providers.build_chain → src.taskill.providers.discover_providers
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → src.taskill.providers.windsurf_mcp._mcp_lib_present
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → src.taskill.providers.windsurf_mcp._candidate_endpoints
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.windsurf_mcp._candidate_endpoints
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.windsurf_mcp._mcp_lib_present
+  src.taskill.providers.openrouter.OpenRouterProvider.generate → src.taskill.providers.openrouter._normalize_model
+  src.taskill.git_state.head_sha → src.taskill.git_state._run
+  src.taskill.git_state.commits_since → src.taskill.git_state._run
+  src.taskill.git_state.changed_files_since → src.taskill.git_state._run
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.head_sha
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.commits_since
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.changed_files_since
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.read_coverage
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.read_failed_tests
+  src.taskill.git_state.collect_snapshot → src.taskill.git_state.file_hash
+  src.taskill.updaters.readme.update_readme → src.taskill.updaters.readme.render_status_block
+  src.taskill.core.Taskill.__init__ → src.taskill.state.load_state
+  src.taskill.core.Taskill.__init__ → src.taskill.config.load_config
+  src.taskill.core.Taskill.run → src.taskill.triggers.evaluate
+  src.taskill.core.Taskill.run → src.taskill.providers.build_chain
+  src.taskill.core.Taskill.status → src.taskill.triggers.evaluate
+  src.taskill.core.Taskill._snapshot → src.taskill.git_state.collect_snapshot
+  src.taskill.core.Taskill._apply → src.taskill.updaters.readme.update_readme
+  src.taskill.cli.main → src.taskill.cli._setup_logging
+  src.taskill.cli.run → src.taskill.config.load_config
+  src.taskill.cli.status → src.taskill.config.load_config
+  src.taskill.cli.release → src.taskill.updaters.changelog.release_unreleased
+  src.taskill.cli.clean_todo → src.taskill.updaters.todo.empty_todo

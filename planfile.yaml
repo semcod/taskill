@@ -1,0 +1,552 @@
+name: Code Quality Improvement
+project_name: ''
+project_type: prefactoring
+domain: dev-tools
+goal: Improve code quality using prefact
+goals:
+- Fix all prefact-detected issues
+- Improve code maintainability
+- Ensure consistent code style
+quality_gates:
+- metric: Prefact Issues
+  threshold: '0'
+sprints:
+- id: sprint-1
+  name: Code Quality Improvements
+  duration: 2 weeks
+  objectives:
+  - Fix code quality issues
+  task_patterns:
+  - id: ticket-db5e9dd3
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/config.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/config.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-dba8c3c5
+    name: Fix magic-numbers issues
+    description: Resolve 1 magic-numbers issues in src/taskill/config.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/config.py
+    rule_id: magic-numbers
+    count: 1
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-af09dd4b
+    name: Fix unused-imports issues
+    description: Resolve 10 unused-imports issues in src/taskill/core.py
+    task_type: prefactor
+    priority: high
+    estimate: 2d
+    files:
+    - src/taskill/core.py
+    rule_id: unused-imports
+    count: 10
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-ea7332e2
+    name: Fix magic-numbers issues
+    description: Resolve 1 magic-numbers issues in src/taskill/core.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/core.py
+    rule_id: magic-numbers
+    count: 1
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-9c26f888
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/cli.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/cli.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-f494aa3e
+    name: Fix magic-numbers issues
+    description: Resolve 1 magic-numbers issues in src/taskill/cli.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/cli.py
+    rule_id: magic-numbers
+    count: 1
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-3bd97300
+    name: Fix ai-boilerplate issues
+    description: Resolve 1 ai-boilerplate issues in src/taskill/cli.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/cli.py
+    rule_id: ai-boilerplate
+    count: 1
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-b6a4b573
+    name: Fix string-concat issues
+    description: Resolve 1 string-concat issues in src/taskill/git_state.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/git_state.py
+    rule_id: string-concat
+    count: 1
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-5432ca41
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/git_state.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/git_state.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-bd9bfba5
+    name: Fix magic-numbers issues
+    description: Resolve 1 magic-numbers issues in src/taskill/git_state.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/git_state.py
+    rule_id: magic-numbers
+    count: 1
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-d5ad71d9
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/providers/algorithmic.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/providers/algorithmic.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-fe3ac057
+    name: Fix magic-numbers issues
+    description: Resolve 1 magic-numbers issues in src/taskill/providers/algorithmic.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/providers/algorithmic.py
+    rule_id: magic-numbers
+    count: 1
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-4d94a8de
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/providers/base.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/providers/base.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-8d730c8d
+    name: Fix magic-numbers issues
+    description: Resolve 4 magic-numbers issues in src/taskill/providers/base.py
+    task_type: prefactor
+    priority: medium
+    estimate: 2d
+    files:
+    - src/taskill/providers/base.py
+    rule_id: magic-numbers
+    count: 4
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-7a0100b5
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/providers/openrouter.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/providers/openrouter.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-bbec1630
+    name: Fix magic-numbers issues
+    description: Resolve 4 magic-numbers issues in src/taskill/providers/openrouter.py
+    task_type: prefactor
+    priority: medium
+    estimate: 2d
+    files:
+    - src/taskill/providers/openrouter.py
+    rule_id: magic-numbers
+    count: 4
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-8a420046
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/providers/__init__.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/providers/__init__.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-1e4e88a3
+    name: Fix unused-imports issues
+    description: Resolve 6 unused-imports issues in src/taskill/providers/windsurf_mcp.py
+    task_type: prefactor
+    priority: high
+    estimate: 2d
+    files:
+    - src/taskill/providers/windsurf_mcp.py
+    rule_id: unused-imports
+    count: 6
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-e510c6ac
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/state.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/state.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-827efc22
+    name: Fix string-concat issues
+    description: Resolve 1 string-concat issues in src/taskill/triggers.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/triggers.py
+    rule_id: string-concat
+    count: 1
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-d605ceff
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/triggers.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/triggers.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-36ce53f0
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/updaters/__init__.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/updaters/__init__.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-2afcff30
+    name: Fix string-concat issues
+    description: Resolve 9 string-concat issues in src/taskill/updaters/changelog.py
+    task_type: prefactor
+    priority: high
+    estimate: 2d
+    files:
+    - src/taskill/updaters/changelog.py
+    rule_id: string-concat
+    count: 9
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-3865ee88
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/updaters/changelog.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/updaters/changelog.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-f2dc4a4e
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/updaters/base.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/updaters/base.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-190195e3
+    name: Fix llm-generated-code issues
+    description: Resolve 1 llm-generated-code issues in src/taskill/updaters/base.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/updaters/base.py
+    rule_id: llm-generated-code
+    count: 1
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-b05e6370
+    name: Fix string-concat issues
+    description: Resolve 3 string-concat issues in src/taskill/updaters/readme.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/updaters/readme.py
+    rule_id: string-concat
+    count: 3
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-fdbb78c9
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/updaters/readme.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/updaters/readme.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-605e46fa
+    name: Fix string-concat issues
+    description: Resolve 2 string-concat issues in src/taskill/updaters/todo.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/updaters/todo.py
+    rule_id: string-concat
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-8062d9b4
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/updaters/todo.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/updaters/todo.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-c98c14b7
+    name: Fix smart-return-type issues
+    description: Resolve 7 smart-return-type issues in tests/test_algorithmic.py
+    task_type: prefactor
+    priority: high
+    estimate: 2d
+    files:
+    - tests/test_algorithmic.py
+    rule_id: smart-return-type
+    count: 7
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-14a6db68
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in tests/test_algorithmic.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - tests/test_algorithmic.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-af05b203
+    name: Fix smart-return-type issues
+    description: Resolve 5 smart-return-type issues in tests/test_config.py
+    task_type: prefactor
+    priority: medium
+    estimate: 2d
+    files:
+    - tests/test_config.py
+    rule_id: smart-return-type
+    count: 5
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-885edd98
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in tests/test_config.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - tests/test_config.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-f77051af
+    name: Fix duplicate-imports issues
+    description: Resolve 1 duplicate-imports issues in tests/test_config.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - tests/test_config.py
+    rule_id: duplicate-imports
+    count: 1
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-1f6a0131
+    name: Fix smart-return-type issues
+    description: Resolve 6 smart-return-type issues in tests/test_providers.py
+    task_type: prefactor
+    priority: high
+    estimate: 2d
+    files:
+    - tests/test_providers.py
+    rule_id: smart-return-type
+    count: 6
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-1ced127f
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in tests/test_providers.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - tests/test_providers.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-22f03c7b
+    name: Fix smart-return-type issues
+    description: Resolve 8 smart-return-type issues in tests/test_triggers.py
+    task_type: prefactor
+    priority: high
+    estimate: 2d
+    files:
+    - tests/test_triggers.py
+    rule_id: smart-return-type
+    count: 8
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-11ba31e7
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in tests/test_triggers.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - tests/test_triggers.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-098fd02a
+    name: Fix smart-return-type issues
+    description: Resolve 13 smart-return-type issues in tests/test_updaters.py
+    task_type: prefactor
+    priority: high
+    estimate: 3d
+    files:
+    - tests/test_updaters.py
+    rule_id: smart-return-type
+    count: 13
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-3ec5ceaf
+    name: Fix unused-imports issues
+    description: Resolve 6 unused-imports issues in tests/test_updaters.py
+    task_type: prefactor
+    priority: high
+    estimate: 2d
+    files:
+    - tests/test_updaters.py
+    rule_id: unused-imports
+    count: 6
+    model_hints:
+      planning: balanced
+      implementation: balanced

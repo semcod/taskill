@@ -1,0 +1,53 @@
+# taskill | 60 func | 15f | 3823L | python | 2026-04-25
+
+HEALTH:
+  CC̄=4.3  critical=7 (limit:10)  dup=0  cycles=0
+
+ALERTS[14]:
+  !!! high_fan_out     ChangelogUpdater._update_changelog = 20 (limit:10)
+  !!  cc_exceeded      evaluate = 21 (limit:15)
+  !!  high_fan_out     WindsurfMcpProvider.generate = 19 (limit:10)
+  !!  high_fan_out     load_config = 17 (limit:10)
+  !!  high_fan_out     run = 16 (limit:10)
+  !   cc_exceeded      run = 16 (limit:15)
+  !   high_fan_out     Taskill.run = 14 (limit:10)
+  !   high_fan_out     OpenRouterProvider.generate = 13 (limit:10)
+  !   high_fan_out     AlgorithmicProvider.generate = 13 (limit:10)
+  !   high_fan_out     collect_snapshot = 12 (limit:10)
+
+MODULES[25] (top by size):
+  M[goal.yaml] 512L C:0 F:0 CC↑0 D:0 (yaml)
+  M[src/taskill/cli.py] 253L C:0 F:7 CC↑16 D:0 (python)
+  M[src/taskill/core.py] 211L C:2 F:9 CC↑11 D:0 (python)
+  M[src/taskill/config.py] 170L C:4 F:1 CC↑8 D:2 (python)
+  M[src/taskill/providers/algorithmic.py] 155L C:1 F:5 CC↑10 D:0 (python)
+  M[src/taskill/git_state.py] 147L C:2 F:8 CC↑7 D:2 (python)
+  M[src/taskill/providers/windsurf_mcp.py] 135L C:1 F:4 CC↑7 D:0 (python)
+  M[src/taskill/providers/openrouter.py] 114L C:1 F:4 CC↑6 D:0 (python)
+  M[src/taskill/updaters/todo.py] 113L C:1 F:3 CC↑1 D:1 (python)
+  M[src/taskill/updaters/changelog.py] 112L C:1 F:3 CC↑12 D:1 (python)
+  M[src/taskill/providers/base.py] 105L C:3 F:5 CC↑9 D:2 (python)
+  M[pyproject.toml] 97L C:0 F:0 CC↑0 D:0 (toml)
+  M[src/taskill/triggers.py] 94L C:1 F:2 CC↑21 D:1 (python)
+  M[src/taskill/providers/__init__.py] 75L C:0 F:2 CC↑6 D:1 (python)
+  M[src/taskill/updaters/readme.py] 71L C:0 F:2 CC↑6 D:1 (python)
+  LANGS: python:17/yml:3/yaml:2/shell:2/toml:1
+
+HOTSPOTS[10]:
+  ★ ChangelogUpdater._update_changelog fan=20  // Append entries under [Unreleased]. Returns True if the file changed.
+  ★ WindsurfMcpProvider.generate fan=19  // Orchestrates 19 calls
+  ★ load_config fan=17  // Load config from YAML + .env. Missing YAML → defaults.
+
+Resolution order for pro
+  ★ run fan=16  // Execute the update pipeline.
+  ★ Taskill.run fan=14  // Orchestrates 14 calls
+
+REFACTOR[6]:
+  [1] H/H Split god module goal.yaml (512L, 0 classes)
+  [2] M/L Split evaluate (CC=21)
+  [3] M/L Split run (CC=16)
+  [4] M/M Reduce ChangelogUpdater._update_changelog fan-out (currently 20)
+  [5] M/M Reduce WindsurfMcpProvider.generate fan-out (currently 19)
+
+EVOLUTION:
+  2026-04-25 CC̄=4.3 crit=7 3823L // Automated analysis

@@ -1,0 +1,60 @@
+# code2llm | 25f 2730L | python:17,yml:3,shell:2,yaml:2,toml:1 | 2026-04-25
+# CC̄=4.3 | critical:2/60 | dups:0 | cycles:0
+
+HEALTH[2]:
+  🟡 CC    evaluate CC=21 (limit:15)
+  🟡 CC    run CC=16 (limit:15)
+
+REFACTOR[1]:
+  1. split 2 high-CC methods  (CC>15)
+
+PIPELINES[29]:
+  [1] Src [is_available]: is_available → _mcp_lib_present
+      PURITY: 100% pure
+  [2] Src [generate]: generate → _candidate_endpoints
+      PURITY: 100% pure
+  [3] Src [is_available]: is_available
+      PURITY: 100% pure
+  [4] Src [generate]: generate → _normalize_model
+      PURITY: 100% pure
+  [5] Src [_parse_json_loosely]: _parse_json_loosely
+      PURITY: 100% pure
+
+LAYERS:
+  src/                            CC̄=4.3    ←in:0  →out:0
+  │ !! cli                        253L  0C    7m  CC=16     ←0
+  │ core                       211L  2C    9m  CC=11     ←0
+  │ config                     170L  4C    1m  CC=8      ←2
+  │ algorithmic                155L  1C    5m  CC=10     ←0
+  │ git_state                  147L  2C    8m  CC=7      ←2
+  │ windsurf_mcp               135L  1C    4m  CC=7      ←0
+  │ openrouter                 114L  1C    4m  CC=6      ←1
+  │ todo                       113L  1C    3m  CC=1      ←1
+  │ changelog                  112L  1C    3m  CC=12     ←1
+  │ base                       105L  3C    5m  CC=9      ←2
+  │ !! triggers                    94L  1C    2m  CC=21     ←1
+  │ __init__                    75L  0C    2m  CC=6      ←1
+  │ readme                      71L  0C    2m  CC=6      ←1
+  │ base                        44L  2C    2m  CC=2      ←0
+  │ state                       42L  1C    3m  CC=3      ←1
+  │ __init__                    20L  0C    0m  CC=0.0    ←0
+  │ __init__                     6L  0C    0m  CC=0.0    ←0
+  │
+  ./                              CC̄=0.0    ←in:0  →out:0
+  │ !! goal.yaml                  512L  0C    0m  CC=0.0    ←0
+  │ pyproject.toml              97L  0C    0m  CC=0.0    ←0
+  │ taskill.yaml                57L  0C    0m  CC=0.0    ←0
+  │ project.sh                  47L  0C    0m  CC=0.0    ←0
+  │ tree.sh                      1L  0C    0m  CC=0.0    ←0
+  │
+  examples/                       CC̄=0.0    ←in:0  →out:0
+  │ ansible-playbook.yml        52L  0C    0m  CC=0.0    ←0
+  │ github-action.yml           51L  0C    0m  CC=0.0    ←0
+  │ gitlab-ci.yml               46L  0C    0m  CC=0.0    ←0
+  │
+
+COUPLING: no cross-package imports detected
+
+EXTERNAL:
+  validation: run `vallm batch .` → validation.toon
+  duplication: run `redup scan .` → duplication.toon
