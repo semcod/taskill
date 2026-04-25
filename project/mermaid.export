@@ -66,14 +66,6 @@ flowchart TD
         src__taskill__state__TaskillState__stamp["stamp"]
         src__taskill__state__load_state["load_state"]
         src__taskill__state__save_state["save_state"]
-        src__taskill__cli___setup_logging["_setup_logging"]
-        src__taskill__cli__main["main"]
-        src__taskill__cli__run{{run CC=16}}
-        src__taskill__cli__status("status CC=11")
-        src__taskill__cli__init["init"]
-        src__taskill__cli__release["release"]
-        src__taskill__cli__bulk_run_cmd{{bulk_run_cmd CC=17}}
-        src__taskill__cli__clean_todo["clean_todo"]
         src__taskill__git_state___run["_run"]
         src__taskill__git_state__head_sha["head_sha"]
         src__taskill__git_state__commits_since["commits_since"]
@@ -82,8 +74,6 @@ flowchart TD
         src__taskill__git_state__read_failed_tests["read_failed_tests"]
         src__taskill__git_state__file_hash["file_hash"]
         src__taskill__git_state__collect_snapshot["collect_snapshot"]
-        src__taskill__triggers__TriggerEvaluation__summary["summary"]
-        src__taskill__triggers__evaluate{{evaluate CC=21}}
         src__taskill__core__TaskillResult__as_dict["as_dict"]
         src__taskill__core__Taskill____init__["__init__"]
         src__taskill__core__Taskill__run("run CC=11")
@@ -93,13 +83,6 @@ flowchart TD
         src__taskill__core__Taskill___maybe_pyqual_report["_maybe_pyqual_report"]
         src__taskill__core__Taskill___apply["_apply"]
         src__taskill__core__Taskill___update_state["_update_state"]
-        src__taskill__bulk__BulkResult__as_dict["as_dict"]
-        src__taskill__bulk__BulkResult__summary["summary"]
-        src__taskill__bulk__find_repos["find_repos"]
-        src__taskill__bulk___scan("_scan CC=9")
-        src__taskill__bulk__resolve_repo_config["resolve_repo_config"]
-        src__taskill__bulk___rebase_config["_rebase_config"]
-        src__taskill__bulk__bulk_run{{bulk_run CC=17}}
         src__taskill__updaters__readme__render_status_block["render_status_block"]
         src__taskill__updaters__readme__ReadmeUpdater__apply["apply"]
         src__taskill__updaters__readme__ReadmeUpdater___update_readme["_update_readme"]
@@ -111,24 +94,35 @@ flowchart TD
         src__taskill__updaters__changelog__update_changelog["update_changelog"]
         src__taskill__updaters__changelog__release_unreleased["release_unreleased"]
         src__taskill__updaters__discover_updaters["discover_updaters"]
-        src__taskill__updaters__todo__TodoUpdater__apply["apply"]
-        src__taskill__updaters__todo__TodoUpdater___update_todo{{_update_todo CC=21}}
-        src__taskill__updaters__todo__update_todo["update_todo"]
-        src__taskill__updaters__todo__empty_todo["empty_todo"]
+        src__taskill__providers__discover_providers["discover_providers"]
+        src__taskill__providers__build_chain["build_chain"]
+        src__taskill__providers__algorithmic__AlgorithmicProvider__is_available["is_available"]
+        src__taskill__providers__algorithmic__AlgorithmicProvider__generate("generate CC=10")
+        src__taskill__providers__algorithmic__AlgorithmicProvider___format_commit["_format_commit"]
+        src__taskill__providers__algorithmic__AlgorithmicProvider___find_completed_todos("_find_completed_todos CC=10")
+        src__taskill__providers__algorithmic__AlgorithmicProvider___extract_new_todos["_extract_new_todos"]
+        src__taskill__providers__base__GeneratedDocs____post_init__["__post_init__"]
+        src__taskill__providers__base__Provider____init__["__init__"]
+        src__taskill__providers__base__Provider__is_available["is_available"]
+        src__taskill__providers__base__Provider__generate["generate"]
+        src__taskill__providers__base__build_user_prompt("build_user_prompt CC=9")
+        src__taskill__providers__base__parse_json_loosely["parse_json_loosely"]
+        src__taskill__providers__openrouter___normalize_model["_normalize_model"]
+        src__taskill__providers__openrouter__OpenRouterProvider__is_available["is_available"]
+        src__taskill__providers__openrouter__OpenRouterProvider__generate["generate"]
         src__taskill__providers__windsurf_mcp___mcp_lib_present["_mcp_lib_present"]
         src__taskill__providers__windsurf_mcp___candidate_endpoints["_candidate_endpoints"]
         src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available["is_available"]
         src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate["generate"]
-        src__taskill__providers__base__GeneratedDocs____post_init__["__post_init__"]
-        src__taskill__providers__base__Provider____init__["__init__"]
-        src__taskill__providers__base__Provider__is_available["is_available"]
+        src__taskill__triggers__TriggerEvaluation__summary["summary"]
+        src__taskill__triggers___check_time["_check_time"]
+        src__taskill__triggers___check_commits["_check_commits"]
+        src__taskill__triggers___check_changed_files["_check_changed_files"]
+        src__taskill__triggers___check_coverage["_check_coverage"]
+        src__taskill__triggers___check_failed_tests["_check_failed_tests"]
+        src__taskill__triggers___check_sumd["_check_sumd"]
+        src__taskill__triggers___check_watched_files["_check_watched_files"]
     end
-    src__taskill__cli__main --> src__taskill__cli___setup_logging
-    src__taskill__cli__run --> src__taskill__config__load_config
-    src__taskill__cli__status --> src__taskill__config__load_config
-    src__taskill__cli__release --> src__taskill__updaters__changelog__release_unreleased
-    src__taskill__cli__bulk_run_cmd --> src__taskill__bulk__bulk_run
-    src__taskill__cli__clean_todo --> src__taskill__updaters__todo__empty_todo
     src__taskill__git_state__head_sha --> src__taskill__git_state___run
     src__taskill__git_state__commits_since --> src__taskill__git_state___run
     src__taskill__git_state__changed_files_since --> src__taskill__git_state___run
@@ -140,28 +134,49 @@ flowchart TD
     src__taskill__git_state__collect_snapshot --> src__taskill__git_state__file_hash
     src__taskill__core__Taskill____init__ --> src__taskill__state__load_state
     src__taskill__core__Taskill____init__ --> src__taskill__config__load_config
-    src__taskill__core__Taskill__run --> src__taskill__triggers__evaluate
+    src__taskill__core__Taskill__run --> project__map__toon__evaluate
     src__taskill__core__Taskill__run --> src__taskill__providers__build_chain
     src__taskill__core__Taskill__run --> src__taskill__state__save_state
-    src__taskill__core__Taskill__status --> src__taskill__triggers__evaluate
+    src__taskill__core__Taskill__status --> project__map__toon__evaluate
     src__taskill__core__Taskill___snapshot --> src__taskill__git_state__collect_snapshot
     src__taskill__core__Taskill___apply --> src__taskill__updaters__changelog__update_changelog
-    src__taskill__core__Taskill___apply --> src__taskill__updaters__todo__update_todo
+    src__taskill__core__Taskill___apply --> project__map__toon__update_todo
     src__taskill__core__Taskill___apply --> src__taskill__updaters__readme__update_readme
+    src__taskill__updaters__readme__ReadmeUpdater___update_readme --> src__taskill__updaters__readme__render_status_block
+    src__taskill__providers__build_chain --> src__taskill__providers__discover_providers
+    src__taskill__providers__openrouter__OpenRouterProvider__generate --> project__map__toon___normalize_model
+    src__taskill__providers__openrouter__OpenRouterProvider__generate --> src__taskill__providers__base__parse_json_loosely
+    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available --> project__map__toon___mcp_lib_present
+    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available --> project__map__toon___candidate_endpoints
+    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> project__map__toon___candidate_endpoints
+    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> src__taskill__providers__base__parse_json_loosely
+    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> project__map__toon___mcp_lib_present
+    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> src__taskill__git_state___run
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_time
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_commits
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_changed_files
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_coverage
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_failed_tests
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_sumd
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_watched_files
     src__taskill__bulk__find_repos --> src__taskill__bulk___scan
     src__taskill__bulk__resolve_repo_config --> src__taskill__config__load_config
     src__taskill__bulk__resolve_repo_config --> src__taskill__bulk___rebase_config
+    src__taskill__bulk___load_shared_config --> src__taskill__config__load_config
+    src__taskill__bulk___run_single_repo --> src__taskill__bulk__resolve_repo_config
+    src__taskill__bulk__bulk_run --> src__taskill__bulk___load_shared_config
     src__taskill__bulk__bulk_run --> src__taskill__bulk__find_repos
-    src__taskill__updaters__readme__ReadmeUpdater___update_readme --> src__taskill__updaters__readme__render_status_block
-    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available --> src__taskill__providers__windsurf_mcp___mcp_lib_present
-    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available --> src__taskill__providers__windsurf_mcp___candidate_endpoints
-    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> src__taskill__providers__windsurf_mcp___candidate_endpoints
-    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> src__taskill__providers__windsurf_mcp___mcp_lib_present
-    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> src__taskill__git_state___run
-    src__taskill__providers__openrouter__OpenRouterProvider__generate --> src__taskill__providers__openrouter___normalize_model
-    src__taskill__providers__build_chain --> src__taskill__providers__discover_providers
+    src__taskill__bulk__bulk_run --> src__taskill__bulk___apply_filters
+    src__taskill__bulk__bulk_run --> src__taskill__bulk___run_single_repo
+    src__taskill__cli__main --> src__taskill__cli___setup_logging
+    src__taskill__cli__run --> src__taskill__config__load_config
+    src__taskill__cli__run --> src__taskill__cli___print_run_result
+    src__taskill__cli__status --> src__taskill__config__load_config
+    src__taskill__cli__release --> src__taskill__updaters__changelog__release_unreleased
+    src__taskill__cli__bulk_run_cmd --> project__map__toon__bulk_run
+    src__taskill__cli__bulk_run_cmd --> src__taskill__cli___print_bulk_table
+    src__taskill__cli__clean_todo --> project__map__toon__empty_todo
 
     classDef highCC fill:#ff6b6b,stroke:#c92a2a,color:#fff
     classDef medCC fill:#ffd43b,stroke:#f08c00,color:#000
-    class src__taskill__cli__run,src__taskill__cli__bulk_run_cmd,src__taskill__triggers__evaluate,src__taskill__bulk__bulk_run,src__taskill__updaters__todo__TodoUpdater___update_todo highCC
-    class src__taskill__config__load_config,src__taskill__cli__status,src__taskill__core__Taskill__run,src__taskill__bulk___scan,src__taskill__updaters__changelog__ChangelogUpdater___update_changelog,src__taskill__providers__base__build_user_prompt,src__taskill__providers__algorithmic__AlgorithmicProvider__generate,src__taskill__providers__algorithmic__AlgorithmicProvider___find_completed_todos medCC
+    class src__taskill__config__load_config,src__taskill__core__Taskill__run,src__taskill__updaters__changelog__ChangelogUpdater___update_changelog,src__taskill__providers__algorithmic__AlgorithmicProvider__generate,src__taskill__providers__algorithmic__AlgorithmicProvider___find_completed_todos,src__taskill__providers__base__build_user_prompt,src__taskill__bulk___scan,src__taskill__bulk___apply_filters,src__taskill__updaters__todo__TodoUpdater___assemble_output,src__taskill__cli___print_run_result,src__taskill__cli__status,src__taskill__cli___print_bulk_table medCC

@@ -1,7 +1,7 @@
-# taskill | 29f 3286L | python:25,shell:3,less:1 | 2026-04-25
-# stats: 102 func | 22 cls | 29 mod | CC̄=3.9 | critical:5 | cycles:0
-# alerts[5]: CC evaluate=21; CC bulk_run=17; CC bulk_run_cmd=17; CC run=16; CC status=11
-# hotspots[5]: bulk_run fan=18; bulk_run_cmd fan=17; run fan=16; status fan=12; load_config fan=12
+# taskill | 29f 3338L | python:25,shell:3,less:1 | 2026-04-25
+# stats: 115 func | 22 cls | 29 mod | CC̄=3.6 | critical:4 | cycles:0
+# alerts[5]: CC _print_bulk_table=13; CC _apply_filters=12; CC _print_run_result=12; CC status=11; CC _scan=9
+# hotspots[5]: bulk_run fan=13; status fan=12; load_config fan=12; run fan=10; bulk_run_cmd fan=10
 # evolution: baseline
 # Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
 M[29]:
@@ -9,23 +9,23 @@ M[29]:
   daily_update.sh,94
   project.sh,47
   src/taskill/__init__.py,31
-  src/taskill/bulk.py,250
-  src/taskill/cli.py,348
+  src/taskill/bulk.py,262
+  src/taskill/cli.py,357
   src/taskill/config.py,171
   src/taskill/core.py,212
   src/taskill/git_state.py,148
   src/taskill/providers/__init__.py,76
   src/taskill/providers/algorithmic.py,156
-  src/taskill/providers/base.py,106
-  src/taskill/providers/openrouter.py,115
-  src/taskill/providers/windsurf_mcp.py,136
+  src/taskill/providers/base.py,127
+  src/taskill/providers/openrouter.py,96
+  src/taskill/providers/windsurf_mcp.py,135
   src/taskill/state.py,43
-  src/taskill/triggers.py,95
+  src/taskill/triggers.py,111
   src/taskill/updaters/__init__.py,60
   src/taskill/updaters/base.py,45
   src/taskill/updaters/changelog.py,120
   src/taskill/updaters/readme.py,100
-  src/taskill/updaters/todo.py,114
+  src/taskill/updaters/todo.py,128
   tests/__init__.py,1
   tests/test_algorithmic.py,94
   tests/test_bulk.py,280
@@ -37,21 +37,26 @@ M[29]:
 D:
   src/taskill/__init__.py:
   src/taskill/bulk.py:
-    e: find_repos,_scan,resolve_repo_config,_rebase_config,bulk_run,BulkResult
+    e: find_repos,_scan,resolve_repo_config,_rebase_config,_load_shared_config,_apply_filters,_run_single_repo,bulk_run,BulkResult
     BulkResult: total_repos(0),ran_count(0),changed_count(0),as_dict(0),summary(0)  # Aggregate result of running taskill across multiple repos.
     find_repos(root;max_depth)
     _scan(directory;repos;depth;max_depth)
     resolve_repo_config(repo;shared_config)
     _rebase_config(base;new_root)
+    _load_shared_config(shared_config)
+    _apply_filters(repos;repo_filter;max_projects)
+    _run_single_repo(repo;shared_cfg;force;dry_run)
     bulk_run(root;shared_config)
   src/taskill/cli.py:
-    e: _setup_logging,main,run,status,init,release,bulk_run_cmd,clean_todo
+    e: _setup_logging,main,_print_run_result,run,status,init,release,_print_bulk_table,bulk_run_cmd,clean_todo
     _setup_logging(verbose)
     main(ctx;verbose;config)
+    _print_run_result(result)
     run(ctx;force;dry_run;as_json)
     status(ctx;as_json)
     init(force)
     release(version;changelog)
+    _print_bulk_table(result)
     bulk_run_cmd(root;shared_config;max_depth;max_projects;force;dry_run;as_json;repo_filter)
     clean_todo(todo)
   src/taskill/config.py:
@@ -85,14 +90,15 @@ D:
     e: AlgorithmicProvider
     AlgorithmicProvider: is_available(0),generate(1),_format_commit(1),_find_completed_todos(2),_extract_new_todos(1)
   src/taskill/providers/base.py:
-    e: build_user_prompt,ProviderError,GeneratedDocs,Provider
+    e: build_user_prompt,parse_json_loosely,ProviderError,GeneratedDocs,Provider
     ProviderError:  # Provider failed — chain falls through to next provider.
     GeneratedDocs: __post_init__(0)  # What every provider returns.
     Provider: __init__(1),is_available(0),generate(1)  # Abstract provider — produces docs from a project snapshot.
     build_user_prompt(context)
+    parse_json_loosely(text)
   src/taskill/providers/openrouter.py:
     e: _normalize_model,OpenRouterProvider
-    OpenRouterProvider: is_available(0),generate(1),_parse_json_loosely(1)
+    OpenRouterProvider: is_available(0),generate(1)
     _normalize_model(model)
   src/taskill/providers/windsurf_mcp.py:
     e: _mcp_lib_present,_candidate_endpoints,WindsurfMcpProvider
@@ -105,8 +111,15 @@ D:
     load_state(path)
     save_state(path;state)
   src/taskill/triggers.py:
-    e: evaluate,TriggerEvaluation
+    e: _check_time,_check_commits,_check_changed_files,_check_coverage,_check_failed_tests,_check_sumd,_check_watched_files,evaluate,TriggerEvaluation
     TriggerEvaluation: summary(0)
+    _check_time(state;triggers;reasons;skipped)
+    _check_commits(snapshot;triggers;reasons;skipped)
+    _check_changed_files(snapshot;triggers;reasons;skipped)
+    _check_coverage(snapshot;state;triggers;reasons;skipped)
+    _check_failed_tests(snapshot;state;triggers;reasons)
+    _check_sumd(snapshot;state;reasons)
+    _check_watched_files(triggers;state;project_root;reasons)
     evaluate(triggers;state;snapshot;project_root)
   src/taskill/updaters/__init__.py:
     e: discover_updaters
@@ -127,7 +140,7 @@ D:
     update_readme(path;snapshot;summary)
   src/taskill/updaters/todo.py:
     e: update_todo,empty_todo,TodoUpdater
-    TodoUpdater: apply(3),_update_todo(3)  # Updater for TODO.md files.
+    TodoUpdater: apply(3),_partition_lines(2),_dedup_new_items(2),_assemble_output(3),_update_todo(3)  # Updater for TODO.md files.
     update_todo(path;completed_lines;new_items)
     empty_todo(path;header)
   tests/__init__.py:

@@ -28,6 +28,7 @@ from taskill.providers.base import (
     ProviderError,
     SYSTEM_PROMPT,
     build_user_prompt,
+    parse_json_loosely,
 )
 
 
@@ -120,9 +121,7 @@ class WindsurfMcpProvider(Provider):
         except Exception as e:  # broad — MCP can fail many ways; surface cleanly
             raise ProviderError(f"Windsurf MCP call failed: {e}") from e
 
-        # parse same JSON contract as OpenRouter
-        from taskill.providers.openrouter import OpenRouterProvider
-        parsed = OpenRouterProvider._parse_json_loosely(content)
+        parsed = parse_json_loosely(content)
         if parsed is None:
             raise ProviderError("Windsurf MCP did not return valid JSON")
 

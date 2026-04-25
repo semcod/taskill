@@ -1,55 +1,65 @@
 flowchart LR
+    subgraph project__map
+        project__map__toon___normalize_model["_normalize_model"]
+        project__map__toon__update_todo["update_todo"]
+        project__map__toon___mcp_lib_present["_mcp_lib_present"]
+        project__map__toon__empty_todo["empty_todo"]
+        project__map__toon__bulk_run["bulk_run"]
+        project__map__toon___candidate_endpoints["_candidate_endpoints"]
+        project__map__toon__evaluate["evaluate"]
+    end
     subgraph src__taskill
-        src__taskill__git_state__commits_since["commits_since"]
-        src__taskill__updaters__changelog__update_changelog["update_changelog"]
-        src__taskill__providers__openrouter__OpenRouterProvider__generate["generate"]
+        src__taskill__triggers___check_time["_check_time"]
+        src__taskill__bulk__find_repos["find_repos"]
+        src__taskill__triggers___check_commits["_check_commits"]
+        src__taskill__cli__clean_todo["clean_todo"]
         src__taskill__cli__release["release"]
-        src__taskill__git_state__changed_files_since["changed_files_since"]
-        src__taskill__updaters__todo__empty_todo["empty_todo"]
-        src__taskill__cli__status["status"]
-        src__taskill__git_state__read_failed_tests["read_failed_tests"]
-        src__taskill__cli___setup_logging["_setup_logging"]
-        src__taskill__git_state__read_coverage["read_coverage"]
-        src__taskill__cli__main["main"]
-        src__taskill__git_state___run["_run"]
-        src__taskill__core__Taskill___snapshot["_snapshot"]
-        src__taskill__core__Taskill____init__["__init__"]
-        src__taskill__bulk__resolve_repo_config["resolve_repo_config"]
-        src__taskill__bulk__bulk_run["bulk_run"]
-        src__taskill__core__Taskill__run["run"]
-        src__taskill__updaters__readme__update_readme["update_readme"]
         src__taskill__core__Taskill___apply["_apply"]
+        src__taskill__cli__run["run"]
+        src__taskill__updaters__readme__update_readme["update_readme"]
+        src__taskill__providers__build_chain["build_chain"]
+        src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate["generate"]
+        src__taskill__updaters__changelog__update_changelog["update_changelog"]
+        src__taskill__bulk___load_shared_config["_load_shared_config"]
+        src__taskill__git_state__read_coverage["read_coverage"]
+        src__taskill__triggers___check_watched_files["_check_watched_files"]
+        src__taskill__cli___print_run_result["_print_run_result"]
+        src__taskill__state__load_state["load_state"]
+        src__taskill__git_state___run["_run"]
+        src__taskill__core__Taskill__run["run"]
+        src__taskill__cli__bulk_run_cmd["bulk_run_cmd"]
+        src__taskill__bulk___run_single_repo["_run_single_repo"]
+        src__taskill__cli__status["status"]
+        src__taskill__triggers___check_changed_files["_check_changed_files"]
+        src__taskill__updaters__readme__ReadmeUpdater___update_readme["_update_readme"]
+        src__taskill__triggers___check_failed_tests["_check_failed_tests"]
+        src__taskill__git_state__collect_snapshot["collect_snapshot"]
+        src__taskill__core__Taskill___snapshot["_snapshot"]
+        src__taskill__git_state__read_failed_tests["read_failed_tests"]
+        src__taskill__updaters__readme__render_status_block["render_status_block"]
+        src__taskill__triggers___check_coverage["_check_coverage"]
+        src__taskill__triggers___check_sumd["_check_sumd"]
+        src__taskill__git_state__file_hash["file_hash"]
+        src__taskill__providers__openrouter__OpenRouterProvider__generate["generate"]
+        src__taskill__bulk___scan["_scan"]
+        src__taskill__core__Taskill__status["status"]
+        src__taskill__git_state__commits_since["commits_since"]
+        src__taskill__bulk__resolve_repo_config["resolve_repo_config"]
+        src__taskill__cli___setup_logging["_setup_logging"]
+        src__taskill__providers__base__parse_json_loosely["parse_json_loosely"]
+        src__taskill__updaters__changelog__release_unreleased["release_unreleased"]
+        src__taskill__bulk___rebase_config["_rebase_config"]
         src__taskill__git_state__head_sha["head_sha"]
         src__taskill__config__load_config["load_config"]
-        src__taskill__bulk__find_repos["find_repos"]
-        src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available["is_available"]
-        src__taskill__bulk___scan["_scan"]
-        src__taskill__bulk___rebase_config["_rebase_config"]
-        src__taskill__providers__windsurf_mcp___candidate_endpoints["_candidate_endpoints"]
         src__taskill__providers__discover_providers["discover_providers"]
-        src__taskill__cli__clean_todo["clean_todo"]
-        src__taskill__updaters__readme__ReadmeUpdater___update_readme["_update_readme"]
-        src__taskill__updaters__todo__update_todo["update_todo"]
-        src__taskill__updaters__readme__render_status_block["render_status_block"]
-        src__taskill__cli__run["run"]
-        src__taskill__providers__openrouter___normalize_model["_normalize_model"]
-        src__taskill__git_state__collect_snapshot["collect_snapshot"]
-        src__taskill__updaters__changelog__release_unreleased["release_unreleased"]
-        src__taskill__providers__windsurf_mcp___mcp_lib_present["_mcp_lib_present"]
-        src__taskill__providers__build_chain["build_chain"]
+        src__taskill__git_state__changed_files_since["changed_files_since"]
+        src__taskill__bulk__bulk_run["bulk_run"]
+        src__taskill__bulk___apply_filters["_apply_filters"]
         src__taskill__triggers__evaluate["evaluate"]
-        src__taskill__git_state__file_hash["file_hash"]
-        src__taskill__cli__bulk_run_cmd["bulk_run_cmd"]
-        src__taskill__state__load_state["load_state"]
-        src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate["generate"]
-        src__taskill__core__Taskill__status["status"]
+        src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available["is_available"]
+        src__taskill__core__Taskill____init__["__init__"]
+        src__taskill__cli__main["main"]
     end
-    src__taskill__cli__main --> src__taskill__cli___setup_logging
-    src__taskill__cli__run --> src__taskill__config__load_config
-    src__taskill__cli__status --> src__taskill__config__load_config
-    src__taskill__cli__release --> src__taskill__updaters__changelog__release_unreleased
-    src__taskill__cli__bulk_run_cmd --> src__taskill__bulk__bulk_run
-    src__taskill__cli__clean_todo --> src__taskill__updaters__todo__empty_todo
     src__taskill__git_state__head_sha --> src__taskill__git_state___run
     src__taskill__git_state__commits_since --> src__taskill__git_state___run
     src__taskill__git_state__changed_files_since --> src__taskill__git_state___run
@@ -61,21 +71,42 @@ flowchart LR
     src__taskill__git_state__collect_snapshot --> src__taskill__git_state__file_hash
     src__taskill__core__Taskill____init__ --> src__taskill__state__load_state
     src__taskill__core__Taskill____init__ --> src__taskill__config__load_config
-    src__taskill__core__Taskill__run --> src__taskill__triggers__evaluate
+    src__taskill__core__Taskill__run --> project__map__toon__evaluate
     src__taskill__core__Taskill__run --> src__taskill__providers__build_chain
-    src__taskill__core__Taskill__status --> src__taskill__triggers__evaluate
+    src__taskill__core__Taskill__status --> project__map__toon__evaluate
     src__taskill__core__Taskill___snapshot --> src__taskill__git_state__collect_snapshot
     src__taskill__core__Taskill___apply --> src__taskill__updaters__changelog__update_changelog
-    src__taskill__core__Taskill___apply --> src__taskill__updaters__todo__update_todo
+    src__taskill__core__Taskill___apply --> project__map__toon__update_todo
     src__taskill__core__Taskill___apply --> src__taskill__updaters__readme__update_readme
+    src__taskill__updaters__readme__ReadmeUpdater___update_readme --> src__taskill__updaters__readme__render_status_block
+    src__taskill__providers__build_chain --> src__taskill__providers__discover_providers
+    src__taskill__providers__openrouter__OpenRouterProvider__generate --> project__map__toon___normalize_model
+    src__taskill__providers__openrouter__OpenRouterProvider__generate --> src__taskill__providers__base__parse_json_loosely
+    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available --> project__map__toon___mcp_lib_present
+    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available --> project__map__toon___candidate_endpoints
+    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> project__map__toon___candidate_endpoints
+    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> src__taskill__providers__base__parse_json_loosely
+    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> project__map__toon___mcp_lib_present
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_time
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_commits
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_changed_files
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_coverage
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_failed_tests
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_sumd
+    src__taskill__triggers__evaluate --> src__taskill__triggers___check_watched_files
     src__taskill__bulk__find_repos --> src__taskill__bulk___scan
     src__taskill__bulk__resolve_repo_config --> src__taskill__config__load_config
     src__taskill__bulk__resolve_repo_config --> src__taskill__bulk___rebase_config
+    src__taskill__bulk___load_shared_config --> src__taskill__config__load_config
+    src__taskill__bulk___run_single_repo --> src__taskill__bulk__resolve_repo_config
+    src__taskill__bulk__bulk_run --> src__taskill__bulk___load_shared_config
     src__taskill__bulk__bulk_run --> src__taskill__bulk__find_repos
-    src__taskill__updaters__readme__ReadmeUpdater___update_readme --> src__taskill__updaters__readme__render_status_block
-    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available --> src__taskill__providers__windsurf_mcp___mcp_lib_present
-    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__is_available --> src__taskill__providers__windsurf_mcp___candidate_endpoints
-    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> src__taskill__providers__windsurf_mcp___candidate_endpoints
-    src__taskill__providers__windsurf_mcp__WindsurfMcpProvider__generate --> src__taskill__providers__windsurf_mcp___mcp_lib_present
-    src__taskill__providers__openrouter__OpenRouterProvider__generate --> src__taskill__providers__openrouter___normalize_model
-    src__taskill__providers__build_chain --> src__taskill__providers__discover_providers
+    src__taskill__bulk__bulk_run --> src__taskill__bulk___apply_filters
+    src__taskill__bulk__bulk_run --> src__taskill__bulk___run_single_repo
+    src__taskill__cli__main --> src__taskill__cli___setup_logging
+    src__taskill__cli__run --> src__taskill__config__load_config
+    src__taskill__cli__run --> src__taskill__cli___print_run_result
+    src__taskill__cli__status --> src__taskill__config__load_config
+    src__taskill__cli__release --> src__taskill__updaters__changelog__release_unreleased
+    src__taskill__cli__bulk_run_cmd --> project__map__toon__bulk_run
+    src__taskill__cli__clean_todo --> project__map__toon__empty_todo

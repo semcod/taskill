@@ -167,6 +167,48 @@ def _rebase_config(base: TaskillConfig, new_root: Path) -> TaskillConfig:
     return cfg
 
 
+def _load_shared_config(shared_config: Path | TaskillConfig | None) -> TaskillConfig | None:
+    """Pre-load shared config if a path was given."""
+    if isinstance(shared_config, TaskillConfig):
+        return shared_config
+    if shared_config is None:
+        return None
+    shared_path = Path(shared_config)
+    if shared_path.exists():
+        return load_config(shared_path, project_root=shared_path.parent)
+    log.warning("Shared config %s not found, using defaults", shared_path)
+    return None
+
+
+def _apply_filters(
+    repos: list[Path],
+    repo_filter: list[str] | None,
+    max_projects: int,
+) -> tuple[list[Path], list[tuple[Path, str]]]:
+    """Apply name filter and max_projects cap. Returns (kept, skipped)."""
+    skipped: list[tuple[Path, str]] = []
+    if repo_filter:
+        filtered_out = [repo for repo in repos if not any(f in repo.name for f in repo_filter)]
+        repos = [repo for repo in repos if any(f in repo.name for f in repo_filter)]
+        log.info("Filtered out %d repos", len(filtered_out))
+        skipped.extend((repo, "filtered out") for repo in filtered_out)
+    if max_projects > 0 and len(repos) > max_projects:
+        limit_skipped = repos[max_projects:]
+        repos = repos[:max_projects]
+        log.info("Limiting to first %d matching repos", max_projects)
+        skipped.extend((repo, "max_projects limit") for repo in limit_skipped)
+    return repos, skipped
+
+
+def _run_single_repo(repo: Path, shared_cfg: TaskillConfig | None, force: bool, dry_run: bool) -> TaskillResult:
+    """Run taskill on a single repo."""
+    cfg = resolve_repo_config(repo, shared_cfg)
+    if dry_run:
+        cfg.dry_run = True
+    tk = Taskill(config=cfg)
+    return tk.run(force=force)
+
+
 def bulk_run(
     root: Path,
     shared_config: Path | TaskillConfig | None = None,
@@ -194,49 +236,19 @@ def bulk_run(
         BulkResult with per-repo TaskillResult and aggregated counts.
     """
     root = Path(root).resolve()
-
-    # Pre-load shared config if a path was given
-    shared_cfg: TaskillConfig | None = None
-    if isinstance(shared_config, TaskillConfig):
-        shared_cfg = shared_config
-    elif shared_config is not None:
-        shared_path = Path(shared_config)
-        if shared_path.exists():
-            shared_cfg = load_config(shared_path, project_root=shared_path.parent)
-        else:
-            log.warning("Shared config %s not found, using defaults", shared_path)
+    shared_cfg = _load_shared_config(shared_config)
 
     repos = find_repos(root, max_depth=max_depth)
     log.info("Found %d repos under %s", len(repos), root)
 
-    if repo_filter:
-        filtered_out = [
-            repo for repo in repos
-            if not any(f in repo.name for f in repo_filter)
-        ]
-        repos = [
-            repo for repo in repos
-            if any(f in repo.name for f in repo_filter)
-        ]
-        log.info("Filtered out %d repos", len(filtered_out))
-    else:
-        filtered_out = []
-
-    if max_projects > 0 and len(repos) > max_projects:
-        filtered_out.extend(repos[max_projects:])
-        repos = repos[:max_projects]
-        log.info("Limiting to first %d matching repos", max_projects)
+    repos, skipped = _apply_filters(repos, repo_filter, max_projects)
 
     result = BulkResult(root=root)
-    result.skipped.extend((repo, "filtered out") for repo in filtered_out)
+    result.skipped.extend(skipped)
 
     for repo in repos:
         try:
-            cfg = resolve_repo_config(repo, shared_cfg)
-            if dry_run:
-                cfg.dry_run = True
-            tk = Taskill(config=cfg)
-            repo_result = tk.run(force=force)
+            repo_result = _run_single_repo(repo, shared_cfg, force, dry_run)
             result.per_repo[repo] = repo_result
             log.info(
                 "%s: ran=%s, changed=%s",

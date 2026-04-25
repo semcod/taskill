@@ -5,9 +5,7 @@ Uses HTTP directly to keep deps minimal — no openai SDK needed.
 """
 from __future__ import annotations
 
-import json
 import os
-import re
 from typing import Any
 
 import httpx
@@ -18,6 +16,7 @@ from taskill.providers.base import (
     ProviderError,
     SYSTEM_PROMPT,
     build_user_prompt,
+    parse_json_loosely,
 )
 
 
@@ -82,7 +81,7 @@ class OpenRouterProvider(Provider):
         except (KeyError, IndexError, json.JSONDecodeError) as e:
             raise ProviderError(f"Malformed OpenRouter response: {e}") from e
 
-        parsed = self._parse_json_loosely(content)
+        parsed = parse_json_loosely(content)
         if parsed is None:
             raise ProviderError("Model did not return valid JSON")
 
@@ -94,21 +93,3 @@ class OpenRouterProvider(Provider):
             provider_name=f"{self.name}:{model}",
         )
 
-    @staticmethod
-    def _parse_json_loosely(text: str) -> dict[str, Any] | None:
-        """Be forgiving: strip ```json fences, extract first {...} block."""
-        text = text.strip()
-        # strip fences
-        text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.MULTILINE)
-        try:
-            return json.loads(text)
-        except json.JSONDecodeError:
-            pass
-        # find first balanced { ... }
-        m = re.search(r"\{.*\}", text, re.DOTALL)
-        if not m:
-            return None
-        try:
-            return json.loads(m.group(0))
-        except json.JSONDecodeError:
-            return None

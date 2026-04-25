@@ -1,6 +1,8 @@
 """Provider abstraction + shared types."""
 from __future__ import annotations
 
+import json
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
@@ -103,3 +105,22 @@ def build_user_prompt(context: dict[str, Any]) -> str:
 {sumd[:3000]}
 
 Now produce the JSON described in the system prompt."""
+
+
+def parse_json_loosely(text: str) -> dict[str, Any] | None:
+    """Be forgiving: strip ```json fences, extract first {...} block."""
+    text = text.strip()
+    # strip fences
+    text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.MULTILINE)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    # find first balanced { ... }
+    m = re.search(r"\{.*\}", text, re.DOTALL)
+    if not m:
+        return None
+    try:
+        return json.loads(m.group(0))
+    except json.JSONDecodeError:
+        return None

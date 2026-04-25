@@ -1,44 +1,38 @@
-# code2llm | 38f 5304L | python:18,yaml:12,yml:3,txt:2,shell:2,toml:1 | 2026-04-25
-# CC̄=2.0 | critical:5/172 | dups:0 | cycles:1
+# code2llm | 38f 5356L | python:18,yaml:12,yml:3,txt:2,shell:2,toml:1 | 2026-04-25
+# CC̄=1.9 | critical:0/187 | dups:0 | cycles:1
 
-HEALTH[5]:
-  🟡 CC    run CC=16 (limit:15)
-  🟡 CC    bulk_run_cmd CC=17 (limit:15)
-  🟡 CC    evaluate CC=21 (limit:15)
-  🟡 CC    bulk_run CC=17 (limit:15)
-  🟡 CC    _update_todo CC=21 (limit:15)
+HEALTH[0]: ok
 
-REFACTOR[2]:
-  1. split 5 high-CC methods  (CC>15)
-  2. break 1 circular dependencies
+REFACTOR[1]:
+  1. break 1 circular dependencies
 
-PIPELINES[36]:
+PIPELINES[45]:
   [1] Src [stamp]: stamp
       PURITY: 100% pure
-  [2] Src [main]: main → _setup_logging
+  [2] Src [as_dict]: as_dict
       PURITY: 100% pure
-  [3] Src [run]: run → load_config
+  [3] Src [__init__]: __init__ → load_state
       PURITY: 100% pure
-  [4] Src [status]: status → load_config
+  [4] Src [run]: run → evaluate
       PURITY: 100% pure
-  [5] Src [init]: init
+  [5] Src [status]: status → evaluate
       PURITY: 100% pure
 
 LAYERS:
-  src/                            CC̄=4.7    ←in:0  →out:0
-  │ !! cli                        347L  0C    8m  CC=17     ←0
-  │ !! bulk                       249L  1C    7m  CC=17     ←1
+  src/                            CC̄=4.1    ←in:0  →out:0
+  │ cli                        356L  0C   10m  CC=13     ←0
+  │ bulk                       261L  1C   10m  CC=12     ←0
   │ core                       211L  2C    9m  CC=11     ←0
   │ config                     170L  4C    1m  CC=8      ←3
   │ algorithmic                155L  1C    5m  CC=10     ←0
   │ git_state                  147L  2C    8m  CC=7      ←2
-  │ windsurf_mcp               135L  1C    4m  CC=7      ←0
+  │ windsurf_mcp               134L  1C    4m  CC=7      ←0
+  │ todo                       127L  1C    7m  CC=8      ←0
+  │ base                       126L  3C    6m  CC=9      ←2
   │ changelog                  119L  1C    4m  CC=12     ←2
-  │ openrouter                 114L  1C    4m  CC=6      ←1
-  │ !! todo                       113L  1C    4m  CC=21     ←2
-  │ base                       105L  3C    5m  CC=9      ←2
+  │ triggers                   110L  1C    9m  CC=5      ←0
   │ readme                      99L  1C    4m  CC=6      ←1
-  │ !! triggers                    94L  1C    2m  CC=21     ←1
+  │ openrouter                  95L  1C    3m  CC=6      ←0
   │ __init__                    75L  0C    2m  CC=6      ←1
   │ __init__                    59L  0C    1m  CC=6      ←0
   │ base                        44L  2C    2m  CC=2      ←0
@@ -47,7 +41,7 @@ LAYERS:
   │
   project/                        CC̄=0.0    ←in:0  →out:0
   │ !! calls.yaml                 614L  0C    0m  CC=0.0    ←0
-  │ map.toon.yaml              209L  0C   99m  CC=0.0    ←0
+  │ map.toon.yaml              209L  0C   99m  CC=0.0    ←4
   │ calls.toon.yaml            140L  0C    0m  CC=0.0    ←0
   │ analysis.toon.yaml          81L  0C    0m  CC=0.0    ←0
   │ evolution.toon.yaml         59L  0C    0m  CC=0.0    ←0
@@ -74,7 +68,13 @@ LAYERS:
   │ generated-cli-tests.testql.toon.yaml    12L  0C    0m  CC=0.0    ←0
   │
 
-COUPLING: no cross-package imports detected
+COUPLING:
+               project.map  src.taskill
+  project.map           ──          ←12  hub
+  src.taskill           12           ──  !! fan-out
+  CYCLES: 1
+  HUB: project.map/ (fan-in=12)
+  SMELL: src.taskill/ fan-out=12 → split needed
 
 EXTERNAL:
   validation: run `vallm batch .` → validation.toon

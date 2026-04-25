@@ -52,29 +52,13 @@ def main(ctx: click.Context, verbose: bool, config: str) -> None:
     ctx.obj["config_path"] = config
 
 
-@main.command()
-@click.option("--force", is_flag=True, help="Run even if triggers say no")
-@click.option("--dry-run", is_flag=True, help="Don't write files or persist state")
-@click.option("--json", "as_json", is_flag=True, help="Output result as JSON")
-@click.pass_context
-def run(ctx: click.Context, force: bool, dry_run: bool, as_json: bool) -> None:
-    """Execute the update pipeline."""
-    cfg = load_config(ctx.obj["config_path"])
-    if dry_run:
-        cfg.dry_run = True
-    tk = Taskill(config=cfg)
-    result = tk.run(force=force)
-
-    if as_json:
-        click.echo(json.dumps(result.as_dict(), indent=2))
-        sys.exit(0 if result.ran or not result.errors else 1)
-
+def _print_run_result(result) -> None:
     if not result.ran:
         console.print(f"[yellow]✗ Did not run.[/yellow] {result.trigger_eval.summary()}")
         if result.errors:
             for e in result.errors:
                 console.print(f"  [red]error:[/red] {e}")
-        sys.exit(0)
+        return
 
     console.print(
         f"[green]✓ Ran via [bold]{result.provider_used}[/bold][/green]"
@@ -93,6 +77,27 @@ def run(ctx: click.Context, force: bool, dry_run: bool, as_json: bool) -> None:
         console.print("[dim]Provider fallthrough:[/dim]")
         for e in result.errors:
             console.print(f"  [dim]- {e}[/dim]")
+
+
+@main.command()
+@click.option("--force", is_flag=True, help="Run even if triggers say no")
+@click.option("--dry-run", is_flag=True, help="Don't write files or persist state")
+@click.option("--json", "as_json", is_flag=True, help="Output result as JSON")
+@click.pass_context
+def run(ctx: click.Context, force: bool, dry_run: bool, as_json: bool) -> None:
+    """Execute the update pipeline."""
+    cfg = load_config(ctx.obj["config_path"])
+    if dry_run:
+        cfg.dry_run = True
+    tk = Taskill(config=cfg)
+    result = tk.run(force=force)
+
+    if as_json:
+        click.echo(json.dumps(result.as_dict(), indent=2))
+        sys.exit(0 if result.ran or not result.errors else 1)
+
+    _print_run_result(result)
+    sys.exit(0 if result.ran else 0)
 
 
 @main.command()
@@ -165,6 +170,45 @@ def release(version: str, changelog: str) -> None:
         sys.exit(1)
 
 
+def _print_bulk_table(result) -> None:
+    console.print(f"[bold cyan]Bulk run:[/bold cyan] {result.root}")
+    console.print(f"[dim]{result.summary()}[/dim]\n")
+
+    if not result.per_repo and not result.skipped and not result.errors:
+        console.print("[yellow]No repos found.[/yellow]")
+        return
+
+    table = Table(title="Per-repo results", show_header=True, header_style="bold cyan")
+    table.add_column("Repo")
+    table.add_column("Ran")
+    table.add_column("Provider")
+    table.add_column("Files changed")
+    table.add_column("Note")
+
+    for repo_path, repo_result in result.per_repo.items():
+        ran_color = "green" if repo_result.ran else "yellow"
+        ran_str = f"[{ran_color}]{repo_result.ran}[/{ran_color}]"
+        provider = repo_result.provider_used or "—"
+        files = ", ".join(repo_result.files_changed) or "—"
+        note = ""
+        if not repo_result.ran:
+            note = repo_result.trigger_eval.summary()
+        elif repo_result.errors:
+            note = f"{len(repo_result.errors)} provider fallthroughs"
+        table.add_row(repo_path.name, ran_str, provider, files, note)
+
+    for repo_path, reason in result.skipped:
+        table.add_row(repo_path.name, "[dim]skip[/dim]", "—", "—", reason)
+
+    for repo_path, error in result.errors:
+        table.add_row(repo_path.name, "[red]error[/red]", "—", "—", error)
+
+    console.print(table)
+
+    if result.errors:
+        sys.exit(1)
+
+
 @main.command("bulk-run")
 @click.option(
     "--root", "-r", default=".", show_default=True,
@@ -220,42 +264,7 @@ def bulk_run_cmd(
         click.echo(json.dumps(result.as_dict(), indent=2, default=str))
         sys.exit(0 if not result.errors else 1)
 
-    console.print(f"[bold cyan]Bulk run:[/bold cyan] {result.root}")
-    console.print(f"[dim]{result.summary()}[/dim]\n")
-
-    if not result.per_repo and not result.skipped and not result.errors:
-        console.print("[yellow]No repos found.[/yellow]")
-        return
-
-    table = Table(title="Per-repo results", show_header=True, header_style="bold cyan")
-    table.add_column("Repo")
-    table.add_column("Ran")
-    table.add_column("Provider")
-    table.add_column("Files changed")
-    table.add_column("Note")
-
-    for repo_path, repo_result in result.per_repo.items():
-        ran_color = "green" if repo_result.ran else "yellow"
-        ran_str = f"[{ran_color}]{repo_result.ran}[/{ran_color}]"
-        provider = repo_result.provider_used or "—"
-        files = ", ".join(repo_result.files_changed) or "—"
-        note = ""
-        if not repo_result.ran:
-            note = repo_result.trigger_eval.summary()
-        elif repo_result.errors:
-            note = f"{len(repo_result.errors)} provider fallthroughs"
-        table.add_row(repo_path.name, ran_str, provider, files, note)
-
-    for repo_path, reason in result.skipped:
-        table.add_row(repo_path.name, "[dim]skip[/dim]", "—", "—", reason)
-
-    for repo_path, error in result.errors:
-        table.add_row(repo_path.name, "[red]error[/red]", "—", "—", error)
-
-    console.print(table)
-
-    if result.errors:
-        sys.exit(1)
+    _print_bulk_table(result)
 
 
 @main.command("clean-todo")

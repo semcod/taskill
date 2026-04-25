@@ -35,6 +35,48 @@ class TodoUpdater(DocumentUpdater):
         changed = self._update_todo(path, completed, new_items, archive_completed=archive_completed)
         return UpdateResult(changed=changed, path=path, updater_name=self.name)
 
+    @staticmethod
+    def _partition_lines(lines: list[str], completed_set: set[str]) -> tuple[list[str], list[str]]:
+        kept: list[str] = []
+        archived: list[str] = []
+        for line in lines:
+            if line.rstrip() in completed_set and line.strip().startswith(("-", "*", "+")):
+                archived.append(line)
+            else:
+                kept.append(line)
+        return kept, archived
+
+    @staticmethod
+    def _dedup_new_items(kept: list[str], new_items: list[str]) -> list[str]:
+        existing = {l.strip() for l in kept if l.strip()}
+        return [item for item in new_items if item.strip() not in existing]
+
+    @staticmethod
+    def _assemble_output(
+        kept: list[str],
+        fresh_new: list[str],
+        archived: list[str],
+        *,
+        archive_completed: bool = True,
+    ) -> list[str]:
+        out_lines = list(kept)
+        if fresh_new:
+            if out_lines and out_lines[-1].strip():
+                out_lines.append("")
+            if not any(l.startswith("# ") for l in out_lines):
+                out_lines = ["# TODO", ""] + out_lines
+            out_lines.append("## Discovered")
+            out_lines.append("")
+            out_lines.extend(fresh_new)
+            out_lines.append("")
+        if archive_completed and archived:
+            out_lines.append("")
+            out_lines.append("## Done (moved to CHANGELOG)")
+            out_lines.append("")
+            out_lines.extend(archived)
+            out_lines.append("")
+        return out_lines
+
     def _update_todo(
         self,
         path: Path,
@@ -55,37 +97,9 @@ class TodoUpdater(DocumentUpdater):
         lines = original.splitlines(keepends=False)
         completed_set = {l.rstrip() for l in completed_lines if l.strip()}
 
-        kept: list[str] = []
-        archived: list[str] = []
-        for line in lines:
-            if line.rstrip() in completed_set and line.strip().startswith(("-", "*", "+")):
-                archived.append(line)
-            else:
-                kept.append(line)
-
-        # dedup new items: don't re-add what's already in TODO
-        existing = {l.strip() for l in kept if l.strip()}
-        fresh_new = [item for item in new_items if item.strip() not in existing]
-
-        # build output
-        out_lines = list(kept)
-        if fresh_new:
-            if out_lines and out_lines[-1].strip():
-                out_lines.append("")
-            # if no header, prepend one
-            if not any(l.startswith("# ") for l in out_lines):
-                out_lines = ["# TODO", ""] + out_lines
-            out_lines.append("## Discovered")
-            out_lines.append("")
-            out_lines.extend(fresh_new)
-            out_lines.append("")
-
-        if archive_completed and archived:
-            out_lines.append("")
-            out_lines.append("## Done (moved to CHANGELOG)")
-            out_lines.append("")
-            out_lines.extend(archived)
-            out_lines.append("")
+        kept, archived = self._partition_lines(lines, completed_set)
+        fresh_new = self._dedup_new_items(kept, new_items)
+        out_lines = self._assemble_output(kept, fresh_new, archived, archive_completed=archive_completed)
 
         new_content = "\n".join(out_lines).rstrip() + "\n"
         if new_content == original:
