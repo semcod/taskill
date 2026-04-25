@@ -10,7 +10,7 @@ Provider chain (Windsurf MCP → OpenRouter → algorithmic), triggers, state, t
 
 Goal: make every external touchpoint a real plugin instead of inline code.
 
-### v0.2.1 — provider plugin protocol
+### v0.2.1 — provider plugin protocol ✅ shipped
 
 The `Provider` ABC works for the three built-ins, but third-party providers should be discoverable through `entry_points`:
 
@@ -19,7 +19,7 @@ The `Provider` ABC works for the three built-ins, but third-party providers shou
 my_provider = "my_pkg.provider:MyProvider"
 ```
 
-The chain builder switches from a hard-coded registry (`providers/__init__.py:build_chain`) to a `pkg_resources.iter_entry_points` lookup. Existing built-ins re-register themselves through the same mechanism so there's no special-casing.
+The chain builder switches from a hard-coded registry (`providers/__init__.py:build_chain`) to an `importlib.metadata.entry_points` lookup. Existing built-ins re-register themselves through the same mechanism so there's no special-casing. See `discover_providers()` in `taskill.providers`.
 
 This is the single most important refactor — it turns "add another LLM" from a PR into a separate package.
 
@@ -33,7 +33,7 @@ The current `WindsurfMcpProvider` only handles stdio with a configured `command`
 
 Refactor: introduce `AsyncProvider` alongside `Provider`, push the async layer all the way to `Taskill.run()`, expose a `taskill.run_async()` entry point. Built-ins stay sync; only MCP and future streaming providers go async.
 
-### v0.2.3 — pluggable updaters
+### v0.2.3 — pluggable updaters ✅ shipped
 
 Same protocol-via-entry_points story, but for documents. Some users want:
 
@@ -41,7 +41,7 @@ Same protocol-via-entry_points story, but for documents. Some users want:
 - Sync `CHANGELOG.md` to GitHub Releases as it's written
 - Mirror TODOs to a `TODO.json` for a custom dashboard
 
-Move `update_changelog`, `update_todo`, `update_readme` behind a `DocumentUpdater` ABC with `apply(docs, snapshot, config) -> list[Path]`. Wire entry points the same way.
+Built-in updaters now live behind a `DocumentUpdater` ABC (`taskill.updaters.base`) with an `apply(path, snapshot, docs) -> UpdateResult` method. Entry points work the same way as providers, via `[project.entry-points."taskill.updaters"]` and `discover_updaters()`. Legacy `update_changelog` / `update_todo` / `update_readme` functions are preserved as thin wrappers.
 
 ### v0.2.4 — `llx` and `prefact` reuse
 
@@ -105,15 +105,23 @@ profile: python-library
 
 Profiles live in `taskill.profiles` and are user-extensible via the same entry-points pattern. Likely starting profiles: `python-library`, `python-app`, `monorepo-package`, `ci-only`, `windsurf-first`.
 
-## v0.5 — multi-repo / monorepo
+## v0.5 — multi-repo / monorepo ✅ baseline shipped
 
-State management was designed with this in mind (it's per-config-file, not per-process). The missing pieces:
+State management was designed with this in mind (it's per-config-file, not per-process). What's now in place:
 
-- `taskill bulk-run --root /home/me/github` — scan a directory tree, run taskill in every repo whose triggers fire
-- Per-repo overrides via `.taskill.yaml` while a parent directory holds shared `taskill.yaml`
-- Combined report so you can see "of 47 repos, 12 needed updates today, here are the diffs"
+- ✅ `taskill bulk-run --root /home/me/github` — scans a directory tree, runs taskill in every repo whose triggers fire (or all repos with `--force`)
+- ✅ Per-repo overrides via `.taskill.yaml` (or `taskill.yaml`) while a parent `--shared-config` holds the default
+- ✅ `--filter` (repeatable) to scope to repos whose name matches a substring
+- ✅ `--max-projects` to cap throughput per run (handy for rate-limited LLMs and cron windows)
+- ✅ `--json` machine-readable summary with per-repo `TaskillResult.as_dict()`
 
-This is the layer that would replace the manual loop you're doing daily across `oqlos/testql`, `oqlos/pyqual`, etc.
+Still planned:
+
+- Combined diff report (one place to see "of 47 repos, 12 needed updates today, here are the diffs")
+- Parallel execution across repos (currently sequential — fine for small fleets)
+- Smarter discovery: respect `.taskillignore` files
+
+This layer replaces the manual loop you'd otherwise run daily across `oqlos/testql`, `oqlos/pyqual`, etc. The `daily_update.sh` wrapper plus a cron entry are usually enough.
 
 ## v0.6 — wider trigger sources
 

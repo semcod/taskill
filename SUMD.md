@@ -20,7 +20,7 @@ Daily project hygiene: keep README / CHANGELOG / TODO in sync with reality. LLM-
 ## Metadata
 
 - **name**: `taskill`
-- **version**: `0.1.1`
+- **version**: `0.1.2`
 - **python_requires**: `>=3.10`
 - **license**: Apache-2.0
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
@@ -40,7 +40,7 @@ SUMD (description) → DOQL/source (code) → taskfile (automation) → testql (
 
 app {
   name: taskill;
-  version: 0.1.1;
+  version: 0.1.2;
 }
 
 dependencies {
@@ -53,6 +53,10 @@ interface[type="cli"] {
 }
 interface[type="cli"] page[name="taskill"] {
 
+}
+
+integration[name="github"] {
+  type: scm;
 }
 
 deploy {
@@ -96,7 +100,7 @@ LOG[3]{message}:
 ```yaml
 project:
   name: taskill
-  version: 0.1.1
+  version: 0.1.2
   env: local
 ```
 
@@ -142,6 +146,12 @@ pip install -e .[dev]
 |----------|---------|-------------|
 | `OPENROUTER_API_KEY` | `*(not set)*` |  |
 | `LLM_MODEL` | `openrouter/qwen/qwen3-coder-next` | (taskill auto-strips the openrouter/ prefix for the OpenRouter REST API) |
+| `GITHUB_ROOT` | `$HOME/github` | Root directory for bulk-run (default: $HOME/github) |
+| `TASKILL_MAX_DEPTH` | `2` | Max directory depth to scan for repos |
+| `TASKILL_MAX_PROJECTS` | `0` | Max number of projects to process (0 = unlimited) |
+| `TASKILL_DRY_RUN` | `false` | Preview changes without writing |
+| `TASKILL_FORCE` | `false` | Override triggers |
+| `TASKILL_FILTER` | `*(not set)*` | Comma-separated repo names to filter |
 
 ## Release Management (`goal.yaml`)
 
@@ -149,24 +159,26 @@ pip install -e .[dev]
 - **commits**: `conventional` scope=`taskill`
 - **changelog**: `keep-a-changelog`
 - **build strategies**: `python`, `nodejs`, `rust`
-- **version files**: `pyproject.toml:version`, `src/taskill/__init__.py:__version__`
+- **version files**: `VERSION`, `pyproject.toml:version`, `venv/lib/python3.13/site-packages/matplotlib/__init__.py:__version__`
 
 ## Code Analysis
 
 ### `project/map.toon.yaml`
 
 ```toon markpact:analysis path=project/map.toon.yaml
-# taskill | 26f 2554L | python:23,shell:2,less:1 | 2026-04-25
-# stats: 76 func | 21 cls | 26 mod | CC̄=3.7 | critical:3 | cycles:0
-# alerts[5]: CC evaluate=21; CC run=16; CC status=11; CC build_user_prompt=9; CC load_config=8
-# hotspots[5]: run fan=16; status fan=12; load_config fan=12; collect_snapshot fan=10; evaluate fan=10
+# taskill | 29f 3286L | python:25,shell:3,less:1 | 2026-04-25
+# stats: 102 func | 22 cls | 29 mod | CC̄=3.9 | critical:5 | cycles:0
+# alerts[5]: CC evaluate=21; CC bulk_run=17; CC bulk_run_cmd=17; CC run=16; CC status=11
+# hotspots[5]: bulk_run fan=18; bulk_run_cmd fan=17; run fan=16; status fan=12; load_config fan=12
 # evolution: baseline
 # Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
-M[26]:
-  app.doql.less,29
+M[29]:
+  app.doql.less,33
+  daily_update.sh,94
   project.sh,47
-  src/taskill/__init__.py,21
-  src/taskill/cli.py,254
+  src/taskill/__init__.py,31
+  src/taskill/bulk.py,250
+  src/taskill/cli.py,348
   src/taskill/config.py,171
   src/taskill/core.py,212
   src/taskill/git_state.py,148
@@ -184,6 +196,7 @@ M[26]:
   src/taskill/updaters/todo.py,114
   tests/__init__.py,1
   tests/test_algorithmic.py,94
+  tests/test_bulk.py,280
   tests/test_config.py,61
   tests/test_providers.py,77
   tests/test_triggers.py,119
@@ -191,14 +204,23 @@ M[26]:
   tree.sh,2
 D:
   src/taskill/__init__.py:
+  src/taskill/bulk.py:
+    e: find_repos,_scan,resolve_repo_config,_rebase_config,bulk_run,BulkResult
+    BulkResult: total_repos(0),ran_count(0),changed_count(0),as_dict(0),summary(0)  # Aggregate result of running taskill across multiple repos.
+    find_repos(root;max_depth)
+    _scan(directory;repos;depth;max_depth)
+    resolve_repo_config(repo;shared_config)
+    _rebase_config(base;new_root)
+    bulk_run(root;shared_config)
   src/taskill/cli.py:
-    e: _setup_logging,main,run,status,init,release,clean_todo
+    e: _setup_logging,main,run,status,init,release,bulk_run_cmd,clean_todo
     _setup_logging(verbose)
     main(ctx;verbose;config)
     run(ctx;force;dry_run;as_json)
     status(ctx;as_json)
     init(force)
     release(version;changelog)
+    bulk_run_cmd(root;shared_config;max_depth;max_projects;force;dry_run;as_json;repo_filter)
     clean_todo(todo)
   src/taskill/config.py:
     e: load_config,Triggers,ProviderConfig,IntegrationConfig,TaskillConfig
@@ -288,6 +310,28 @@ D:
     test_extracts_new_todos_from_commit_bodies()
     test_empty_input_is_safe()
     test_always_available()
+  tests/test_bulk.py:
+    e: _make_repo,test_find_repos_finds_direct_children,test_find_repos_respects_max_depth,test_find_repos_skips_hidden_and_noise_dirs,test_find_repos_does_not_descend_into_repos,test_find_repos_returns_empty_for_nonexistent,test_resolve_repo_config_uses_local_yaml,test_resolve_repo_config_uses_dot_taskill_yaml,test_resolve_repo_config_falls_back_to_shared,test_resolve_repo_config_falls_back_to_defaults,test_resolve_repo_config_local_wins_over_shared,test_bulk_run_no_repos,test_bulk_run_executes_each_repo,test_bulk_run_repo_filter,test_bulk_run_with_shared_config,test_bulk_run_max_projects_limits_count,test_bulk_run_max_projects_zero_means_unlimited,test_bulk_run_filters_before_max_projects,test_bulk_run_summary_format,test_bulk_result_as_dict
+    _make_repo(path)
+    test_find_repos_finds_direct_children(tmp_path)
+    test_find_repos_respects_max_depth(tmp_path)
+    test_find_repos_skips_hidden_and_noise_dirs(tmp_path)
+    test_find_repos_does_not_descend_into_repos(tmp_path)
+    test_find_repos_returns_empty_for_nonexistent(tmp_path)
+    test_resolve_repo_config_uses_local_yaml(tmp_path)
+    test_resolve_repo_config_uses_dot_taskill_yaml(tmp_path)
+    test_resolve_repo_config_falls_back_to_shared(tmp_path)
+    test_resolve_repo_config_falls_back_to_defaults(tmp_path)
+    test_resolve_repo_config_local_wins_over_shared(tmp_path)
+    test_bulk_run_no_repos(tmp_path)
+    test_bulk_run_executes_each_repo(tmp_path)
+    test_bulk_run_repo_filter(tmp_path)
+    test_bulk_run_with_shared_config(tmp_path)
+    test_bulk_run_max_projects_limits_count(tmp_path)
+    test_bulk_run_max_projects_zero_means_unlimited(tmp_path)
+    test_bulk_run_filters_before_max_projects(tmp_path)
+    test_bulk_run_summary_format(tmp_path)
+    test_bulk_result_as_dict(tmp_path)
   tests/test_config.py:
     e: test_missing_yaml_returns_defaults,test_yaml_overrides_defaults,test_dotenv_loaded_from_project_root,test_process_env_overrides_dotenv,test_files_config_merges_with_defaults
     test_missing_yaml_returns_defaults(tmp_path)
@@ -335,71 +379,80 @@ D:
 
 ## Call Graph
 
-*34 nodes · 28 edges · 12 modules · CC̄=4.3*
+*44 nodes · 35 edges · 14 modules · CC̄=2.0*
 
 ### Hubs (by degree)
 
 | Function | CC | in | out | total |
 |----------|----|----|-----|-------|
-| `load_config` *(in src.taskill.config)* | 8 | 3 | 35 | **38** |
-| `run` *(in src.taskill.cli)* | 16 ⚠ | 0 | 32 | **32** |
+| `load_config` *(in src.taskill.config)* | 8 | 6 | 35 | **41** |
+| `bulk_run_cmd` *(in src.taskill.cli)* | 17 ⚠ | 0 | 38 | **38** |
 | `generate` *(in src.taskill.providers.windsurf_mcp.WindsurfMcpProvider)* | 7 | 0 | 32 | **32** |
+| `run` *(in src.taskill.cli)* | 16 ⚠ | 0 | 32 | **32** |
 | `generate` *(in src.taskill.providers.openrouter.OpenRouterProvider)* | 6 | 0 | 27 | **27** |
-| `evaluate` *(in src.taskill.triggers)* | 21 ⚠ | 2 | 23 | **25** |
+| `bulk_run` *(in src.taskill.bulk)* | 17 ⚠ | 0 | 26 | **26** |
 | `status` *(in src.taskill.cli)* | 11 ⚠ | 0 | 25 | **25** |
-| `run` *(in src.taskill.core.Taskill)* | 11 ⚠ | 0 | 20 | **20** |
-| `collect_snapshot` *(in src.taskill.git_state)* | 3 | 1 | 13 | **14** |
+| `evaluate` *(in src.taskill.triggers)* | 21 ⚠ | 2 | 23 | **25** |
 
 ```toon markpact:analysis path=project/calls.toon.yaml
 # code2llm call graph | /home/tom/github/semcod/taskill
-# nodes: 34 | edges: 28 | modules: 12
-# CC̄=4.3
+# nodes: 44 | edges: 35 | modules: 14
+# CC̄=2.0
 
 HUBS[20]:
   src.taskill.config.load_config
-    CC=8  in:3  out:35  total:38
-  src.taskill.cli.run
-    CC=16  in:0  out:32  total:32
+    CC=8  in:6  out:35  total:41
+  src.taskill.cli.bulk_run_cmd
+    CC=17  in:0  out:38  total:38
   src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate
     CC=7  in:0  out:32  total:32
+  src.taskill.cli.run
+    CC=16  in:0  out:32  total:32
   src.taskill.providers.openrouter.OpenRouterProvider.generate
     CC=6  in:0  out:27  total:27
-  src.taskill.triggers.evaluate
-    CC=21  in:2  out:23  total:25
+  src.taskill.bulk.bulk_run
+    CC=17  in:0  out:26  total:26
   src.taskill.cli.status
     CC=11  in:0  out:25  total:25
+  src.taskill.triggers.evaluate
+    CC=21  in:2  out:23  total:25
   src.taskill.core.Taskill.run
     CC=11  in:0  out:20  total:20
   src.taskill.git_state.collect_snapshot
     CC=3  in:1  out:13  total:14
-  src.taskill.updaters.readme.update_readme
-    CC=6  in:1  out:11  total:12
   src.taskill.git_state.read_coverage
     CC=7  in:1  out:11  total:12
   src.taskill.core.Taskill._apply
     CC=4  in:0  out:12  total:12
-  src.taskill.git_state.read_failed_tests
-    CC=5  in:1  out:8  total:9
-  src.taskill.providers.windsurf_mcp._candidate_endpoints
-    CC=5  in:2  out:7  total:9
+  src.taskill.updaters.readme.ReadmeUpdater._update_readme
+    CC=6  in:0  out:11  total:11
+  src.taskill.bulk._scan
+    CC=9  in:2  out:7  total:9
   src.taskill.git_state.commits_since
     CC=7  in:1  out:8  total:9
-  src.taskill.providers.discover_providers
-    CC=6  in:1  out:7  total:8
+  src.taskill.providers.windsurf_mcp._candidate_endpoints
+    CC=5  in:2  out:7  total:9
+  src.taskill.git_state.read_failed_tests
+    CC=5  in:1  out:8  total:9
   src.taskill.cli.release
     CC=2  in:0  out:8  total:8
+  src.taskill.providers.discover_providers
+    CC=6  in:1  out:7  total:8
   src.taskill.state.load_state
     CC=3  in:1  out:6  total:7
-  src.taskill.updaters.changelog.release_unreleased
-    CC=4  in:1  out:6  total:7
-  src.taskill.updaters.readme.render_status_block
-    CC=6  in:1  out:5  total:6
-  src.taskill.git_state._run
-    CC=2  in:4  out:2  total:6
 
 MODULES:
-  src.taskill.cli  [6 funcs]
+  project.map.toon  [1 funcs]
+    bulk_run  CC=0  out:0
+  src.taskill.bulk  [5 funcs]
+    _rebase_config  CC=1  out:3
+    _scan  CC=9  out:7
+    bulk_run  CC=17  out:26
+    find_repos  CC=2  out:5
+    resolve_repo_config  CC=4  out:4
+  src.taskill.cli  [7 funcs]
     _setup_logging  CC=2  out:1
+    bulk_run_cmd  CC=17  out:38
     clean_todo  CC=1  out:6
     main  CC=1  out:6
     release  CC=2  out:8
@@ -437,21 +490,24 @@ MODULES:
     load_state  CC=3  out:6
   src.taskill.triggers  [1 funcs]
     evaluate  CC=21  out:23
-  src.taskill.updaters.changelog  [1 funcs]
+  src.taskill.updaters.changelog  [2 funcs]
     release_unreleased  CC=4  out:6
-  src.taskill.updaters.readme  [2 funcs]
+    update_changelog  CC=1  out:2
+  src.taskill.updaters.readme  [3 funcs]
+    _update_readme  CC=6  out:11
     render_status_block  CC=6  out:5
-    update_readme  CC=6  out:11
-  src.taskill.updaters.todo  [1 funcs]
+    update_readme  CC=1  out:2
+  src.taskill.updaters.todo  [2 funcs]
     empty_todo  CC=1  out:1
+    update_todo  CC=1  out:2
 
 EDGES:
-  src.taskill.providers.build_chain → src.taskill.providers.discover_providers
-  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → src.taskill.providers.windsurf_mcp._mcp_lib_present
-  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → src.taskill.providers.windsurf_mcp._candidate_endpoints
-  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.windsurf_mcp._candidate_endpoints
-  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.windsurf_mcp._mcp_lib_present
-  src.taskill.providers.openrouter.OpenRouterProvider.generate → src.taskill.providers.openrouter._normalize_model
+  src.taskill.cli.main → src.taskill.cli._setup_logging
+  src.taskill.cli.run → src.taskill.config.load_config
+  src.taskill.cli.status → src.taskill.config.load_config
+  src.taskill.cli.release → src.taskill.updaters.changelog.release_unreleased
+  src.taskill.cli.bulk_run_cmd → project.map.toon.bulk_run
+  src.taskill.cli.clean_todo → src.taskill.updaters.todo.empty_todo
   src.taskill.git_state.head_sha → src.taskill.git_state._run
   src.taskill.git_state.commits_since → src.taskill.git_state._run
   src.taskill.git_state.changed_files_since → src.taskill.git_state._run
@@ -461,19 +517,26 @@ EDGES:
   src.taskill.git_state.collect_snapshot → src.taskill.git_state.read_coverage
   src.taskill.git_state.collect_snapshot → src.taskill.git_state.read_failed_tests
   src.taskill.git_state.collect_snapshot → src.taskill.git_state.file_hash
-  src.taskill.updaters.readme.update_readme → src.taskill.updaters.readme.render_status_block
   src.taskill.core.Taskill.__init__ → src.taskill.state.load_state
   src.taskill.core.Taskill.__init__ → src.taskill.config.load_config
   src.taskill.core.Taskill.run → src.taskill.triggers.evaluate
   src.taskill.core.Taskill.run → src.taskill.providers.build_chain
   src.taskill.core.Taskill.status → src.taskill.triggers.evaluate
   src.taskill.core.Taskill._snapshot → src.taskill.git_state.collect_snapshot
+  src.taskill.core.Taskill._apply → src.taskill.updaters.changelog.update_changelog
+  src.taskill.core.Taskill._apply → src.taskill.updaters.todo.update_todo
   src.taskill.core.Taskill._apply → src.taskill.updaters.readme.update_readme
-  src.taskill.cli.main → src.taskill.cli._setup_logging
-  src.taskill.cli.run → src.taskill.config.load_config
-  src.taskill.cli.status → src.taskill.config.load_config
-  src.taskill.cli.release → src.taskill.updaters.changelog.release_unreleased
-  src.taskill.cli.clean_todo → src.taskill.updaters.todo.empty_todo
+  src.taskill.updaters.readme.ReadmeUpdater._update_readme → src.taskill.updaters.readme.render_status_block
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → src.taskill.providers.windsurf_mcp._mcp_lib_present
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → src.taskill.providers.windsurf_mcp._candidate_endpoints
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.windsurf_mcp._candidate_endpoints
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.windsurf_mcp._mcp_lib_present
+  src.taskill.providers.openrouter.OpenRouterProvider.generate → src.taskill.providers.openrouter._normalize_model
+  src.taskill.providers.build_chain → src.taskill.providers.discover_providers
+  src.taskill.bulk.find_repos → src.taskill.bulk._scan
+  src.taskill.bulk.resolve_repo_config → src.taskill.config.load_config
+  src.taskill.bulk.resolve_repo_config → src.taskill.bulk._rebase_config
+  src.taskill.bulk.bulk_run → src.taskill.bulk.find_repos
 ```
 
 ## Test Contracts

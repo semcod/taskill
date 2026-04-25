@@ -3,10 +3,10 @@
 
 ## AI Cost Tracking
 
-![PyPI](https://img.shields.io/badge/pypi-costs-blue) ![Version](https://img.shields.io/badge/version-0.1.2-blue) ![Python](https://img.shields.io/badge/python-3.9+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
-![AI Cost](https://img.shields.io/badge/AI%20Cost-$0.15-orange) ![Human Time](https://img.shields.io/badge/Human%20Time-2.0h-blue) ![Model](https://img.shields.io/badge/Model-openrouter%2Fqwen%2Fqwen3--coder--next-lightgrey)
+![PyPI](https://img.shields.io/badge/pypi-costs-blue) ![Version](https://img.shields.io/badge/version-0.1.3-blue) ![Python](https://img.shields.io/badge/python-3.9+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
+![AI Cost](https://img.shields.io/badge/AI%20Cost-$0.30-orange) ![Human Time](https://img.shields.io/badge/Human%20Time-2.0h-blue) ![Model](https://img.shields.io/badge/Model-openrouter%2Fqwen%2Fqwen3--coder--next-lightgrey)
 
-- 🤖 **LLM usage:** $0.1500 (1 commits)
+- 🤖 **LLM usage:** $0.3000 (2 commits)
 - 👤 **Human dev:** ~$200 (2.0h @ $100/h, 30min dedup)
 
 Generated on 2026-04-25 using [openrouter/qwen/qwen3-coder-next](https://openrouter.ai/qwen/qwen3-coder-next)
@@ -47,7 +47,22 @@ Every run produces three (idempotent) edits:
 
 1. **`CHANGELOG.md`** — appends new entries under `## [Unreleased]`, grouped by Conventional Commit type (`### Added`, `### Fixed`, `### Performance`, etc.). Uses [Keep a Changelog](https://keepachangelog.com/) layout. Existing entries are deduplicated.
 2. **`TODO.md`** — moves completed items to a `## Done (moved to CHANGELOG)` section, and appends `TODO:` / `FIXME:` markers found in new commit bodies under `## Discovered`.
-3. **`README.md`** — refreshes only the block between `<!-- taskill:status:start -->` and `<!-- taskill:status:end -->` markers (HEAD, coverage, failing tests, summary). Never touches the rest of the file.
+3. **`README.md`** — refreshes only the block between `<!-- taskill:status:start -->
+
+## Status
+
+_Last updated by [taskill](https://github.com/oqlos/taskill) at 2026-04-25 09:23 UTC_
+
+| Metric | Value |
+|---|---|
+| HEAD | `4618c29` |
+| Coverage | — |
+| Failing tests | — |
+| Commits in last cycle | 0 |
+
+> No changes were made to the project since the last taskill run.
+
+<!-- taskill:status:end -->` markers (HEAD, coverage, failing tests, summary). Never touches the rest of the file.
 
 ## Provider chain
 
@@ -94,6 +109,18 @@ triggers:
 0 6 * * * cd /path/to/project && /usr/local/bin/taskill run >> ~/.taskill.log 2>&1
 ```
 
+### Bulk run (multiple projects)
+
+For fleet-wide hygiene across many repos:
+
+```bash
+taskill bulk-run --root ~/github --max-depth 2
+taskill bulk-run --root ~/github --max-depth 2 --dry-run  # preview
+taskill bulk-run --root ~/github --filter taskill --filter testql  # filter repos
+```
+
+See `/daily-docs-update` workflow for complete documentation.
+
 ### GitHub Actions
 
 See `examples/github-action.yml`. Triggers on `push` to main, runs `taskill run`, opens a PR if files changed.
@@ -115,9 +142,137 @@ taskill run            # execute (respects triggers)
 taskill run --force    # ignore triggers
 taskill run --dry-run  # don't write files or state
 taskill run --json     # machine-readable output
+taskill bulk-run       # run across all git repos in a directory
 taskill release X.Y.Z  # promote [Unreleased] → versioned heading
 taskill clean-todo     # wipe TODO.md (after a release)
 ```
+
+## Bulk / fleet-wide runs
+
+When you maintain many small repos (a personal "github" folder, a self-hosted
+GitLab group, a monorepo of independent packages), `taskill bulk-run` runs the
+same hygiene job across all of them with a single command:
+
+```bash
+# Scan ~/github (depth 2), use a shared taskill.yaml as the base config
+taskill bulk-run --root ~/github --shared-config ~/github/taskill.yaml
+
+# Same, but only run on repos whose name matches one of the filters
+taskill bulk-run --root ~/github -f oqlos -f semcod
+
+# Process at most 5 projects per run (useful for rate-limited LLMs)
+taskill bulk-run --root ~/github --max-projects 5
+
+# Preview without writing anything
+taskill bulk-run --root ~/github --dry-run --force
+
+# Machine-readable summary for CI / dashboards
+taskill bulk-run --root ~/github --json
+```
+
+### Config resolution per repo
+
+Per-repo `taskill.yaml` (or `.taskill.yaml`) takes precedence over the shared
+config, so you can have one default policy plus per-project overrides. Repos
+without any local config inherit the shared one with their own `project_root`.
+
+Resolution order for each discovered repo:
+
+1. `<repo>/taskill.yaml` — local override (highest priority)
+2. `<repo>/.taskill.yaml` — alternative local override
+3. Shared config from `--shared-config`, rebased onto the repo
+4. Built-in defaults
+
+### Discovery rules
+
+`bulk-run` walks the directory tree starting at `--root` up to `--max-depth`
+levels deep (default 2). A directory containing a `.git` entry is treated as a
+repo, and `bulk-run` does **not** descend into nested repos. Hidden directories
+and common noise (`node_modules`, `__pycache__`, `.venv`, `dist`, `build`,
+`target`, `.tox`, `.pytest_cache`) are skipped automatically.
+
+### Daily-run wrapper
+
+A shell wrapper (`daily_update.sh`) reads its defaults from `.env`:
+
+```bash
+# .env
+GITHUB_ROOT=$HOME/github
+TASKILL_MAX_DEPTH=2
+TASKILL_MAX_PROJECTS=10        # cap per cron tick
+TASKILL_DRY_RUN=false
+TASKILL_FORCE=false
+TASKILL_FILTER=oqlos,semcod    # comma-separated
+```
+
+```bash
+./daily_update.sh                              # uses .env
+./daily_update.sh --dry-run                    # CLI override
+./daily_update.sh --root /tmp/my-projects      # different root
+./daily_update.sh --filter taskill,testql      # narrow scope
+```
+
+## Extending taskill: providers and updaters as plugins
+
+Both providers (LLM/algorithmic backends) and document updaters (CHANGELOG /
+TODO / README writers) are discovered through Python entry points, so a
+third-party package can register a new provider or updater without touching
+this codebase.
+
+### Custom provider
+
+```toml
+# my_pkg/pyproject.toml
+[project.entry-points."taskill.providers"]
+my_provider = "my_pkg.provider:MyProvider"
+```
+
+```python
+# my_pkg/provider.py
+from taskill.providers.base import Provider, GeneratedDocs
+
+class MyProvider(Provider):
+    name = "my_provider"
+
+    def is_available(self) -> bool:
+        return True
+
+    def generate(self, context) -> GeneratedDocs:
+        ...
+```
+
+Then reference it from `taskill.yaml` like any built-in:
+
+```yaml
+providers:
+  - name: my_provider
+    enabled: true
+    options: { ... }
+  - name: algorithmic
+    enabled: true
+```
+
+### Custom updater
+
+```toml
+[project.entry-points."taskill.updaters"]
+wiki = "my_pkg.wiki:WikiUpdater"
+```
+
+```python
+from taskill.updaters.base import DocumentUpdater, UpdateResult
+
+class WikiUpdater(DocumentUpdater):
+    name = "wiki"
+
+    def apply(self, path, snapshot, docs) -> UpdateResult:
+        ...
+        return UpdateResult(changed=True, path=path, updater_name=self.name)
+```
+
+Built-in updaters (`changelog`, `todo`, `readme`) are registered the same way,
+so removing or replacing them is just a matter of the entry-point taking
+precedence.
 
 ## Configuration reference
 
@@ -154,5 +309,18 @@ Licensed under Apache-2.0.
 ## Status
 
 <!-- taskill:status:start -->
-_Bootstrapped — no live project status yet. Will populate after first `taskill run`._
+
+## Status
+
+_Last updated by [taskill](https://github.com/oqlos/taskill) at 2026-04-25 09:23 UTC_
+
+| Metric | Value |
+|---|---|
+| HEAD | `4618c29` |
+| Coverage | — |
+| Failing tests | — |
+| Commits in last cycle | 0 |
+
+> No changes were made to the project since the last taskill run.
+
 <!-- taskill:status:end -->

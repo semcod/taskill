@@ -19,6 +19,7 @@ from rich.console import Console
 from rich.table import Table
 
 from taskill import __version__
+from taskill.bulk import bulk_run
 from taskill.config import load_config
 from taskill.core import Taskill
 from taskill.updaters.changelog import release_unreleased
@@ -161,6 +162,99 @@ def release(version: str, changelog: str) -> None:
         console.print(f"[green]✓[/green] Released v{version} in {p}")
     else:
         console.print(f"[yellow]Nothing to release in {p}[/yellow]")
+        sys.exit(1)
+
+
+@main.command("bulk-run")
+@click.option(
+    "--root", "-r", default=".", show_default=True,
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    help="Parent directory to scan for repos",
+)
+@click.option(
+    "--shared-config", "-s", default=None,
+    type=click.Path(exists=False),
+    help="Optional shared taskill.yaml used as base for repos without their own config",
+)
+@click.option(
+    "--max-depth", default=2, show_default=True, type=int,
+    help="Max directory levels to descend looking for git repos",
+)
+@click.option(
+    "--max-projects", default=0, show_default=True, type=int,
+    help="Maximum number of projects to process (0 = unlimited)",
+)
+@click.option("--force", is_flag=True, help="Run even if triggers say no")
+@click.option("--dry-run", is_flag=True, help="Don't write files or persist state")
+@click.option("--json", "as_json", is_flag=True, help="Output result as JSON")
+@click.option(
+    "--filter", "-f", "repo_filter", multiple=True,
+    help="Only run on repos whose name contains this substring (repeatable)",
+)
+def bulk_run_cmd(
+    root: str,
+    shared_config: str | None,
+    max_depth: int,
+    max_projects: int,
+    force: bool,
+    dry_run: bool,
+    as_json: bool,
+    repo_filter: tuple[str, ...],
+) -> None:
+    """Run taskill across all git repos under a directory.
+
+    Useful for fleet-wide hygiene: keep README/CHANGELOG/TODO in sync
+    across many self-hosted projects with a single shared config.
+    """
+    result = bulk_run(
+        root=Path(root),
+        shared_config=Path(shared_config) if shared_config else None,
+        max_depth=max_depth,
+        max_projects=max_projects,
+        force=force,
+        dry_run=dry_run,
+        repo_filter=list(repo_filter) if repo_filter else None,
+    )
+
+    if as_json:
+        click.echo(json.dumps(result.as_dict(), indent=2, default=str))
+        sys.exit(0 if not result.errors else 1)
+
+    console.print(f"[bold cyan]Bulk run:[/bold cyan] {result.root}")
+    console.print(f"[dim]{result.summary()}[/dim]\n")
+
+    if not result.per_repo and not result.skipped and not result.errors:
+        console.print("[yellow]No repos found.[/yellow]")
+        return
+
+    table = Table(title="Per-repo results", show_header=True, header_style="bold cyan")
+    table.add_column("Repo")
+    table.add_column("Ran")
+    table.add_column("Provider")
+    table.add_column("Files changed")
+    table.add_column("Note")
+
+    for repo_path, repo_result in result.per_repo.items():
+        ran_color = "green" if repo_result.ran else "yellow"
+        ran_str = f"[{ran_color}]{repo_result.ran}[/{ran_color}]"
+        provider = repo_result.provider_used or "—"
+        files = ", ".join(repo_result.files_changed) or "—"
+        note = ""
+        if not repo_result.ran:
+            note = repo_result.trigger_eval.summary()
+        elif repo_result.errors:
+            note = f"{len(repo_result.errors)} provider fallthroughs"
+        table.add_row(repo_path.name, ran_str, provider, files, note)
+
+    for repo_path, reason in result.skipped:
+        table.add_row(repo_path.name, "[dim]skip[/dim]", "—", "—", reason)
+
+    for repo_path, error in result.errors:
+        table.add_row(repo_path.name, "[red]error[/red]", "—", "—", error)
+
+    console.print(table)
+
+    if result.errors:
         sys.exit(1)
 
 

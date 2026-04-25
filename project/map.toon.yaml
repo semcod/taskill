@@ -1,14 +1,16 @@
-# taskill | 26f 2554L | python:23,shell:2,less:1 | 2026-04-25
-# stats: 76 func | 21 cls | 26 mod | CC̄=3.7 | critical:3 | cycles:0
-# alerts[5]: CC evaluate=21; CC run=16; CC status=11; CC build_user_prompt=9; CC load_config=8
-# hotspots[5]: run fan=16; status fan=12; load_config fan=12; collect_snapshot fan=10; evaluate fan=10
+# taskill | 29f 3286L | python:25,shell:3,less:1 | 2026-04-25
+# stats: 102 func | 22 cls | 29 mod | CC̄=3.9 | critical:5 | cycles:0
+# alerts[5]: CC evaluate=21; CC bulk_run=17; CC bulk_run_cmd=17; CC run=16; CC status=11
+# hotspots[5]: bulk_run fan=18; bulk_run_cmd fan=17; run fan=16; status fan=12; load_config fan=12
 # evolution: baseline
 # Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
-M[26]:
-  app.doql.less,29
+M[29]:
+  app.doql.less,33
+  daily_update.sh,94
   project.sh,47
-  src/taskill/__init__.py,21
-  src/taskill/cli.py,254
+  src/taskill/__init__.py,31
+  src/taskill/bulk.py,250
+  src/taskill/cli.py,348
   src/taskill/config.py,171
   src/taskill/core.py,212
   src/taskill/git_state.py,148
@@ -26,6 +28,7 @@ M[26]:
   src/taskill/updaters/todo.py,114
   tests/__init__.py,1
   tests/test_algorithmic.py,94
+  tests/test_bulk.py,280
   tests/test_config.py,61
   tests/test_providers.py,77
   tests/test_triggers.py,119
@@ -33,14 +36,23 @@ M[26]:
   tree.sh,2
 D:
   src/taskill/__init__.py:
+  src/taskill/bulk.py:
+    e: find_repos,_scan,resolve_repo_config,_rebase_config,bulk_run,BulkResult
+    BulkResult: total_repos(0),ran_count(0),changed_count(0),as_dict(0),summary(0)  # Aggregate result of running taskill across multiple repos.
+    find_repos(root;max_depth)
+    _scan(directory;repos;depth;max_depth)
+    resolve_repo_config(repo;shared_config)
+    _rebase_config(base;new_root)
+    bulk_run(root;shared_config)
   src/taskill/cli.py:
-    e: _setup_logging,main,run,status,init,release,clean_todo
+    e: _setup_logging,main,run,status,init,release,bulk_run_cmd,clean_todo
     _setup_logging(verbose)
     main(ctx;verbose;config)
     run(ctx;force;dry_run;as_json)
     status(ctx;as_json)
     init(force)
     release(version;changelog)
+    bulk_run_cmd(root;shared_config;max_depth;max_projects;force;dry_run;as_json;repo_filter)
     clean_todo(todo)
   src/taskill/config.py:
     e: load_config,Triggers,ProviderConfig,IntegrationConfig,TaskillConfig
@@ -130,6 +142,28 @@ D:
     test_extracts_new_todos_from_commit_bodies()
     test_empty_input_is_safe()
     test_always_available()
+  tests/test_bulk.py:
+    e: _make_repo,test_find_repos_finds_direct_children,test_find_repos_respects_max_depth,test_find_repos_skips_hidden_and_noise_dirs,test_find_repos_does_not_descend_into_repos,test_find_repos_returns_empty_for_nonexistent,test_resolve_repo_config_uses_local_yaml,test_resolve_repo_config_uses_dot_taskill_yaml,test_resolve_repo_config_falls_back_to_shared,test_resolve_repo_config_falls_back_to_defaults,test_resolve_repo_config_local_wins_over_shared,test_bulk_run_no_repos,test_bulk_run_executes_each_repo,test_bulk_run_repo_filter,test_bulk_run_with_shared_config,test_bulk_run_max_projects_limits_count,test_bulk_run_max_projects_zero_means_unlimited,test_bulk_run_filters_before_max_projects,test_bulk_run_summary_format,test_bulk_result_as_dict
+    _make_repo(path)
+    test_find_repos_finds_direct_children(tmp_path)
+    test_find_repos_respects_max_depth(tmp_path)
+    test_find_repos_skips_hidden_and_noise_dirs(tmp_path)
+    test_find_repos_does_not_descend_into_repos(tmp_path)
+    test_find_repos_returns_empty_for_nonexistent(tmp_path)
+    test_resolve_repo_config_uses_local_yaml(tmp_path)
+    test_resolve_repo_config_uses_dot_taskill_yaml(tmp_path)
+    test_resolve_repo_config_falls_back_to_shared(tmp_path)
+    test_resolve_repo_config_falls_back_to_defaults(tmp_path)
+    test_resolve_repo_config_local_wins_over_shared(tmp_path)
+    test_bulk_run_no_repos(tmp_path)
+    test_bulk_run_executes_each_repo(tmp_path)
+    test_bulk_run_repo_filter(tmp_path)
+    test_bulk_run_with_shared_config(tmp_path)
+    test_bulk_run_max_projects_limits_count(tmp_path)
+    test_bulk_run_max_projects_zero_means_unlimited(tmp_path)
+    test_bulk_run_filters_before_max_projects(tmp_path)
+    test_bulk_run_summary_format(tmp_path)
+    test_bulk_result_as_dict(tmp_path)
   tests/test_config.py:
     e: test_missing_yaml_returns_defaults,test_yaml_overrides_defaults,test_dotenv_loaded_from_project_root,test_process_env_overrides_dotenv,test_files_config_merges_with_defaults
     test_missing_yaml_returns_defaults(tmp_path)

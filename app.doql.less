@@ -2,7 +2,7 @@
 
 app {
   name: taskill;
-  version: 0.1.1;
+  version: 0.1.2;
 }
 
 dependencies {
@@ -15,6 +15,10 @@ interface[type="cli"] {
 }
 interface[type="cli"] page[name="taskill"] {
 
+}
+
+integration[name="github"] {
+  type: scm;
 }
 
 deploy {

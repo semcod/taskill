@@ -12,9 +12,19 @@ Provider chain (first match wins):
 3. Algorithmic    (deterministic fallback: conventional commits + heuristics)
 """
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
+from taskill.bulk import BulkResult, bulk_run, find_repos
 from taskill.config import TaskillConfig, load_config
 from taskill.core import Taskill, TaskillResult
 
-__all__ = ["TaskillConfig", "load_config", "Taskill", "TaskillResult", "__version__"]
+__all__ = [
+    "TaskillConfig",
+    "load_config",
+    "Taskill",
+    "TaskillResult",
+    "BulkResult",
+    "bulk_run",
+    "find_repos",
+    "__version__",
+]

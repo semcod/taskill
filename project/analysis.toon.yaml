@@ -1,48 +1,66 @@
-# code2llm | 25f 2730L | python:17,yml:3,shell:2,yaml:2,toml:1 | 2026-04-25
-# CC̄=4.3 | critical:2/60 | dups:0 | cycles:0
+# code2llm | 38f 5234L | python:18,yaml:12,shell:3,yml:3,toml:1,txt:1 | 2026-04-25
+# CC̄=2.0 | critical:5/171 | dups:0 | cycles:1
 
-HEALTH[2]:
-  🟡 CC    evaluate CC=21 (limit:15)
+HEALTH[5]:
   🟡 CC    run CC=16 (limit:15)
+  🟡 CC    bulk_run_cmd CC=17 (limit:15)
+  🟡 CC    evaluate CC=21 (limit:15)
+  🟡 CC    _update_todo CC=21 (limit:15)
+  🟡 CC    bulk_run CC=17 (limit:15)
 
-REFACTOR[1]:
-  1. split 2 high-CC methods  (CC>15)
+REFACTOR[2]:
+  1. split 5 high-CC methods  (CC>15)
+  2. break 1 circular dependencies
 
-PIPELINES[29]:
-  [1] Src [is_available]: is_available → _mcp_lib_present
+PIPELINES[37]:
+  [1] Src [stamp]: stamp
       PURITY: 100% pure
-  [2] Src [generate]: generate → _candidate_endpoints
+  [2] Src [main]: main → _setup_logging
       PURITY: 100% pure
-  [3] Src [is_available]: is_available
+  [3] Src [run]: run → load_config
       PURITY: 100% pure
-  [4] Src [generate]: generate → _normalize_model
+  [4] Src [status]: status → load_config
       PURITY: 100% pure
-  [5] Src [_parse_json_loosely]: _parse_json_loosely
+  [5] Src [init]: init
       PURITY: 100% pure
 
 LAYERS:
-  src/                            CC̄=4.3    ←in:0  →out:0
-  │ !! cli                        253L  0C    7m  CC=16     ←0
+  src/                            CC̄=4.7    ←in:0  →out:0
+  │ !! cli                        347L  0C    8m  CC=17     ←0
+  │ !! bulk                       249L  1C    7m  CC=17     ←0
   │ core                       211L  2C    9m  CC=11     ←0
-  │ config                     170L  4C    1m  CC=8      ←2
+  │ config                     170L  4C    1m  CC=8      ←3
   │ algorithmic                155L  1C    5m  CC=10     ←0
   │ git_state                  147L  2C    8m  CC=7      ←2
   │ windsurf_mcp               135L  1C    4m  CC=7      ←0
+  │ changelog                  119L  1C    4m  CC=12     ←2
   │ openrouter                 114L  1C    4m  CC=6      ←1
-  │ todo                       113L  1C    3m  CC=1      ←1
-  │ changelog                  112L  1C    3m  CC=12     ←1
+  │ !! todo                       113L  1C    4m  CC=21     ←2
   │ base                       105L  3C    5m  CC=9      ←2
+  │ readme                      99L  1C    4m  CC=6      ←1
   │ !! triggers                    94L  1C    2m  CC=21     ←1
   │ __init__                    75L  0C    2m  CC=6      ←1
-  │ readme                      71L  0C    2m  CC=6      ←1
+  │ __init__                    59L  0C    1m  CC=6      ←0
   │ base                        44L  2C    2m  CC=2      ←0
   │ state                       42L  1C    3m  CC=3      ←1
-  │ __init__                    20L  0C    0m  CC=0.0    ←0
-  │ __init__                     6L  0C    0m  CC=0.0    ←0
+  │ __init__                    30L  0C    0m  CC=0.0    ←0
+  │
+  project/                        CC̄=0.0    ←in:0  →out:0
+  │ !! calls.yaml                 620L  0C    0m  CC=0.0    ←0
+  │ map.toon.yaml              208L  0C   98m  CC=0.0    ←1
+  │ calls.toon.yaml            142L  0C    0m  CC=0.0    ←0
+  │ analysis.toon.yaml          87L  0C    0m  CC=0.0    ←0
+  │ project.toon.yaml           56L  0C    0m  CC=0.0    ←0
+  │ evolution.toon.yaml         55L  0C    0m  CC=0.0    ←0
+  │ prompt.txt                  47L  0C    0m  CC=0.0    ←0
+  │ duplication.toon.yaml       34L  0C    0m  CC=0.0    ←0
   │
   ./                              CC̄=0.0    ←in:0  →out:0
-  │ !! goal.yaml                  512L  0C    0m  CC=0.0    ←0
+  │ !! planfile.yaml              617L  0C    0m  CC=0.0    ←0
+  │ !! goal.yaml                  513L  0C    0m  CC=0.0    ←0
   │ pyproject.toml              97L  0C    0m  CC=0.0    ←0
+  │ daily_update.sh             93L  0C    0m  CC=0.0    ←0
+  │ prefact.yaml                91L  0C    0m  CC=0.0    ←0
   │ taskill.yaml                57L  0C    0m  CC=0.0    ←0
   │ project.sh                  47L  0C    0m  CC=0.0    ←0
   │ tree.sh                      1L  0C    0m  CC=0.0    ←0
@@ -52,8 +70,15 @@ LAYERS:
   │ github-action.yml           51L  0C    0m  CC=0.0    ←0
   │ gitlab-ci.yml               46L  0C    0m  CC=0.0    ←0
   │
+  testql-scenarios/               CC̄=0.0    ←in:0  →out:0
+  │ generated-cli-tests.testql.toon.yaml    12L  0C    0m  CC=0.0    ←0
+  │
 
-COUPLING: no cross-package imports detected
+COUPLING:
+               project.map  src.taskill
+  project.map           ──           ←1
+  src.taskill            1           ──
+  CYCLES: 1
 
 EXTERNAL:
   validation: run `vallm batch .` → validation.toon

@@ -2,6 +2,8 @@
 examples/.env.example
 vscode-extension/.env.example
 .idea
+.pyqual
+.taskill
 litellm_config.yaml
 litellm-config.yaml
 .code2llm_cache

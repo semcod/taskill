@@ -1,0 +1,80 @@
+.
+├── app.doql.less
+├── CHANGELOG.md
+├── daily_update.sh
+├── examples
+│   ├── ansible-playbook.yml
+│   ├── github-action.yml
+│   ├── gitlab-ci.yml
+│   └── systemd-timer
+│       ├── taskill.service
+│       └── taskill.timer
+├── goal.yaml
+├── LICENSE
+├── PKG-INFO
+├── planfile.yaml
+├── prefact.yaml
+├── project
+│   ├── analysis.toon.yaml
+│   ├── calls.mmd
+│   ├── calls.png
+│   ├── calls.toon.yaml
+│   ├── calls.yaml
+│   ├── compact_flow.mmd
+│   ├── compact_flow.png
+│   ├── context.md
+│   ├── duplication.toon.yaml
+│   ├── evolution.toon.yaml
+│   ├── flow.mmd
+│   ├── flow.png
+│   ├── index.html
+│   ├── map.toon.yaml
+│   ├── mermaid.export
+│   ├── project.toon.yaml
+│   ├── prompt.txt
+│   └── README.md
+├── project.sh
+├── pyproject.toml
+├── README.md
+├── ROADMAP.md
+├── src
+│   └── taskill
+│       ├── bulk.py
+│       ├── cli.py
+│       ├── config.py
+│       ├── core.py
+│       ├── git_state.py
+│       ├── __init__.py
+│       ├── providers
+│       │   ├── algorithmic.py
+│       │   ├── base.py
+│       │   ├── __init__.py
+│       │   ├── openrouter.py
+│       │   └── windsurf_mcp.py
+│       ├── state.py
+│       ├── triggers.py
+│       └── updaters
+│           ├── base.py
+│           ├── changelog.py
+│           ├── __init__.py
+│           ├── readme.py
+│           └── todo.py
+├── SUMD.md
+├── SUMR.md
+├── taskill.yaml
+├── testql-scenarios
+│   └── generated-cli-tests.testql.toon.yaml
+├── tests
+│   ├── __init__.py
+│   ├── test_algorithmic.py
+│   ├── test_bulk.py
+│   ├── test_config.py
+│   ├── test_providers.py
+│   ├── test_triggers.py
+│   └── test_updaters.py
+├── TODO.md
+├── tree.sh
+├── tree.txt
+└── VERSION
+
+10 directories, 68 files

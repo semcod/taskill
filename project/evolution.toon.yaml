@@ -1,11 +1,23 @@
-# code2llm/evolution | 60 func | 15f | 2026-04-25
+# code2llm/evolution | 171 func | 18f | 2026-04-25
 
-NEXT[2] (ranked by impact):
-  [1] !  SPLIT-FUNC      run  CC=16  fan=16
+NEXT[5] (ranked by impact):
+  [1] !  SPLIT-FUNC      TodoUpdater._update_todo  CC=21  fan=20
+      WHY: CC=21 exceeds 15
+      EFFORT: ~1h  IMPACT: 420
+
+  [2] !  SPLIT-FUNC      bulk_run_cmd  CC=17  fan=19
+      WHY: CC=17 exceeds 15
+      EFFORT: ~1h  IMPACT: 323
+
+  [3] !  SPLIT-FUNC      bulk_run  CC=17  fan=19
+      WHY: CC=17 exceeds 15
+      EFFORT: ~1h  IMPACT: 323
+
+  [4] !  SPLIT-FUNC      run  CC=16  fan=16
       WHY: CC=16 exceeds 15
       EFFORT: ~1h  IMPACT: 256
 
-  [2] !  SPLIT-FUNC      evaluate  CC=21  fan=11
+  [5] !  SPLIT-FUNC      evaluate  CC=21  fan=11
       WHY: CC=21 exceeds 15
       EFFORT: ~1h  IMPACT: 231
 
@@ -13,10 +25,10 @@ NEXT[2] (ranked by impact):
 RISKS[0]: none
 
 METRICS-TARGET:
-  CC̄:          4.3 → ≤3.0
+  CC̄:          2.0 → ≤1.4
   max-CC:      21 → ≤10
   god-modules: 0 → 0
-  high-CC(≥15): 2 → ≤1
+  high-CC(≥15): 5 → ≤2
   hub-types:   0 → ≤0
 
 PATTERNS (language parser shared logic):
@@ -44,4 +56,4 @@ PATTERNS (language parser shared logic):
     - Standardized FunctionInfo/ClassInfo models
 
 HISTORY:
-  (first run — no previous data)
+  prev CC̄=2.0 → now CC̄=2.0

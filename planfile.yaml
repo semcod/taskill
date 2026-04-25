@@ -550,3 +550,68 @@ sprints:
     model_hints:
       planning: balanced
       implementation: balanced
+  - id: ticket-b239ce82
+    name: Fix string-concat issues
+    description: Resolve 3 string-concat issues in src/taskill/bulk.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/bulk.py
+    rule_id: string-concat
+    count: 3
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-37e0cb27
+    name: Fix unused-imports issues
+    description: Resolve 2 unused-imports issues in src/taskill/bulk.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/bulk.py
+    rule_id: unused-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-1c7d5f6a
+    name: Fix llm-generated-code issues
+    description: Resolve 3 llm-generated-code issues in src/taskill/bulk.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - src/taskill/bulk.py
+    rule_id: llm-generated-code
+    count: 3
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-a7a0a53e
+    name: Fix smart-return-type issues
+    description: Resolve 16 smart-return-type issues in tests/test_bulk.py
+    task_type: prefactor
+    priority: high
+    estimate: 3d
+    files:
+    - tests/test_bulk.py
+    rule_id: smart-return-type
+    count: 16
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-8dae20d0
+    name: Fix unused-imports issues
+    description: Resolve 6 unused-imports issues in tests/test_bulk.py
+    task_type: prefactor
+    priority: high
+    estimate: 2d
+    files:
+    - tests/test_bulk.py
+    rule_id: unused-imports
+    count: 6
+    model_hints:
+      planning: balanced
+      implementation: balanced
