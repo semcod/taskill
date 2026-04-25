@@ -6,7 +6,7 @@ SUMMARY:
   dup_groups:    1
   dup_fragments: 2
   saved_lines:   29
-  scan_ms:       4828
+  scan_ms:       6585
 
 HOTSPOTS[2] (files with most duplication):
   src/taskill/providers/__init__.py  dup=29L  groups=1  frags=1  (1.3%)

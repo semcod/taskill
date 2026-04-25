@@ -81,6 +81,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README: new "Bulk / fleet-wide runs" and "Extending taskill" sections
 - ROADMAP: marked v0.2.1, v0.2.3, and v0.5 baseline as shipped
 
+## [0.1.5] - 2026-04-25
+
+### Docs
+- Update README.md
+- Update SUMD.md
+- Update SUMR.md
+- Update TODO.md
+
+### Other
+- Update app.doql.less
+- Update project/analysis.toon.yaml
+- Update project/calls.mmd
+- Update project/calls.png
+- Update project/calls.toon.yaml
+- Update project/calls.yaml
+- Update project/duplication.toon.yaml
+- Update project/index.html
+- Update project/project.toon.yaml
+
 ## [0.1.4] - 2026-04-25
 
 ### Docs

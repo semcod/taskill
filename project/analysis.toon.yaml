@@ -1,4 +1,4 @@
-# code2llm | 38f 5318L | python:18,yaml:12,yml:3,txt:2,shell:2,toml:1 | 2026-04-25
+# code2llm | 38f 5304L | python:18,yaml:12,yml:3,txt:2,shell:2,toml:1 | 2026-04-25
 # CC̄=2.0 | critical:5/172 | dups:0 | cycles:1
 
 HEALTH[5]:
@@ -46,10 +46,10 @@ LAYERS:
   │ __init__                    30L  0C    0m  CC=0.0    ←0
   │
   project/                        CC̄=0.0    ←in:0  →out:0
-  │ !! calls.yaml                 622L  0C    0m  CC=0.0    ←0
+  │ !! calls.yaml                 614L  0C    0m  CC=0.0    ←0
   │ map.toon.yaml              209L  0C   99m  CC=0.0    ←0
-  │ calls.toon.yaml            142L  0C    0m  CC=0.0    ←0
-  │ analysis.toon.yaml          85L  0C    0m  CC=0.0    ←0
+  │ calls.toon.yaml            140L  0C    0m  CC=0.0    ←0
+  │ analysis.toon.yaml          81L  0C    0m  CC=0.0    ←0
   │ evolution.toon.yaml         59L  0C    0m  CC=0.0    ←0
   │ project.toon.yaml           56L  0C    0m  CC=0.0    ←0
   │ prompt.txt                  47L  0C    0m  CC=0.0    ←0

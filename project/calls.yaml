@@ -5,13 +5,97 @@ stats:
   total_edges: 35
   modules_count: 13
 nodes:
-  src.taskill.updaters.todo.update_todo:
-    name: update_todo
-    module: src.taskill.updaters.todo
+  src.taskill.git_state.commits_since:
+    name: commits_since
+    module: src.taskill.git_state
+    line: 60
+    cyclomatic_complexity: 7
+    calls_out: 8
+    calls_in: 1
+  src.taskill.updaters.changelog.update_changelog:
+    name: update_changelog
+    module: src.taskill.updaters.changelog
     line: 99
     cyclomatic_complexity: 1
     calls_out: 2
     calls_in: 1
+  src.taskill.providers.openrouter.OpenRouterProvider.generate:
+    name: generate
+    module: src.taskill.providers.openrouter
+    line: 39
+    cyclomatic_complexity: 6
+    calls_out: 27
+    calls_in: 0
+  src.taskill.cli.release:
+    name: release
+    module: src.taskill.cli
+    line: 158
+    cyclomatic_complexity: 2
+    calls_out: 8
+    calls_in: 0
+  src.taskill.git_state.changed_files_since:
+    name: changed_files_since
+    module: src.taskill.git_state
+    line: 83
+    cyclomatic_complexity: 4
+    calls_out: 2
+    calls_in: 1
+  src.taskill.updaters.todo.empty_todo:
+    name: empty_todo
+    module: src.taskill.updaters.todo
+    line: 111
+    cyclomatic_complexity: 1
+    calls_out: 1
+    calls_in: 1
+  src.taskill.cli.status:
+    name: status
+    module: src.taskill.cli
+    line: 101
+    cyclomatic_complexity: 11
+    calls_out: 25
+    calls_in: 0
+  src.taskill.git_state.read_failed_tests:
+    name: read_failed_tests
+    module: src.taskill.git_state
+    line: 111
+    cyclomatic_complexity: 5
+    calls_out: 8
+    calls_in: 1
+  src.taskill.cli._setup_logging:
+    name: _setup_logging
+    module: src.taskill.cli
+    line: 31
+    cyclomatic_complexity: 2
+    calls_out: 1
+    calls_in: 1
+  src.taskill.git_state.read_coverage:
+    name: read_coverage
+    module: src.taskill.git_state
+    line: 90
+    cyclomatic_complexity: 7
+    calls_out: 11
+    calls_in: 1
+  src.taskill.cli.main:
+    name: main
+    module: src.taskill.cli
+    line: 48
+    cyclomatic_complexity: 1
+    calls_out: 6
+    calls_in: 0
+  src.taskill.git_state._run:
+    name: _run
+    module: src.taskill.git_state
+    line: 45
+    cyclomatic_complexity: 2
+    calls_out: 2
+    calls_in: 4
+  src.taskill.core.Taskill._snapshot:
+    name: _snapshot
+    module: src.taskill.core
+    line: 140
+    cyclomatic_complexity: 1
+    calls_out: 1
+    calls_in: 0
   src.taskill.core.Taskill.__init__:
     name: __init__
     module: src.taskill.core
@@ -26,111 +110,6 @@ nodes:
     cyclomatic_complexity: 4
     calls_out: 4
     calls_in: 1
-  src.taskill.updaters.readme.update_readme:
-    name: update_readme
-    module: src.taskill.updaters.readme
-    line: 96
-    cyclomatic_complexity: 1
-    calls_out: 2
-    calls_in: 1
-  src.taskill.providers.windsurf_mcp._candidate_endpoints:
-    name: _candidate_endpoints
-    module: src.taskill.providers.windsurf_mcp
-    line: 42
-    cyclomatic_complexity: 5
-    calls_out: 7
-    calls_in: 2
-  src.taskill.core.Taskill._apply:
-    name: _apply
-    module: src.taskill.core
-    line: 184
-    cyclomatic_complexity: 4
-    calls_out: 12
-    calls_in: 0
-  src.taskill.providers.openrouter.OpenRouterProvider.generate:
-    name: generate
-    module: src.taskill.providers.openrouter
-    line: 39
-    cyclomatic_complexity: 6
-    calls_out: 27
-    calls_in: 0
-  src.taskill.bulk.find_repos:
-    name: find_repos
-    module: src.taskill.bulk
-    line: 78
-    cyclomatic_complexity: 2
-    calls_out: 5
-    calls_in: 1
-  src.taskill.bulk._scan:
-    name: _scan
-    module: src.taskill.bulk
-    line: 100
-    cyclomatic_complexity: 9
-    calls_out: 7
-    calls_in: 2
-  src.taskill.git_state.head_sha:
-    name: head_sha
-    module: src.taskill.git_state
-    line: 55
-    cyclomatic_complexity: 2
-    calls_out: 1
-    calls_in: 1
-  src.taskill.cli.clean_todo:
-    name: clean_todo
-    module: src.taskill.cli
-    line: 264
-    cyclomatic_complexity: 1
-    calls_out: 6
-    calls_in: 0
-  src.taskill.cli.run:
-    name: run
-    module: src.taskill.cli
-    line: 60
-    cyclomatic_complexity: 16
-    calls_out: 32
-    calls_in: 0
-  src.taskill.core.Taskill.run:
-    name: run
-    module: src.taskill.core
-    line: 63
-    cyclomatic_complexity: 11
-    calls_out: 20
-    calls_in: 0
-  src.taskill.providers.windsurf_mcp._mcp_lib_present:
-    name: _mcp_lib_present
-    module: src.taskill.providers.windsurf_mcp
-    line: 34
-    cyclomatic_complexity: 2
-    calls_out: 0
-    calls_in: 2
-  src.taskill.git_state._run:
-    name: _run
-    module: src.taskill.git_state
-    line: 45
-    cyclomatic_complexity: 2
-    calls_out: 2
-    calls_in: 4
-  src.taskill.updaters.readme.ReadmeUpdater._update_readme:
-    name: _update_readme
-    module: src.taskill.updaters.readme
-    line: 70
-    cyclomatic_complexity: 6
-    calls_out: 11
-    calls_in: 0
-  src.taskill.triggers.evaluate:
-    name: evaluate
-    module: src.taskill.triggers
-    line: 25
-    cyclomatic_complexity: 21
-    calls_out: 23
-    calls_in: 2
-  src.taskill.updaters.readme.render_status_block:
-    name: render_status_block
-    module: src.taskill.updaters.readme
-    line: 26
-    cyclomatic_complexity: 6
-    calls_out: 5
-    calls_in: 1
   src.taskill.bulk.bulk_run:
     name: bulk_run
     module: src.taskill.bulk
@@ -138,75 +117,33 @@ nodes:
     cyclomatic_complexity: 17
     calls_out: 26
     calls_in: 1
-  src.taskill.cli.release:
-    name: release
-    module: src.taskill.cli
-    line: 158
-    cyclomatic_complexity: 2
-    calls_out: 8
+  src.taskill.core.Taskill.run:
+    name: run
+    module: src.taskill.core
+    line: 63
+    cyclomatic_complexity: 11
+    calls_out: 20
     calls_in: 0
-  src.taskill.bulk._rebase_config:
-    name: _rebase_config
-    module: src.taskill.bulk
-    line: 162
-    cyclomatic_complexity: 1
-    calls_out: 3
-    calls_in: 1
-  src.taskill.updaters.changelog.update_changelog:
-    name: update_changelog
-    module: src.taskill.updaters.changelog
-    line: 99
+  src.taskill.updaters.readme.update_readme:
+    name: update_readme
+    module: src.taskill.updaters.readme
+    line: 96
     cyclomatic_complexity: 1
     calls_out: 2
     calls_in: 1
-  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate:
-    name: generate
-    module: src.taskill.providers.windsurf_mcp
-    line: 67
-    cyclomatic_complexity: 7
-    calls_out: 32
+  src.taskill.core.Taskill._apply:
+    name: _apply
+    module: src.taskill.core
+    line: 184
+    cyclomatic_complexity: 4
+    calls_out: 12
     calls_in: 0
-  src.taskill.providers.discover_providers:
-    name: discover_providers
-    module: src.taskill.providers
-    line: 33
-    cyclomatic_complexity: 6
-    calls_out: 7
-    calls_in: 1
-  src.taskill.cli.bulk_run_cmd:
-    name: bulk_run_cmd
-    module: src.taskill.cli
-    line: 194
-    cyclomatic_complexity: 17
-    calls_out: 38
-    calls_in: 0
-  src.taskill.cli._setup_logging:
-    name: _setup_logging
-    module: src.taskill.cli
-    line: 31
+  src.taskill.git_state.head_sha:
+    name: head_sha
+    module: src.taskill.git_state
+    line: 55
     cyclomatic_complexity: 2
     calls_out: 1
-    calls_in: 1
-  src.taskill.cli.main:
-    name: main
-    module: src.taskill.cli
-    line: 48
-    cyclomatic_complexity: 1
-    calls_out: 6
-    calls_in: 0
-  src.taskill.providers.openrouter._normalize_model:
-    name: _normalize_model
-    module: src.taskill.providers.openrouter
-    line: 27
-    cyclomatic_complexity: 2
-    calls_out: 2
-    calls_in: 1
-  src.taskill.git_state.read_coverage:
-    name: read_coverage
-    module: src.taskill.git_state
-    line: 90
-    cyclomatic_complexity: 7
-    calls_out: 11
     calls_in: 1
   src.taskill.config.load_config:
     name: load_config
@@ -215,75 +152,12 @@ nodes:
     cyclomatic_complexity: 8
     calls_out: 35
     calls_in: 6
-  src.taskill.git_state.collect_snapshot:
-    name: collect_snapshot
-    module: src.taskill.git_state
-    line: 130
-    cyclomatic_complexity: 3
-    calls_out: 13
-    calls_in: 1
-  src.taskill.providers.build_chain:
-    name: build_chain
-    module: src.taskill.providers
-    line: 64
-    cyclomatic_complexity: 4
-    calls_out: 4
-    calls_in: 1
-  src.taskill.git_state.changed_files_since:
-    name: changed_files_since
-    module: src.taskill.git_state
-    line: 83
-    cyclomatic_complexity: 4
-    calls_out: 2
-    calls_in: 1
-  src.taskill.git_state.commits_since:
-    name: commits_since
-    module: src.taskill.git_state
-    line: 60
-    cyclomatic_complexity: 7
-    calls_out: 8
-    calls_in: 1
-  src.taskill.core.Taskill._snapshot:
-    name: _snapshot
-    module: src.taskill.core
-    line: 140
-    cyclomatic_complexity: 1
-    calls_out: 1
-    calls_in: 0
-  src.taskill.core.Taskill.status:
-    name: status
-    module: src.taskill.core
-    line: 123
-    cyclomatic_complexity: 1
-    calls_out: 3
-    calls_in: 0
-  src.taskill.git_state.read_failed_tests:
-    name: read_failed_tests
-    module: src.taskill.git_state
-    line: 111
-    cyclomatic_complexity: 5
-    calls_out: 8
-    calls_in: 1
-  src.taskill.git_state.file_hash:
-    name: file_hash
-    module: src.taskill.git_state
-    line: 124
+  src.taskill.bulk.find_repos:
+    name: find_repos
+    module: src.taskill.bulk
+    line: 78
     cyclomatic_complexity: 2
-    calls_out: 4
-    calls_in: 1
-  src.taskill.state.load_state:
-    name: load_state
-    module: src.taskill.state
-    line: 29
-    cyclomatic_complexity: 3
-    calls_out: 6
-    calls_in: 1
-  src.taskill.updaters.todo.empty_todo:
-    name: empty_todo
-    module: src.taskill.updaters.todo
-    line: 111
-    cyclomatic_complexity: 1
-    calls_out: 1
+    calls_out: 5
     calls_in: 1
   src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available:
     name: is_available
@@ -292,6 +166,83 @@ nodes:
     cyclomatic_complexity: 2
     calls_out: 3
     calls_in: 0
+  src.taskill.bulk._scan:
+    name: _scan
+    module: src.taskill.bulk
+    line: 100
+    cyclomatic_complexity: 9
+    calls_out: 7
+    calls_in: 2
+  src.taskill.bulk._rebase_config:
+    name: _rebase_config
+    module: src.taskill.bulk
+    line: 162
+    cyclomatic_complexity: 1
+    calls_out: 3
+    calls_in: 1
+  src.taskill.providers.windsurf_mcp._candidate_endpoints:
+    name: _candidate_endpoints
+    module: src.taskill.providers.windsurf_mcp
+    line: 42
+    cyclomatic_complexity: 5
+    calls_out: 7
+    calls_in: 2
+  src.taskill.providers.discover_providers:
+    name: discover_providers
+    module: src.taskill.providers
+    line: 33
+    cyclomatic_complexity: 6
+    calls_out: 7
+    calls_in: 1
+  src.taskill.cli.clean_todo:
+    name: clean_todo
+    module: src.taskill.cli
+    line: 264
+    cyclomatic_complexity: 1
+    calls_out: 6
+    calls_in: 0
+  src.taskill.updaters.readme.ReadmeUpdater._update_readme:
+    name: _update_readme
+    module: src.taskill.updaters.readme
+    line: 70
+    cyclomatic_complexity: 6
+    calls_out: 11
+    calls_in: 0
+  src.taskill.updaters.todo.update_todo:
+    name: update_todo
+    module: src.taskill.updaters.todo
+    line: 99
+    cyclomatic_complexity: 1
+    calls_out: 2
+    calls_in: 1
+  src.taskill.updaters.readme.render_status_block:
+    name: render_status_block
+    module: src.taskill.updaters.readme
+    line: 26
+    cyclomatic_complexity: 6
+    calls_out: 5
+    calls_in: 1
+  src.taskill.cli.run:
+    name: run
+    module: src.taskill.cli
+    line: 60
+    cyclomatic_complexity: 16
+    calls_out: 32
+    calls_in: 0
+  src.taskill.providers.openrouter._normalize_model:
+    name: _normalize_model
+    module: src.taskill.providers.openrouter
+    line: 27
+    cyclomatic_complexity: 2
+    calls_out: 2
+    calls_in: 1
+  src.taskill.git_state.collect_snapshot:
+    name: collect_snapshot
+    module: src.taskill.git_state
+    line: 130
+    cyclomatic_complexity: 3
+    calls_out: 13
+    calls_in: 1
   src.taskill.updaters.changelog.release_unreleased:
     name: release_unreleased
     module: src.taskill.updaters.changelog
@@ -299,12 +250,61 @@ nodes:
     cyclomatic_complexity: 4
     calls_out: 6
     calls_in: 1
-  src.taskill.cli.status:
-    name: status
+  src.taskill.providers.windsurf_mcp._mcp_lib_present:
+    name: _mcp_lib_present
+    module: src.taskill.providers.windsurf_mcp
+    line: 34
+    cyclomatic_complexity: 2
+    calls_out: 0
+    calls_in: 2
+  src.taskill.providers.build_chain:
+    name: build_chain
+    module: src.taskill.providers
+    line: 64
+    cyclomatic_complexity: 4
+    calls_out: 4
+    calls_in: 1
+  src.taskill.triggers.evaluate:
+    name: evaluate
+    module: src.taskill.triggers
+    line: 25
+    cyclomatic_complexity: 21
+    calls_out: 23
+    calls_in: 2
+  src.taskill.git_state.file_hash:
+    name: file_hash
+    module: src.taskill.git_state
+    line: 124
+    cyclomatic_complexity: 2
+    calls_out: 4
+    calls_in: 1
+  src.taskill.cli.bulk_run_cmd:
+    name: bulk_run_cmd
     module: src.taskill.cli
-    line: 101
-    cyclomatic_complexity: 11
-    calls_out: 25
+    line: 194
+    cyclomatic_complexity: 17
+    calls_out: 38
+    calls_in: 0
+  src.taskill.state.load_state:
+    name: load_state
+    module: src.taskill.state
+    line: 29
+    cyclomatic_complexity: 3
+    calls_out: 6
+    calls_in: 1
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate:
+    name: generate
+    module: src.taskill.providers.windsurf_mcp
+    line: 67
+    cyclomatic_complexity: 7
+    calls_out: 32
+    calls_in: 0
+  src.taskill.core.Taskill.status:
+    name: status
+    module: src.taskill.core
+    line: 123
+    cyclomatic_complexity: 1
+    calls_out: 3
     calls_in: 0
 edges:
 - caller: src.taskill.cli.main

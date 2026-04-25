@@ -15,7 +15,7 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project refactorizati
 ## Metadata
 
 - **name**: `taskill`
-- **version**: `0.1.3`
+- **version**: `0.1.4`
 - **python_requires**: `>=3.10`
 - **license**: Apache-2.0
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
@@ -35,7 +35,7 @@ SUMD (description) → DOQL/source (code) → taskfile (automation) → testql (
 
 app {
   name: taskill;
-  version: 0.1.3;
+  version: 0.1.4;
 }
 
 dependencies {
@@ -106,8 +106,8 @@ pfix>=0.1.60
 | `generate` *(in src.taskill.providers.windsurf_mcp.WindsurfMcpProvider)* | 7 | 0 | 32 | **32** |
 | `generate` *(in src.taskill.providers.openrouter.OpenRouterProvider)* | 6 | 0 | 27 | **27** |
 | `bulk_run` *(in src.taskill.bulk)* | 17 ⚠ | 1 | 26 | **27** |
-| `evaluate` *(in src.taskill.triggers)* | 21 ⚠ | 2 | 23 | **25** |
 | `status` *(in src.taskill.cli)* | 11 ⚠ | 0 | 25 | **25** |
+| `evaluate` *(in src.taskill.triggers)* | 21 ⚠ | 2 | 23 | **25** |
 
 ```toon markpact:analysis path=project/calls.toon.yaml
 # code2llm call graph | /home/tom/github/semcod/taskill
@@ -127,34 +127,34 @@ HUBS[20]:
     CC=6  in:0  out:27  total:27
   src.taskill.bulk.bulk_run
     CC=17  in:1  out:26  total:27
-  src.taskill.triggers.evaluate
-    CC=21  in:2  out:23  total:25
   src.taskill.cli.status
     CC=11  in:0  out:25  total:25
+  src.taskill.triggers.evaluate
+    CC=21  in:2  out:23  total:25
   src.taskill.core.Taskill.run
     CC=11  in:0  out:20  total:20
   src.taskill.git_state.collect_snapshot
     CC=3  in:1  out:13  total:14
-  src.taskill.core.Taskill._apply
-    CC=4  in:0  out:12  total:12
   src.taskill.git_state.read_coverage
     CC=7  in:1  out:11  total:12
+  src.taskill.core.Taskill._apply
+    CC=4  in:0  out:12  total:12
   src.taskill.updaters.readme.ReadmeUpdater._update_readme
     CC=6  in:0  out:11  total:11
-  src.taskill.providers.windsurf_mcp._candidate_endpoints
-    CC=5  in:2  out:7  total:9
-  src.taskill.bulk._scan
-    CC=9  in:2  out:7  total:9
   src.taskill.git_state.commits_since
     CC=7  in:1  out:8  total:9
   src.taskill.git_state.read_failed_tests
     CC=5  in:1  out:8  total:9
+  src.taskill.bulk._scan
+    CC=9  in:2  out:7  total:9
+  src.taskill.providers.windsurf_mcp._candidate_endpoints
+    CC=5  in:2  out:7  total:9
   src.taskill.cli.release
     CC=2  in:0  out:8  total:8
   src.taskill.providers.discover_providers
     CC=6  in:1  out:7  total:8
-  src.taskill.state.load_state
-    CC=3  in:1  out:6  total:7
+  src.taskill.updaters.changelog.release_unreleased
+    CC=4  in:1  out:6  total:7
 
 MODULES:
   src.taskill.bulk  [5 funcs]
@@ -284,34 +284,34 @@ HUBS[20]:
     CC=6  in:0  out:27  total:27
   src.taskill.bulk.bulk_run
     CC=17  in:1  out:26  total:27
-  src.taskill.triggers.evaluate
-    CC=21  in:2  out:23  total:25
   src.taskill.cli.status
     CC=11  in:0  out:25  total:25
+  src.taskill.triggers.evaluate
+    CC=21  in:2  out:23  total:25
   src.taskill.core.Taskill.run
     CC=11  in:0  out:20  total:20
   src.taskill.git_state.collect_snapshot
     CC=3  in:1  out:13  total:14
-  src.taskill.core.Taskill._apply
-    CC=4  in:0  out:12  total:12
   src.taskill.git_state.read_coverage
     CC=7  in:1  out:11  total:12
+  src.taskill.core.Taskill._apply
+    CC=4  in:0  out:12  total:12
   src.taskill.updaters.readme.ReadmeUpdater._update_readme
     CC=6  in:0  out:11  total:11
-  src.taskill.providers.windsurf_mcp._candidate_endpoints
-    CC=5  in:2  out:7  total:9
-  src.taskill.bulk._scan
-    CC=9  in:2  out:7  total:9
   src.taskill.git_state.commits_since
     CC=7  in:1  out:8  total:9
   src.taskill.git_state.read_failed_tests
     CC=5  in:1  out:8  total:9
+  src.taskill.bulk._scan
+    CC=9  in:2  out:7  total:9
+  src.taskill.providers.windsurf_mcp._candidate_endpoints
+    CC=5  in:2  out:7  total:9
   src.taskill.cli.release
     CC=2  in:0  out:8  total:8
   src.taskill.providers.discover_providers
     CC=6  in:1  out:7  total:8
-  src.taskill.state.load_state
-    CC=3  in:1  out:6  total:7
+  src.taskill.updaters.changelog.release_unreleased
+    CC=4  in:1  out:6  total:7
 
 MODULES:
   src.taskill.bulk  [5 funcs]
@@ -412,7 +412,7 @@ EDGES:
 ### Code Analysis (`project/analysis.toon.yaml`)
 
 ```toon markpact:analysis path=project/analysis.toon.yaml
-# code2llm | 38f 5318L | python:18,yaml:12,yml:3,txt:2,shell:2,toml:1 | 2026-04-25
+# code2llm | 38f 5304L | python:18,yaml:12,yml:3,txt:2,shell:2,toml:1 | 2026-04-25
 # CC̄=2.0 | critical:5/172 | dups:0 | cycles:1
 
 HEALTH[5]:
@@ -460,10 +460,10 @@ LAYERS:
   │ __init__                    30L  0C    0m  CC=0.0    ←0
   │
   project/                        CC̄=0.0    ←in:0  →out:0
-  │ !! calls.yaml                 622L  0C    0m  CC=0.0    ←0
+  │ !! calls.yaml                 614L  0C    0m  CC=0.0    ←0
   │ map.toon.yaml              209L  0C   99m  CC=0.0    ←0
-  │ calls.toon.yaml            142L  0C    0m  CC=0.0    ←0
-  │ analysis.toon.yaml          85L  0C    0m  CC=0.0    ←0
+  │ calls.toon.yaml            140L  0C    0m  CC=0.0    ←0
+  │ analysis.toon.yaml          81L  0C    0m  CC=0.0    ←0
   │ evolution.toon.yaml         59L  0C    0m  CC=0.0    ←0
   │ project.toon.yaml           56L  0C    0m  CC=0.0    ←0
   │ prompt.txt                  47L  0C    0m  CC=0.0    ←0
@@ -506,7 +506,7 @@ SUMMARY:
   dup_groups:    1
   dup_fragments: 2
   saved_lines:   29
-  scan_ms:       4828
+  scan_ms:       6585
 
 HOTSPOTS[2] (files with most duplication):
   src/taskill/providers/__init__.py  dup=29L  groups=1  frags=1  (1.3%)
