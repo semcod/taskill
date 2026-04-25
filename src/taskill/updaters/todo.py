@@ -103,7 +103,8 @@ class TodoUpdater(DocumentUpdater):
             kept, fresh_new, archived, archive_completed=archive_completed,
         )
 
-        new_content = "\n".join(out_lines).rstrip() + "\n"
+        joined = "\n".join(out_lines).rstrip()
+        new_content = f"{joined}\n"
         if new_content == original:
             return False
 

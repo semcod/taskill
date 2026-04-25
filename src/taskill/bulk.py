@@ -200,7 +200,9 @@ def _apply_filters(
     return repos, skipped
 
 
-def _run_single_repo(repo: Path, shared_cfg: TaskillConfig | None, force: bool, dry_run: bool) -> TaskillResult:
+def _run_single_repo(
+    repo: Path, shared_cfg: TaskillConfig | None, force: bool, dry_run: bool,
+) -> TaskillResult:
     """Run taskill on a single repo."""
     cfg = resolve_repo_config(repo, shared_cfg)
     if dry_run:

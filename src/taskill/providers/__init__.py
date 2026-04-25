@@ -37,7 +37,7 @@ def discover_providers() -> dict[str, type[Provider]]:
     (e.g., during development before install).
     """
     registry: dict[str, type[Provider]] = {}
-    
+
     # Try to load from entry points
     try:
         entry_points = importlib.metadata.entry_points(group="taskill.providers")
@@ -52,12 +52,12 @@ def discover_providers() -> dict[str, type[Provider]]:
     except Exception:
         # Entry points not available (e.g., not installed), fall back to built-ins
         pass
-    
+
     # Always ensure built-ins are available as fallback
     registry.setdefault("windsurf_mcp", WindsurfMcpProvider)
     registry.setdefault("openrouter", OpenRouterProvider)
     registry.setdefault("algorithmic", AlgorithmicProvider)
-    
+
     return registry
 
 

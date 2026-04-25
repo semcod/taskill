@@ -83,7 +83,7 @@ class ReadmeUpdater(DocumentUpdater):
             )
             updated = pattern.sub(block, original)
         else:
-            updated = original.rstrip() + "\n\n" + block + "\n"
+            updated = f"{original.rstrip()}\n\n{block}\n"
 
         if updated == original:
             return False

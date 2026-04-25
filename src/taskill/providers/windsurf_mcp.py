@@ -22,10 +22,10 @@ from pathlib import Path
 from typing import Any
 
 from taskill.providers.base import (
+    SYSTEM_PROMPT,
     GeneratedDocs,
     Provider,
     ProviderError,
-    SYSTEM_PROMPT,
     build_user_prompt,
     parse_json_loosely,
 )
@@ -73,7 +73,7 @@ class WindsurfMcpProvider(Provider):
         # Lazy import — keep MCP truly optional
         try:
             from mcp import ClientSession  # type: ignore
-            from mcp.client.stdio import stdio_client, StdioServerParameters  # type: ignore
+            from mcp.client.stdio import StdioServerParameters, stdio_client  # type: ignore
         except ImportError as e:
             raise ProviderError(f"MCP import failed: {e}") from e
 

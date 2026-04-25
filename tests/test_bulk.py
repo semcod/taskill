@@ -4,8 +4,6 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-import pytest
-
 from taskill.bulk import (
     BulkResult,
     bulk_run,
@@ -195,7 +193,7 @@ def test_bulk_run_repo_filter(tmp_path: Path) -> None:
 
 def test_bulk_run_with_shared_config(tmp_path: Path) -> None:
     """Shared config should be used as base for repos without their own."""
-    repo_a = _make_repo(tmp_path / "a")
+    _repo_a = _make_repo(tmp_path / "a")
     repo_b = _make_repo(tmp_path / "b")
     # b has its own override
     (repo_b / "taskill.yaml").write_text(
@@ -277,3 +275,36 @@ def test_bulk_result_as_dict(tmp_path: Path) -> None:
     assert "total_repos" in d
     assert "per_repo" in d
     assert d["total_repos"] == 1
+
+
+def test_bulk_run_keyboard_interrupt_preserves_partial_results(tmp_path: Path) -> None:
+    """Ctrl-C (KeyboardInterrupt) mid-loop should return partial results."""
+    from unittest.mock import MagicMock, patch
+
+    _make_repo(tmp_path / "repo1")
+    _make_repo(tmp_path / "repo2")
+    _make_repo(tmp_path / "repo3")
+
+    call_count = 0
+
+    def side_effect(*a, **k):
+        nonlocal call_count
+        call_count += 1
+        if call_count >= 2:
+            raise KeyboardInterrupt
+        return MagicMock(
+            ran=True,
+            files_changed=["CHANGELOG.md"],
+            provider_used="mock",
+            docs=None,
+            errors=[],
+        )
+
+    with patch("taskill.bulk.Taskill") as MockTk:
+        MockTk.return_value.run = side_effect
+        result = bulk_run(tmp_path, max_depth=1, force=True, dry_run=True)
+
+    assert result.ran_count == 1
+    assert "repo1" in {p.name for p in result.per_repo}
+    # repo2 and repo3 were not reached because loop broke
+    assert len(result.per_repo) == 1

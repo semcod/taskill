@@ -21,8 +21,11 @@ class Commit:
     @property
     def conventional_type(self) -> str | None:
         """Parse 'feat(scope): xxx' → 'feat'. Returns None if not conventional."""
-        m = re.match(r"^(feat|fix|docs|chore|refactor|test|perf|ci|build|style|revert)(\([^)]+\))?!?:\s",
-                     self.subject)
+        m = re.match(
+            r"^(feat|fix|docs|chore|refactor|test|perf|ci|build|style|revert)"
+            r"(\([^)]+\))?!?:\s",
+            self.subject,
+        )
         return m.group(1) if m else None
 
     @property

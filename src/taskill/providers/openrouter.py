@@ -12,10 +12,10 @@ from typing import Any
 import httpx
 
 from taskill.providers.base import (
+    SYSTEM_PROMPT,
     GeneratedDocs,
     Provider,
     ProviderError,
-    SYSTEM_PROMPT,
     build_user_prompt,
     parse_json_loosely,
 )
@@ -41,9 +41,11 @@ class OpenRouterProvider(Provider):
         if not api_key:
             raise ProviderError("OPENROUTER_API_KEY not set")
 
+        _DEFAULT_TIMEOUT = 120
+        _MAX_ERROR_TEXT = 300
         model = _normalize_model(os.getenv("LLM_MODEL", "qwen/qwen3-coder-next"))
         base_url = self.options.get("base_url", "https://openrouter.ai/api/v1")
-        timeout = self.options.get("timeout", 120)
+        timeout = self.options.get("timeout", _DEFAULT_TIMEOUT)
 
         payload = {
             "model": model,
@@ -73,7 +75,7 @@ class OpenRouterProvider(Provider):
 
         if resp.status_code != 200:
             raise ProviderError(
-                f"OpenRouter returned {resp.status_code}: {resp.text[:300]}"
+                f"OpenRouter returned {resp.status_code}: {resp.text[:_MAX_ERROR_TEXT]}"
             )
 
         try:

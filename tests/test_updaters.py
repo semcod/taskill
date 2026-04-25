@@ -3,13 +3,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from taskill.git_state import ProjectSnapshot
-from taskill.updaters.changelog import update_changelog, release_unreleased
-from taskill.updaters.readme import update_readme, START, END
-from taskill.updaters.todo import update_todo, empty_todo
-
+from taskill.updaters.changelog import release_unreleased, update_changelog
+from taskill.updaters.readme import END, START, update_readme
+from taskill.updaters.todo import empty_todo, update_todo
 
 # ─── changelog ───────────────────────────────────────────────────────────
 

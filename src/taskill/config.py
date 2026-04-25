@@ -12,7 +12,6 @@ from typing import Any
 import yaml
 from dotenv import load_dotenv
 
-
 # ───────────────────────────── data classes ─────────────────────────────
 
 @dataclass
@@ -94,7 +93,7 @@ DEFAULT_PROVIDERS = [
         "base_url": "https://openrouter.ai/api/v1",
         "temperature": 0.2,
         "max_tokens": 4096,
-        "timeout": 120,
+        "timeout": 120,  # seconds
     }),
     ProviderConfig(name="algorithmic", enabled=True, options={}),
 ]

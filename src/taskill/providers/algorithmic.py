@@ -16,7 +16,6 @@ from typing import Any
 
 from taskill.providers.base import GeneratedDocs, Provider
 
-
 CATEGORY_HEADINGS = {
     "feat":     "### Added",
     "fix":      "### Fixed",
@@ -148,7 +147,8 @@ class AlgorithmicProvider(Provider):
         seen: set[str] = set()
         for c in commits:
             for m in pat.finditer(c.body or ""):
-                text = m.group(2).strip().rstrip(".")[:160]
+                _MAX_TODO_TEXT_LEN = 160
+                text = m.group(2).strip().rstrip(".")[:_MAX_TODO_TEXT_LEN]
                 if text and text.lower() not in seen:
                     seen.add(text.lower())
                     new.append(f"- [ ] {text}")

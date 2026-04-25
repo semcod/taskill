@@ -5,6 +5,7 @@ Updaters are discovered via entry points under "taskill.updaters".
 from __future__ import annotations
 
 import importlib.metadata
+
 from taskill.updaters.base import DocumentUpdater, UpdateResult
 from taskill.updaters.changelog import ChangelogUpdater, update_changelog
 from taskill.updaters.readme import ReadmeUpdater, update_readme

@@ -51,7 +51,7 @@ class ChangelogUpdater(DocumentUpdater):
         if path.exists():
             original = path.read_text(encoding="utf-8")
         else:
-            original = DEFAULT_HEADER + UNRELEASED_HEADING + "\n\n"
+            original = f"{DEFAULT_HEADER}{UNRELEASED_HEADING}\n\n"
 
         # ensure [Unreleased] section exists
         if UNRELEASED_HEADING not in original:
@@ -60,7 +60,7 @@ class ChangelogUpdater(DocumentUpdater):
                 head, _, tail = original.partition("\n\n")
                 original = f"{head}\n\n{UNRELEASED_HEADING}\n\n{tail}"
             else:
-                original = UNRELEASED_HEADING + "\n\n" + original
+                original = f"{UNRELEASED_HEADING}\n\n{original}"
 
         # find the [Unreleased] block (until next "## [" or EOF)
         pattern = re.compile(
@@ -88,8 +88,9 @@ class ChangelogUpdater(DocumentUpdater):
 
         # rebuild block: keep original body, append new bullets at the end of the
         # appropriate subsection if a heading-of-headings exists; otherwise dump at end
-        new_block = block_body.rstrip() + "\n\n" + "\n".join(new_lines) + "\n\n"
-        updated = original[:m.start(2)] + new_block + original[m.end(2):]
+        joined_new = "\n".join(new_lines)
+        new_block = f"{block_body.rstrip()}\n\n{joined_new}\n\n"
+        updated = f"{original[:m.start(2)]}{new_block}{original[m.end(2):]}"
 
         path.write_text(updated, encoding="utf-8")
         return True

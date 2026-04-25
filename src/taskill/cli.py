@@ -68,7 +68,8 @@ def _print_run_result(result) -> None:
         console.print(f"  [dim]{result.docs.summary}[/dim]")
 
     table = Table(show_header=False, box=None, padding=(0, 1))
-    table.add_row("Changelog entries", str(len(result.docs.changelog_entries) if result.docs else 0))
+    n_changelog = len(result.docs.changelog_entries) if result.docs else 0
+    table.add_row("Changelog entries", str(n_changelog))
     table.add_row("TODO completed", str(len(result.docs.todo_completed) if result.docs else 0))
     table.add_row("TODO new", str(len(result.docs.todo_new) if result.docs else 0))
     table.add_row("Files changed", ", ".join(result.files_changed) or "(none)")
@@ -115,10 +116,12 @@ def status(ctx: click.Context, as_json: bool) -> None:
         return
 
     table = Table(title="taskill status", show_header=True, header_style="bold cyan")
-    table.add_column("Field"); table.add_column("Value")
+    table.add_column("Field")
+    table.add_column("Value")
     color = "green" if info["would_run"] else "yellow"
     table.add_row("Would run?", f"[{color}]{info['would_run']}[/{color}]")
-    table.add_row("HEAD", str(info["head"] or "—")[:12])
+    _SHA_DISPLAY_LEN = 12
+    table.add_row("HEAD", str(info["head"] or "—")[:_SHA_DISPLAY_LEN])
     table.add_row("Pending commits", str(info["commits_pending"]))
     table.add_row("Coverage", f"{info['coverage']:.1f}%" if info["coverage"] else "—")
     failed = info["failed_tests"]

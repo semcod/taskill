@@ -18,7 +18,7 @@ from typing import Any
 
 from taskill.config import TaskillConfig, load_config
 from taskill.git_state import ProjectSnapshot, collect_snapshot
-from taskill.providers import build_chain, GeneratedDocs, ProviderError
+from taskill.providers import GeneratedDocs, ProviderError, build_chain
 from taskill.state import load_state, save_state
 from taskill.triggers import TriggerEvaluation, evaluate
 from taskill.updaters import update_changelog, update_readme, update_todo
@@ -169,10 +169,11 @@ class Taskill:
     def _maybe_pyqual_report(self) -> dict[str, Any] | None:
         """Run `pyqual report --json` if pyqual is on PATH. Tolerate failure."""
         try:
+            _PYQUAL_TIMEOUT = 30
             res = subprocess.run(
                 ["pyqual", "report", "--json"],
                 cwd=self.config.project_root,
-                capture_output=True, text=True, timeout=30, check=False,
+                capture_output=True, text=True, timeout=_PYQUAL_TIMEOUT, check=False,
             )
             if res.returncode == 0 and res.stdout.strip():
                 return json.loads(res.stdout)
