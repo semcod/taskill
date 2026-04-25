@@ -18,7 +18,7 @@ class TriggerEvaluation:
 
     def summary(self) -> str:
         if self.should_run:
-            return "RUN: " + "; ".join(self.reasons)
+            return f"RUN: {'; '.join(self.reasons)}"
         return "SKIP: thresholds not met"
 
 

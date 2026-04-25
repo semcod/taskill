@@ -77,6 +77,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README: new "Bulk / fleet-wide runs" and "Extending taskill" sections
 - ROADMAP: marked v0.2.1, v0.2.3, and v0.5 baseline as shipped
 
+## [0.1.9] - 2026-04-25
+
+### Docs
+- Update README.md
+
+### Test
+- Update tests/test_algorithmic.py
+- Update tests/test_bulk.py
+- Update tests/test_config.py
+- Update tests/test_providers.py
+- Update tests/test_triggers.py
+- Update tests/test_updaters.py
+
 ## [0.1.8] - 2026-04-25
 
 ### Docs

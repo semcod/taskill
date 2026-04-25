@@ -26,7 +26,7 @@ def _commit(subject: str = "feat: x") -> Commit:
                   subject=subject)
 
 
-def test_first_run_always_triggers(tmp_path: Path):
+def test_first_run_always_triggers(tmp_path: Path) -> None:
     triggers = Triggers()
     state = TaskillState()    # never run
     snap = _snap()
@@ -35,7 +35,7 @@ def test_first_run_always_triggers(tmp_path: Path):
     assert "never run before" in result.reasons
 
 
-def test_recent_run_skips_when_no_commits(tmp_path: Path):
+def test_recent_run_skips_when_no_commits(tmp_path: Path) -> None:
     triggers = Triggers(min_hours_since_last_run=24, min_commits_since_last_run=1,
                         changed_files_threshold=1)
     state = TaskillState(last_run_iso=datetime.now(timezone.utc).isoformat())
@@ -44,7 +44,7 @@ def test_recent_run_skips_when_no_commits(tmp_path: Path):
     assert not result.should_run
 
 
-def test_commits_above_threshold_triggers(tmp_path: Path):
+def test_commits_above_threshold_triggers(tmp_path: Path) -> None:
     triggers = Triggers(min_hours_since_last_run=24, min_commits_since_last_run=2,
                         changed_files_threshold=1)
     state = TaskillState(last_run_iso=datetime.now(timezone.utc).isoformat())
@@ -54,7 +54,7 @@ def test_commits_above_threshold_triggers(tmp_path: Path):
     assert any("3 new commit" in r for r in result.reasons)
 
 
-def test_coverage_delta_triggers(tmp_path: Path):
+def test_coverage_delta_triggers(tmp_path: Path) -> None:
     triggers = Triggers(min_hours_since_last_run=999, min_commits_since_last_run=999,
                         changed_files_threshold=999, coverage_change_pct=2.0)
     state = TaskillState(
@@ -66,7 +66,7 @@ def test_coverage_delta_triggers(tmp_path: Path):
     assert result.should_run
 
 
-def test_coverage_within_threshold_does_not_trigger(tmp_path: Path):
+def test_coverage_within_threshold_does_not_trigger(tmp_path: Path) -> None:
     triggers = Triggers(min_hours_since_last_run=999, min_commits_since_last_run=999,
                         changed_files_threshold=999, coverage_change_pct=5.0)
     state = TaskillState(
@@ -78,7 +78,7 @@ def test_coverage_within_threshold_does_not_trigger(tmp_path: Path):
     assert not result.should_run
 
 
-def test_sumd_change_triggers(tmp_path: Path):
+def test_sumd_change_triggers(tmp_path: Path) -> None:
     triggers = Triggers(min_hours_since_last_run=999, min_commits_since_last_run=999,
                         changed_files_threshold=999)
     state = TaskillState(
@@ -91,7 +91,7 @@ def test_sumd_change_triggers(tmp_path: Path):
     assert any("SUMD" in r for r in result.reasons)
 
 
-def test_require_all_with_partial_match_does_not_trigger(tmp_path: Path):
+def test_require_all_with_partial_match_does_not_trigger(tmp_path: Path) -> None:
     triggers = Triggers(
         min_hours_since_last_run=24, min_commits_since_last_run=10,
         changed_files_threshold=1, require_all=True,
@@ -105,7 +105,7 @@ def test_require_all_with_partial_match_does_not_trigger(tmp_path: Path):
     assert not result.should_run
 
 
-def test_watched_file_mtime_triggers(tmp_path: Path):
+def test_watched_file_mtime_triggers(tmp_path: Path) -> None:
     sumd = tmp_path / "SUMD.md"
     sumd.write_text("hi", encoding="utf-8")
     triggers = Triggers(min_hours_since_last_run=999, min_commits_since_last_run=999,

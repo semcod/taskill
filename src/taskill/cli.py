@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import logging
+import signal
 import sys
 from pathlib import Path
 
@@ -255,6 +256,9 @@ def bulk_run_cmd(
     Useful for fleet-wide hygiene: keep README/CHANGELOG/TODO in sync
     across many self-hosted projects with a single shared config.
     """
+    def _on_term(_s, _f):
+        raise KeyboardInterrupt
+    signal.signal(signal.SIGTERM, _on_term)
     result = bulk_run(
         root=Path(root),
         shared_config=Path(shared_config) if shared_config else None,

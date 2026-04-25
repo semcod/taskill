@@ -17,7 +17,7 @@ def _snap(commits: list[Commit]) -> ProjectSnapshot:
     return ProjectSnapshot(head_sha="abc123", commits_since_last_run=commits)
 
 
-def test_groups_commits_by_conventional_type():
+def test_groups_commits_by_conventional_type() -> None:
     p = AlgorithmicProvider()
     snap = _snap([
         _commit("feat: add OAuth"),
@@ -35,7 +35,7 @@ def test_groups_commits_by_conventional_type():
     assert "nullptr in parser" in joined
 
 
-def test_breaking_change_surfaces_first():
+def test_breaking_change_surfaces_first() -> None:
     p = AlgorithmicProvider()
     snap = _snap([
         _commit("feat!: removed legacy /v1 endpoint"),
@@ -45,7 +45,7 @@ def test_breaking_change_surfaces_first():
     assert out.changelog_entries[0].startswith("### ⚠ BREAKING")
 
 
-def test_detects_explicit_checkbox_completion():
+def test_detects_explicit_checkbox_completion() -> None:
     todo = """# TODO
 
 - [ ] not done yet
@@ -59,7 +59,7 @@ def test_detects_explicit_checkbox_completion():
     assert not any("not done yet" in line for line in out.todo_completed)
 
 
-def test_detects_completion_via_token_overlap():
+def test_detects_completion_via_token_overlap() -> None:
     todo = "- implement OAuth login flow with refresh tokens\n- something unrelated"
     p = AlgorithmicProvider()
     snap = _snap([_commit("feat: implement OAuth refresh token rotation")])
@@ -67,7 +67,7 @@ def test_detects_completion_via_token_overlap():
     assert any("OAuth" in line for line in out.todo_completed)
 
 
-def test_extracts_new_todos_from_commit_bodies():
+def test_extracts_new_todos_from_commit_bodies() -> None:
     p = AlgorithmicProvider()
     snap = _snap([
         _commit("fix: parser bug",
@@ -80,7 +80,7 @@ def test_extracts_new_todos_from_commit_bodies():
     assert "invalidation" in text
 
 
-def test_empty_input_is_safe():
+def test_empty_input_is_safe() -> None:
     p = AlgorithmicProvider()
     out = p.generate({"snapshot": _snap([]), "existing_todo": ""})
     assert out.changelog_entries == []
@@ -89,5 +89,5 @@ def test_empty_input_is_safe():
     assert "No new commits" in out.summary
 
 
-def test_always_available():
+def test_always_available() -> None:
     assert AlgorithmicProvider().is_available() is True

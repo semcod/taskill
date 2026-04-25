@@ -42,10 +42,13 @@ class ProjectSnapshot:
     sumr_text: str | None = None
 
 
+SUBPROCESS_TIMEOUT = 30
+
+
 def _run(cmd: list[str], cwd: Path) -> str:
     try:
         out = subprocess.run(
-            cmd, cwd=cwd, capture_output=True, text=True, check=False, timeout=30
+            cmd, cwd=cwd, capture_output=True, text=True, check=False, timeout=SUBPROCESS_TIMEOUT
         )
         return out.stdout.strip()
     except (subprocess.TimeoutExpired, FileNotFoundError):

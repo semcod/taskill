@@ -257,5 +257,8 @@ def bulk_run(
         except Exception as e:
             log.exception("Error running taskill in %s", repo)
             result.errors.append((repo, str(e)))
+        except KeyboardInterrupt:
+            log.warning("Interrupted at %s — returning partial results", repo.name)
+            break
 
     return result

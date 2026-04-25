@@ -77,12 +77,17 @@ Rules:
 """
 
 
+MAX_COMMITS_IN_PROMPT = 50
+MAX_TODO_CHARS = 4000
+MAX_SUMD_CHARS = 3000
+
+
 def build_user_prompt(context: dict[str, Any]) -> str:
     snap = context["snapshot"]
     commits = "\n".join(
-        f"  {c.short_sha} {c.subject}" for c in snap.commits_since_last_run[:50]
+        f"  {c.short_sha} {c.subject}" for c in snap.commits_since_last_run[:MAX_COMMITS_IN_PROMPT]
     ) or "  (no new commits)"
-    changed = "\n".join(f"  {f}" for f in snap.changed_files[:50]) or "  (none)"
+    changed = "\n".join(f"  {f}" for f in snap.changed_files[:MAX_COMMITS_IN_PROMPT]) or "  (none)"
     todo = context.get("existing_todo") or "(empty)"
     sumd = context.get("sumd") or "(no SUMD.md)"
     coverage = f"{snap.coverage_pct:.1f}%" if snap.coverage_pct else "n/a"
@@ -99,10 +104,10 @@ def build_user_prompt(context: dict[str, Any]) -> str:
 # Coverage: {coverage}    Failed tests: {failed}
 
 # Current TODO.md (truncated)
-{todo[:4000]}
+{todo[:MAX_TODO_CHARS]}
 
 # SUMD.md (project structure summary, truncated)
-{sumd[:3000]}
+{sumd[:MAX_SUMD_CHARS]}
 
 Now produce the JSON described in the system prompt."""
 
