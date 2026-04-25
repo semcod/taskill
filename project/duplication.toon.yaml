@@ -1,12 +1,12 @@
-# redup/duplication | 1 groups | 18f 2360L | 2026-04-25
+# redup/duplication | 1 groups | 18f 2388L | 2026-04-25
 
 SUMMARY:
   files_scanned: 18
-  total_lines:   2360
+  total_lines:   2388
   dup_groups:    1
   dup_fragments: 2
   saved_lines:   29
-  scan_ms:       7059
+  scan_ms:       4226
 
 HOTSPOTS[2] (files with most duplication):
   src/taskill/providers/__init__.py  dup=29L  groups=1  frags=1  (1.2%)
@@ -15,7 +15,7 @@ HOTSPOTS[2] (files with most duplication):
 DUPLICATES[1] (ranked by impact):
   [e7fb8feab50f19ae]   STRU  discover_providers  L=29 N=2 saved=29 sim=1.00
       src/taskill/providers/__init__.py:33-61  (discover_providers)
-      src/taskill/updaters/__init__.py:31-59  (discover_updaters)
+      src/taskill/updaters/__init__.py:26-54  (discover_updaters)
 
 REFACTOR[1] (ranked by priority):
   [1] ○ extract_function   → src/taskill/utils/discover_providers.py

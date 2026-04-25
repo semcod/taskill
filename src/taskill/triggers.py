@@ -22,7 +22,9 @@ class TriggerEvaluation:
         return "SKIP: thresholds not met"
 
 
-def _check_time(state: TaskillState, triggers: Triggers, reasons: list[str], skipped: list[str]) -> None:
+def _check_time(
+    state: TaskillState, triggers: Triggers, reasons: list[str], skipped: list[str],
+) -> None:
     if state.last_run_dt is None:
         reasons.append("never run before")
         return
@@ -33,7 +35,9 @@ def _check_time(state: TaskillState, triggers: Triggers, reasons: list[str], ski
         skipped.append(f"only {delta_h:.1f}h since last run")
 
 
-def _check_commits(snapshot: ProjectSnapshot, triggers: Triggers, reasons: list[str], skipped: list[str]) -> None:
+def _check_commits(
+    snapshot: ProjectSnapshot, triggers: Triggers, reasons: list[str], skipped: list[str],
+) -> None:
     n_commits = len(snapshot.commits_since_last_run)
     if n_commits >= triggers.min_commits_since_last_run:
         reasons.append(f"{n_commits} new commit(s)")
@@ -41,7 +45,9 @@ def _check_commits(snapshot: ProjectSnapshot, triggers: Triggers, reasons: list[
         skipped.append(f"only {n_commits} commits (<{triggers.min_commits_since_last_run})")
 
 
-def _check_changed_files(snapshot: ProjectSnapshot, triggers: Triggers, reasons: list[str], skipped: list[str]) -> None:
+def _check_changed_files(
+    snapshot: ProjectSnapshot, triggers: Triggers, reasons: list[str], skipped: list[str],
+) -> None:
     n_changed = len(snapshot.changed_files)
     if n_changed >= triggers.changed_files_threshold:
         reasons.append(f"{n_changed} changed file(s)")
@@ -49,8 +55,18 @@ def _check_changed_files(snapshot: ProjectSnapshot, triggers: Triggers, reasons:
         skipped.append(f"only {n_changed} files changed")
 
 
-def _check_coverage(snapshot: ProjectSnapshot, state: TaskillState, triggers: Triggers, reasons: list[str], skipped: list[str]) -> None:
-    if triggers.coverage_change_pct is None or snapshot.coverage_pct is None or state.last_coverage_pct is None:
+def _check_coverage(
+    snapshot: ProjectSnapshot,
+    state: TaskillState,
+    triggers: Triggers,
+    reasons: list[str],
+    skipped: list[str],
+) -> None:
+    if (
+        triggers.coverage_change_pct is None
+        or snapshot.coverage_pct is None
+        or state.last_coverage_pct is None
+    ):
         return
     delta = abs(snapshot.coverage_pct - state.last_coverage_pct)
     if delta >= triggers.coverage_change_pct:
@@ -59,7 +75,12 @@ def _check_coverage(snapshot: ProjectSnapshot, state: TaskillState, triggers: Tr
         skipped.append(f"coverage Δ {delta:.1f}pp")
 
 
-def _check_failed_tests(snapshot: ProjectSnapshot, state: TaskillState, triggers: Triggers, reasons: list[str]) -> None:
+def _check_failed_tests(
+    snapshot: ProjectSnapshot,
+    state: TaskillState,
+    triggers: Triggers,
+    reasons: list[str],
+) -> None:
     if not triggers.failed_tests_changed:
         return
     if snapshot.failed_tests is None or state.last_failed_tests is None:
@@ -68,12 +89,16 @@ def _check_failed_tests(snapshot: ProjectSnapshot, state: TaskillState, triggers
         reasons.append(f"failed tests {state.last_failed_tests} → {snapshot.failed_tests}")
 
 
-def _check_sumd(snapshot: ProjectSnapshot, state: TaskillState, reasons: list[str]) -> None:
+def _check_sumd(
+    snapshot: ProjectSnapshot, state: TaskillState, reasons: list[str],
+) -> None:
     if snapshot.sumd_hash and snapshot.sumd_hash != state.last_sumd_hash:
         reasons.append("SUMD.md changed")
 
 
-def _check_watched_files(triggers: Triggers, state: TaskillState, project_root: Path, reasons: list[str]) -> None:
+def _check_watched_files(
+    triggers: Triggers, state: TaskillState, project_root: Path, reasons: list[str],
+) -> None:
     for rel in triggers.watch_files:
         p = project_root / rel
         if not p.exists():

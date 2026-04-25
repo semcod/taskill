@@ -37,7 +37,8 @@ class DocumentUpdater(ABC):
         Args:
             path: Path to the document file
             snapshot: Project snapshot with git state
-            docs: Dictionary containing generated docs (readme, changelog_entries, todo_completed, todo_new, summary)
+            docs: Dictionary containing generated docs (readme, changelog_entries,
+                todo_completed, todo_new, summary)
 
         Returns:
             UpdateResult indicating if the file was changed

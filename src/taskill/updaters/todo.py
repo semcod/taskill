@@ -48,7 +48,7 @@ class TodoUpdater(DocumentUpdater):
 
     @staticmethod
     def _dedup_new_items(kept: list[str], new_items: list[str]) -> list[str]:
-        existing = {l.strip() for l in kept if l.strip()}
+        existing = {line.strip() for line in kept if line.strip()}
         return [item for item in new_items if item.strip() not in existing]
 
     @staticmethod
@@ -63,7 +63,7 @@ class TodoUpdater(DocumentUpdater):
         if fresh_new:
             if out_lines and out_lines[-1].strip():
                 out_lines.append("")
-            if not any(l.startswith("# ") for l in out_lines):
+            if not any(line.startswith("# ") for line in out_lines):
                 out_lines = ["# TODO", ""] + out_lines
             out_lines.append("## Discovered")
             out_lines.append("")
@@ -95,11 +95,13 @@ class TodoUpdater(DocumentUpdater):
             original = DEFAULT_HEADER
 
         lines = original.splitlines(keepends=False)
-        completed_set = {l.rstrip() for l in completed_lines if l.strip()}
+        completed_set = {line.rstrip() for line in completed_lines if line.strip()}
 
         kept, archived = self._partition_lines(lines, completed_set)
         fresh_new = self._dedup_new_items(kept, new_items)
-        out_lines = self._assemble_output(kept, fresh_new, archived, archive_completed=archive_completed)
+        out_lines = self._assemble_output(
+            kept, fresh_new, archived, archive_completed=archive_completed,
+        )
 
         new_content = "\n".join(out_lines).rstrip() + "\n"
         if new_content == original:
@@ -119,7 +121,9 @@ def update_todo(
 ) -> bool:
     """Remove completed_lines from TODO and append new_items. Returns True on change."""
     updater = TodoUpdater()
-    return updater._update_todo(path, completed_lines, new_items, archive_completed=archive_completed)
+    return updater._update_todo(
+        path, completed_lines, new_items, archive_completed=archive_completed,
+    )
 
 
 def empty_todo(path: Path, header: str = DEFAULT_HEADER) -> None:

@@ -20,7 +20,7 @@ Daily project hygiene: keep README / CHANGELOG / TODO in sync with reality. LLM-
 ## Metadata
 
 - **name**: `taskill`
-- **version**: `0.1.5`
+- **version**: `0.1.6`
 - **python_requires**: `>=3.10`
 - **license**: Apache-2.0
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
@@ -40,7 +40,7 @@ SUMD (description) → DOQL/source (code) → taskfile (automation) → testql (
 
 app {
   name: taskill;
-  version: 0.1.5;
+  version: 0.1.6;
 }
 
 dependencies {
@@ -100,7 +100,7 @@ LOG[3]{message}:
 ```yaml
 project:
   name: taskill
-  version: 0.1.5
+  version: 0.1.6
   env: local
 ```
 
@@ -166,7 +166,7 @@ pip install -e .[dev]
 ### `project/map.toon.yaml`
 
 ```toon markpact:analysis path=project/map.toon.yaml
-# taskill | 29f 3338L | python:25,shell:3,less:1 | 2026-04-25
+# taskill | 29f 3366L | python:25,shell:3,less:1 | 2026-04-25
 # stats: 115 func | 22 cls | 29 mod | CC̄=3.6 | critical:4 | cycles:0
 # alerts[5]: CC _print_bulk_table=13; CC _apply_filters=12; CC _print_run_result=12; CC status=11; CC _scan=9
 # hotspots[5]: bulk_run fan=13; status fan=12; load_config fan=12; run fan=10; bulk_run_cmd fan=10
@@ -178,22 +178,22 @@ M[29]:
   project.sh,47
   src/taskill/__init__.py,31
   src/taskill/bulk.py,262
-  src/taskill/cli.py,357
+  src/taskill/cli.py,362
   src/taskill/config.py,171
-  src/taskill/core.py,212
+  src/taskill/core.py,211
   src/taskill/git_state.py,148
   src/taskill/providers/__init__.py,76
   src/taskill/providers/algorithmic.py,156
   src/taskill/providers/base.py,127
-  src/taskill/providers/openrouter.py,96
-  src/taskill/providers/windsurf_mcp.py,135
+  src/taskill/providers/openrouter.py,97
+  src/taskill/providers/windsurf_mcp.py,134
   src/taskill/state.py,43
-  src/taskill/triggers.py,111
-  src/taskill/updaters/__init__.py,60
-  src/taskill/updaters/base.py,45
+  src/taskill/triggers.py,136
+  src/taskill/updaters/__init__.py,55
+  src/taskill/updaters/base.py,46
   src/taskill/updaters/changelog.py,120
-  src/taskill/updaters/readme.py,100
-  src/taskill/updaters/todo.py,128
+  src/taskill/updaters/readme.py,99
+  src/taskill/updaters/todo.py,132
   tests/__init__.py,1
   tests/test_algorithmic.py,94
   tests/test_bulk.py,280
@@ -392,7 +392,7 @@ D:
 
 ## Call Graph
 
-*57 nodes · 50 edges · 14 modules · CC̄=1.9*
+*56 nodes · 50 edges · 14 modules · CC̄=1.8*
 
 ### Hubs (by degree)
 
@@ -405,12 +405,12 @@ D:
 | `_print_run_result` *(in src.taskill.cli)* | 12 ⚠ | 1 | 20 | **21** |
 | `run` *(in src.taskill.core.Taskill)* | 11 ⚠ | 0 | 20 | **20** |
 | `bulk_run_cmd` *(in src.taskill.cli)* | 5 | 0 | 20 | **20** |
-| `collect_snapshot` *(in src.taskill.git_state)* | 3 | 1 | 13 | **14** |
+| `bulk_run` *(in src.taskill.bulk)* | 3 | 1 | 14 | **15** |
 
 ```toon markpact:analysis path=project/calls.toon.yaml
 # code2llm call graph | /home/tom/github/semcod/taskill
-# nodes: 57 | edges: 50 | modules: 14
-# CC̄=1.9
+# nodes: 56 | edges: 50 | modules: 14
+# CC̄=1.8
 
 HUBS[20]:
   src.taskill.config.load_config
@@ -427,41 +427,42 @@ HUBS[20]:
     CC=11  in:0  out:20  total:20
   src.taskill.cli.bulk_run_cmd
     CC=5  in:0  out:20  total:20
+  src.taskill.bulk.bulk_run
+    CC=3  in:1  out:14  total:15
   src.taskill.git_state.collect_snapshot
     CC=3  in:1  out:13  total:14
-  src.taskill.bulk.bulk_run
-    CC=3  in:0  out:14  total:14
   src.taskill.cli.run
     CC=6  in:0  out:13  total:13
-  src.taskill.core.Taskill._apply
-    CC=4  in:0  out:12  total:12
   src.taskill.git_state.read_coverage
     CC=7  in:1  out:11  total:12
+  src.taskill.core.Taskill._apply
+    CC=4  in:0  out:12  total:12
   src.taskill.updaters.readme.ReadmeUpdater._update_readme
-    CC=6  in:0  out:11  total:11
+    CC=5  in:0  out:10  total:10
   src.taskill.triggers.evaluate
     CC=3  in:0  out:10  total:10
-  src.taskill.git_state.read_failed_tests
-    CC=5  in:1  out:8  total:9
-  src.taskill.bulk._scan
-    CC=9  in:2  out:7  total:9
-  src.taskill.git_state.commits_since
-    CC=7  in:1  out:8  total:9
   src.taskill.bulk._apply_filters
     CC=12  in:1  out:8  total:9
+  src.taskill.bulk._scan
+    CC=9  in:2  out:7  total:9
+  src.taskill.git_state.read_failed_tests
+    CC=5  in:1  out:8  total:9
+  src.taskill.git_state.commits_since
+    CC=7  in:1  out:8  total:9
   src.taskill.cli.release
     CC=2  in:0  out:8  total:8
-  src.taskill.providers.base.parse_json_loosely
-    CC=4  in:2  out:6  total:8
+  src.taskill.providers.discover_providers
+    CC=6  in:1  out:7  total:8
 
 MODULES:
-  project.map.toon  [7 funcs]
+  project.map.toon  [8 funcs]
     _candidate_endpoints  CC=0  out:0
     _mcp_lib_present  CC=0  out:0
     _normalize_model  CC=0  out:0
-    bulk_run  CC=0  out:0
     empty_todo  CC=0  out:0
     evaluate  CC=0  out:0
+    render_status_block  CC=0  out:0
+    update_readme  CC=0  out:0
     update_todo  CC=0  out:0
   src.taskill.bulk  [8 funcs]
     _apply_filters  CC=12  out:8
@@ -522,10 +523,8 @@ MODULES:
   src.taskill.updaters.changelog  [2 funcs]
     release_unreleased  CC=4  out:6
     update_changelog  CC=1  out:2
-  src.taskill.updaters.readme  [3 funcs]
-    _update_readme  CC=6  out:11
-    render_status_block  CC=6  out:5
-    update_readme  CC=1  out:2
+  src.taskill.updaters.readme  [1 funcs]
+    _update_readme  CC=5  out:10
 
 EDGES:
   src.taskill.git_state.head_sha → src.taskill.git_state._run
@@ -537,31 +536,6 @@ EDGES:
   src.taskill.git_state.collect_snapshot → src.taskill.git_state.read_coverage
   src.taskill.git_state.collect_snapshot → src.taskill.git_state.read_failed_tests
   src.taskill.git_state.collect_snapshot → src.taskill.git_state.file_hash
-  src.taskill.core.Taskill.__init__ → src.taskill.state.load_state
-  src.taskill.core.Taskill.__init__ → src.taskill.config.load_config
-  src.taskill.core.Taskill.run → project.map.toon.evaluate
-  src.taskill.core.Taskill.run → src.taskill.providers.build_chain
-  src.taskill.core.Taskill.status → project.map.toon.evaluate
-  src.taskill.core.Taskill._snapshot → src.taskill.git_state.collect_snapshot
-  src.taskill.core.Taskill._apply → src.taskill.updaters.changelog.update_changelog
-  src.taskill.core.Taskill._apply → project.map.toon.update_todo
-  src.taskill.core.Taskill._apply → src.taskill.updaters.readme.update_readme
-  src.taskill.updaters.readme.ReadmeUpdater._update_readme → src.taskill.updaters.readme.render_status_block
-  src.taskill.providers.build_chain → src.taskill.providers.discover_providers
-  src.taskill.providers.openrouter.OpenRouterProvider.generate → project.map.toon._normalize_model
-  src.taskill.providers.openrouter.OpenRouterProvider.generate → src.taskill.providers.base.parse_json_loosely
-  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → project.map.toon._mcp_lib_present
-  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → project.map.toon._candidate_endpoints
-  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → project.map.toon._candidate_endpoints
-  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.base.parse_json_loosely
-  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → project.map.toon._mcp_lib_present
-  src.taskill.triggers.evaluate → src.taskill.triggers._check_time
-  src.taskill.triggers.evaluate → src.taskill.triggers._check_commits
-  src.taskill.triggers.evaluate → src.taskill.triggers._check_changed_files
-  src.taskill.triggers.evaluate → src.taskill.triggers._check_coverage
-  src.taskill.triggers.evaluate → src.taskill.triggers._check_failed_tests
-  src.taskill.triggers.evaluate → src.taskill.triggers._check_sumd
-  src.taskill.triggers.evaluate → src.taskill.triggers._check_watched_files
   src.taskill.bulk.find_repos → src.taskill.bulk._scan
   src.taskill.bulk.resolve_repo_config → src.taskill.config.load_config
   src.taskill.bulk.resolve_repo_config → src.taskill.bulk._rebase_config
@@ -571,12 +545,37 @@ EDGES:
   src.taskill.bulk.bulk_run → src.taskill.bulk.find_repos
   src.taskill.bulk.bulk_run → src.taskill.bulk._apply_filters
   src.taskill.bulk.bulk_run → src.taskill.bulk._run_single_repo
+  src.taskill.providers.build_chain → src.taskill.providers.discover_providers
+  src.taskill.triggers.evaluate → src.taskill.triggers._check_time
+  src.taskill.triggers.evaluate → src.taskill.triggers._check_commits
+  src.taskill.triggers.evaluate → src.taskill.triggers._check_changed_files
+  src.taskill.triggers.evaluate → src.taskill.triggers._check_coverage
+  src.taskill.triggers.evaluate → src.taskill.triggers._check_failed_tests
+  src.taskill.triggers.evaluate → src.taskill.triggers._check_sumd
+  src.taskill.triggers.evaluate → src.taskill.triggers._check_watched_files
+  src.taskill.providers.openrouter.OpenRouterProvider.generate → project.map.toon._normalize_model
+  src.taskill.providers.openrouter.OpenRouterProvider.generate → src.taskill.providers.base.parse_json_loosely
+  src.taskill.core.Taskill.__init__ → src.taskill.state.load_state
+  src.taskill.core.Taskill.__init__ → src.taskill.config.load_config
+  src.taskill.core.Taskill.run → project.map.toon.evaluate
+  src.taskill.core.Taskill.run → src.taskill.providers.build_chain
+  src.taskill.core.Taskill.status → project.map.toon.evaluate
+  src.taskill.core.Taskill._snapshot → src.taskill.git_state.collect_snapshot
+  src.taskill.core.Taskill._apply → src.taskill.updaters.changelog.update_changelog
+  src.taskill.core.Taskill._apply → project.map.toon.update_todo
+  src.taskill.core.Taskill._apply → project.map.toon.update_readme
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → project.map.toon._mcp_lib_present
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.is_available → project.map.toon._candidate_endpoints
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → project.map.toon._candidate_endpoints
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → src.taskill.providers.base.parse_json_loosely
+  src.taskill.providers.windsurf_mcp.WindsurfMcpProvider.generate → project.map.toon._mcp_lib_present
+  src.taskill.updaters.readme.ReadmeUpdater._update_readme → project.map.toon.render_status_block
   src.taskill.cli.main → src.taskill.cli._setup_logging
   src.taskill.cli.run → src.taskill.config.load_config
   src.taskill.cli.run → src.taskill.cli._print_run_result
   src.taskill.cli.status → src.taskill.config.load_config
   src.taskill.cli.release → src.taskill.updaters.changelog.release_unreleased
-  src.taskill.cli.bulk_run_cmd → project.map.toon.bulk_run
+  src.taskill.cli.bulk_run_cmd → src.taskill.bulk.bulk_run
   src.taskill.cli.clean_todo → project.map.toon.empty_todo
 ```
 

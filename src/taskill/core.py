@@ -14,13 +14,12 @@ import json
 import logging
 import subprocess
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
 
 from taskill.config import TaskillConfig, load_config
 from taskill.git_state import ProjectSnapshot, collect_snapshot
 from taskill.providers import build_chain, GeneratedDocs, ProviderError
-from taskill.state import TaskillState, load_state, save_state
+from taskill.state import load_state, save_state
 from taskill.triggers import TriggerEvaluation, evaluate
 from taskill.updaters import update_changelog, update_readme, update_todo
 

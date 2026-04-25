@@ -1,4 +1,4 @@
-# taskill | 29f 3338L | python:25,shell:3,less:1 | 2026-04-25
+# taskill | 29f 3366L | python:25,shell:3,less:1 | 2026-04-25
 # stats: 115 func | 22 cls | 29 mod | CC̄=3.6 | critical:4 | cycles:0
 # alerts[5]: CC _print_bulk_table=13; CC _apply_filters=12; CC _print_run_result=12; CC status=11; CC _scan=9
 # hotspots[5]: bulk_run fan=13; status fan=12; load_config fan=12; run fan=10; bulk_run_cmd fan=10
@@ -10,22 +10,22 @@ M[29]:
   project.sh,47
   src/taskill/__init__.py,31
   src/taskill/bulk.py,262
-  src/taskill/cli.py,357
+  src/taskill/cli.py,362
   src/taskill/config.py,171
-  src/taskill/core.py,212
+  src/taskill/core.py,211
   src/taskill/git_state.py,148
   src/taskill/providers/__init__.py,76
   src/taskill/providers/algorithmic.py,156
   src/taskill/providers/base.py,127
-  src/taskill/providers/openrouter.py,96
-  src/taskill/providers/windsurf_mcp.py,135
+  src/taskill/providers/openrouter.py,97
+  src/taskill/providers/windsurf_mcp.py,134
   src/taskill/state.py,43
-  src/taskill/triggers.py,111
-  src/taskill/updaters/__init__.py,60
-  src/taskill/updaters/base.py,45
+  src/taskill/triggers.py,136
+  src/taskill/updaters/__init__.py,55
+  src/taskill/updaters/base.py,46
   src/taskill/updaters/changelog.py,120
-  src/taskill/updaters/readme.py,100
-  src/taskill/updaters/todo.py,128
+  src/taskill/updaters/readme.py,99
+  src/taskill/updaters/todo.py,132
   tests/__init__.py,1
   tests/test_algorithmic.py,94
   tests/test_bulk.py,280

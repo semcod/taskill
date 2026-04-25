@@ -5,6 +5,7 @@ Uses HTTP directly to keep deps minimal — no openai SDK needed.
 """
 from __future__ import annotations
 
+import json
 import os
 from typing import Any
 

@@ -1,5 +1,5 @@
-# code2llm | 38f 5356L | python:18,yaml:12,yml:3,txt:2,shell:2,toml:1 | 2026-04-25
-# CC̄=1.9 | critical:0/187 | dups:0 | cycles:1
+# code2llm | 38f 5564L | python:18,yaml:12,yml:3,txt:2,shell:2,toml:1 | 2026-04-25
+# CC̄=1.8 | critical:0/200 | dups:0 | cycles:1
 
 HEALTH[0]: ok
 
@@ -11,42 +11,42 @@ PIPELINES[45]:
       PURITY: 100% pure
   [2] Src [as_dict]: as_dict
       PURITY: 100% pure
-  [3] Src [__init__]: __init__ → load_state
+  [3] Src [summary]: summary
       PURITY: 100% pure
-  [4] Src [run]: run → evaluate
+  [4] Src [apply]: apply
       PURITY: 100% pure
-  [5] Src [status]: status → evaluate
+  [5] Src [_update_changelog]: _update_changelog
       PURITY: 100% pure
 
 LAYERS:
   src/                            CC̄=4.1    ←in:0  →out:0
-  │ cli                        356L  0C   10m  CC=13     ←0
-  │ bulk                       261L  1C   10m  CC=12     ←0
-  │ core                       211L  2C    9m  CC=11     ←0
+  │ cli                        361L  0C   10m  CC=13     ←0
+  │ bulk                       261L  1C   10m  CC=12     ←1
+  │ core                       210L  2C    9m  CC=11     ←0
   │ config                     170L  4C    1m  CC=8      ←3
   │ algorithmic                155L  1C    5m  CC=10     ←0
   │ git_state                  147L  2C    8m  CC=7      ←2
-  │ windsurf_mcp               134L  1C    4m  CC=7      ←0
-  │ todo                       127L  1C    7m  CC=8      ←0
+  │ triggers                   135L  1C    9m  CC=5      ←0
+  │ windsurf_mcp               133L  1C    4m  CC=7      ←0
+  │ todo                       131L  1C    7m  CC=8      ←0
   │ base                       126L  3C    6m  CC=9      ←2
   │ changelog                  119L  1C    4m  CC=12     ←2
-  │ triggers                   110L  1C    9m  CC=5      ←0
-  │ readme                      99L  1C    4m  CC=6      ←1
-  │ openrouter                  95L  1C    3m  CC=6      ←0
+  │ readme                      98L  1C    4m  CC=6      ←0
+  │ openrouter                  96L  1C    3m  CC=6      ←0
   │ __init__                    75L  0C    2m  CC=6      ←1
-  │ __init__                    59L  0C    1m  CC=6      ←0
-  │ base                        44L  2C    2m  CC=2      ←0
+  │ __init__                    54L  0C    1m  CC=6      ←0
+  │ base                        45L  2C    2m  CC=2      ←0
   │ state                       42L  1C    3m  CC=3      ←1
   │ __init__                    30L  0C    0m  CC=0.0    ←0
   │
   project/                        CC̄=0.0    ←in:0  →out:0
-  │ !! calls.yaml                 614L  0C    0m  CC=0.0    ←0
-  │ map.toon.yaml              209L  0C   99m  CC=0.0    ←4
-  │ calls.toon.yaml            140L  0C    0m  CC=0.0    ←0
+  │ !! calls.yaml                 774L  0C    0m  CC=0.0    ←0
+  │ map.toon.yaml              222L  0C  112m  CC=0.0    ←5
+  │ calls.toon.yaml            170L  0C    0m  CC=0.0    ←0
   │ analysis.toon.yaml          81L  0C    0m  CC=0.0    ←0
-  │ evolution.toon.yaml         59L  0C    0m  CC=0.0    ←0
-  │ project.toon.yaml           56L  0C    0m  CC=0.0    ←0
+  │ project.toon.yaml           53L  0C    0m  CC=0.0    ←0
   │ prompt.txt                  47L  0C    0m  CC=0.0    ←0
+  │ evolution.toon.yaml         39L  0C    0m  CC=0.0    ←0
   │ duplication.toon.yaml       34L  0C    0m  CC=0.0    ←0
   │
   ./                              CC̄=0.0    ←in:0  →out:0
@@ -70,11 +70,11 @@ LAYERS:
 
 COUPLING:
                project.map  src.taskill
-  project.map           ──          ←12  hub
-  src.taskill           12           ──  !! fan-out
+  project.map           ──          ←11  hub
+  src.taskill           11           ──  !! fan-out
   CYCLES: 1
-  HUB: project.map/ (fan-in=12)
-  SMELL: src.taskill/ fan-out=12 → split needed
+  HUB: project.map/ (fan-in=11)
+  SMELL: src.taskill/ fan-out=11 → split needed
 
 EXTERNAL:
   validation: run `vallm batch .` → validation.toon

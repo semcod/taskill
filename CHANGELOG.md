@@ -13,10 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix llm-generated-code issues (ticket-1c7d5f6a)
 - Fix smart-return-type issues (ticket-a7a0a53e)
 - Fix unused-imports issues (ticket-8dae20d0)
-
-## [0.1.10] - 2026-04-25
-
-### Fixed
 - Fix unused-imports issues (ticket-db5e9dd3)
 - Fix magic-numbers issues (ticket-dba8c3c5)
 - Fix unused-imports issues (ticket-af09dd4b)
@@ -80,6 +76,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Docs
 - README: new "Bulk / fleet-wide runs" and "Extending taskill" sections
 - ROADMAP: marked v0.2.1, v0.2.3, and v0.5 baseline as shipped
+
+## [0.1.7] - 2026-04-25
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+- Update SUMD.md
+- Update SUMR.md
+- Update project/README.md
+- Update project/context.md
+
+### Other
+- Update app.doql.less
+- Update project/analysis.toon.yaml
+- Update project/calls.mmd
+- Update project/calls.png
+- Update project/calls.toon.yaml
+- Update project/calls.yaml
+- Update project/compact_flow.mmd
+- Update project/compact_flow.png
+- Update project/duplication.toon.yaml
+- Update project/evolution.toon.yaml
+- ... and 6 more files
 
 ## [0.1.6] - 2026-04-25
 

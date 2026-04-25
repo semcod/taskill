@@ -17,7 +17,6 @@ OpenRouter. This is intentional — taskill should not require MCP to work.
 """
 from __future__ import annotations
 
-import json
 import os
 from pathlib import Path
 from typing import Any

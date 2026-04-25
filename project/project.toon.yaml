@@ -1,36 +1,36 @@
-# taskill | 187 func | 18f | 9253L | python | 2026-04-25
+# taskill | 200 func | 18f | 9568L | python | 2026-04-25
 
 HEALTH:
-  CC̄=1.9  critical=8 (limit:10)  dup=0  cycles=1
+  CC̄=1.8  critical=8 (limit:10)  dup=0  cycles=1
 
 ALERTS[15]:
   !!! high_fan_out     ChangelogUpdater._update_changelog = 20 (limit:10)
   !!  high_fan_out     WindsurfMcpProvider.generate = 19 (limit:10)
   !!  high_fan_out     load_config = 17 (limit:10)
   !   high_fan_out     Taskill.run = 14 (limit:10)
+  !   high_fan_out     bulk_run = 13 (limit:10)
   !   high_fan_out     AlgorithmicProvider.generate = 13 (limit:10)
   !   high_fan_out     OpenRouterProvider.generate = 13 (limit:10)
-  !   high_fan_out     bulk_run = 13 (limit:10)
   !   high_fan_out     collect_snapshot = 12 (limit:10)
   !   high_fan_out     status = 12 (limit:10)
   !   high_fan_out     AlgorithmicProvider._find_completed_todos = 11 (limit:10)
 
 MODULES[38] (top by size):
+  M[project/calls.yaml] 774L C:0 F:0 CC↑0 D:0 (yaml)
   M[planfile.yaml] 617L C:0 F:0 CC↑0 D:0 (yaml)
-  M[project/calls.yaml] 614L C:0 F:0 CC↑0 D:0 (yaml)
   M[goal.yaml] 513L C:0 F:0 CC↑0 D:0 (yaml)
-  M[src/taskill/cli.py] 356L C:0 F:10 CC↑13 D:0 (python)
-  M[src/taskill/bulk.py] 261L C:1 F:10 CC↑12 D:0 (python)
-  M[src/taskill/core.py] 211L C:2 F:9 CC↑11 D:0 (python)
-  M[project/map.toon.yaml] 209L C:0 F:99 CC↑0 D:4 (yaml)
+  M[src/taskill/cli.py] 361L C:0 F:10 CC↑13 D:0 (python)
+  M[src/taskill/bulk.py] 261L C:1 F:10 CC↑12 D:1 (python)
+  M[project/map.toon.yaml] 222L C:0 F:112 CC↑0 D:5 (yaml)
+  M[src/taskill/core.py] 210L C:2 F:9 CC↑11 D:0 (python)
   M[src/taskill/config.py] 170L C:4 F:1 CC↑8 D:3 (python)
+  M[project/calls.toon.yaml] 170L C:0 F:0 CC↑0 D:0 (yaml)
   M[src/taskill/providers/algorithmic.py] 155L C:1 F:5 CC↑10 D:0 (python)
   M[src/taskill/git_state.py] 147L C:2 F:8 CC↑7 D:2 (python)
-  M[project/calls.toon.yaml] 140L C:0 F:0 CC↑0 D:0 (yaml)
-  M[src/taskill/providers/windsurf_mcp.py] 134L C:1 F:4 CC↑7 D:0 (python)
-  M[src/taskill/updaters/todo.py] 127L C:1 F:7 CC↑8 D:0 (python)
+  M[src/taskill/triggers.py] 135L C:1 F:9 CC↑5 D:0 (python)
+  M[src/taskill/providers/windsurf_mcp.py] 133L C:1 F:4 CC↑7 D:0 (python)
+  M[src/taskill/updaters/todo.py] 131L C:1 F:7 CC↑8 D:0 (python)
   M[src/taskill/providers/base.py] 126L C:3 F:6 CC↑9 D:2 (python)
-  M[src/taskill/updaters/changelog.py] 119L C:1 F:4 CC↑12 D:2 (python)
   LANGS: python:18/yaml:12/yml:3/shell:2/txt:2/toml:1
 
 HOTSPOTS[10]:
@@ -40,14 +40,17 @@ HOTSPOTS[10]:
 
 Resolution order for pro
   ★ Taskill.run fan=14  // Orchestrates 14 calls
-  ★ AlgorithmicProvider.generate fan=13  // Orchestrates 13 calls
+  ★ bulk_run fan=13  // Run taskill across all repos found under `root`.
+
+Args:
+    root: Parent directo
 
 REFACTOR[7]:
   [1] H/H Split god module goal.yaml (513L, 0 classes)
   [2] H/H Split god module planfile.yaml (617L, 0 classes)
-  [3] H/H Split god module project/calls.yaml (614L, 0 classes)
+  [3] H/H Split god module project/calls.yaml (774L, 0 classes)
   [4] M/L Break circular dependency: src.taskill.bulk._scan
   [5] M/M Reduce ChangelogUpdater._update_changelog fan-out (currently 20)
 
 EVOLUTION:
-  2026-04-25 CC̄=1.9 crit=8 9253L // Automated analysis
+  2026-04-25 CC̄=1.8 crit=8 9568L // Automated analysis

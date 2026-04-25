@@ -4,22 +4,22 @@ flowchart TD
     classDef entry fill:#4dabf7,stroke:#1971c2,color:#fff
 
     subgraph Core
+        src__taskill__config__load_config("load_config CC=8")
         src__taskill__state__TaskillState__stamp["stamp"]
-        src__taskill__git_state___run["_run"]
-        src__taskill__git_state__head_sha["head_sha"]
-        src__taskill__git_state__collect_snapshot["collect_snapshot"]
-        src__taskill__core__TaskillResult__as_dict["as_dict"]
-        src__taskill__core__Taskill__run["run"]
-        src__taskill__core__Taskill__status["status"]
-        src__taskill__core__Taskill___snapshot["_snapshot"]
-        src__taskill__core__Taskill___build_context["_build_context"]
-        src__taskill__core__Taskill___maybe_pyqual_report["_maybe_pyqual_report"]
-        src__taskill__core__Taskill___apply["_apply"]
-        src__taskill__core__Taskill___update_state["_update_state"]
-        src__taskill__updaters__readme__ReadmeUpdater__apply["apply"]
-        src__taskill__updaters__readme__ReadmeUpdater___update_readme["_update_readme"]
-        src__taskill__updaters__base__DocumentUpdater__apply["apply"]
-        ...["+132 more"]
+        src__taskill__bulk__BulkResult__as_dict["as_dict"]
+        src__taskill__bulk__BulkResult__summary["summary"]
+        src__taskill__bulk__resolve_repo_config["resolve_repo_config"]
+        src__taskill__bulk___run_single_repo["_run_single_repo"]
+        src__taskill__bulk__bulk_run["bulk_run"]
+        src__taskill__updaters__changelog__ChangelogUpdater__apply["apply"]
+        src__taskill__updaters__changelog__ChangelogUpdater___update_changelog["_update_changelog"]
+        src__taskill__providers__base__GeneratedDocs____post_init__["__post_init__"]
+        src__taskill__providers__base__Provider__is_available["is_available"]
+        src__taskill__providers__base__Provider__generate["generate"]
+        src__taskill__providers__algorithmic__AlgorithmicProvider__is_available["is_available"]
+        src__taskill__providers__algorithmic__AlgorithmicProvider__generate["generate"]
+        src__taskill__providers__algorithmic__AlgorithmicProvider___format_commit["_format_commit"]
+        ...["+146 more"]
     end
 
-    class src__taskill__state__TaskillState__stamp,src__taskill__core__TaskillResult__as_dict,src__taskill__core__Taskill__run,src__taskill__core__Taskill__status,src__taskill__core__Taskill___snapshot,src__taskill__core__Taskill___build_context,src__taskill__core__Taskill___maybe_pyqual_report,src__taskill__core__Taskill___apply,src__taskill__core__Taskill___update_state,src__taskill__updaters__readme__ReadmeUpdater__apply entry
+    class src__taskill__state__TaskillState__stamp,src__taskill__bulk__BulkResult__as_dict,src__taskill__bulk__BulkResult__summary,src__taskill__updaters__changelog__ChangelogUpdater__apply,src__taskill__updaters__changelog__ChangelogUpdater___update_changelog,src__taskill__providers__base__GeneratedDocs____post_init__,src__taskill__providers__base__Provider__is_available,src__taskill__providers__base__Provider__generate,src__taskill__providers__algorithmic__AlgorithmicProvider__is_available,src__taskill__providers__algorithmic__AlgorithmicProvider__generate entry

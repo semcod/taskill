@@ -120,7 +120,8 @@ def status(ctx: click.Context, as_json: bool) -> None:
     table.add_row("HEAD", str(info["head"] or "—")[:12])
     table.add_row("Pending commits", str(info["commits_pending"]))
     table.add_row("Coverage", f"{info['coverage']:.1f}%" if info["coverage"] else "—")
-    table.add_row("Failed tests", str(info["failed_tests"]) if info["failed_tests"] is not None else "—")
+    failed = info["failed_tests"]
+    table.add_row("Failed tests", str(failed) if failed is not None else "—")
     table.add_row("Last run", str(info["last_run"] or "never"))
     console.print(table)
 
@@ -150,8 +151,12 @@ def init(force: bool) -> None:
         env.write_text(STARTER_ENV, encoding="utf-8")
 
     console.print(f"[green]✓[/green] Wrote {yml} and {env}")
-    console.print("Next: copy [bold].env.example[/bold] → [bold].env[/bold] and add your OpenRouter key,")
-    console.print("then run [cyan]taskill status[/cyan] to inspect, [cyan]taskill run[/cyan] to execute.")
+    console.print(
+        "Next: copy [bold].env.example[/bold] → [bold].env[/bold] and add your OpenRouter key,"
+    )
+    console.print(
+        "then run [cyan]taskill status[/cyan] to inspect, [cyan]taskill run[/cyan] to execute."
+    )
 
 
 @main.command()
