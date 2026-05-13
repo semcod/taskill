@@ -1,4 +1,5 @@
 """Tests for the algorithmic provider — the safety net must always work."""
+
 from __future__ import annotations
 
 from taskill.git_state import Commit, ProjectSnapshot
@@ -7,9 +8,12 @@ from taskill.providers.algorithmic import AlgorithmicProvider
 
 def _commit(subject: str, body: str = "") -> Commit:
     return Commit(
-        sha="0" * 40, short_sha="0000000",
-        author="Test", date="2026-04-25T10:00:00Z",
-        subject=subject, body=body,
+        sha="0" * 40,
+        short_sha="0000000",
+        author="Test",
+        date="2026-04-25T10:00:00Z",
+        subject=subject,
+        body=body,
     )
 
 
@@ -19,12 +23,14 @@ def _snap(commits: list[Commit]) -> ProjectSnapshot:
 
 def test_groups_commits_by_conventional_type() -> None:
     p = AlgorithmicProvider()
-    snap = _snap([
-        _commit("feat: add OAuth"),
-        _commit("fix: nullptr in parser"),
-        _commit("feat(api): paginate /users"),
-        _commit("just a regular message"),
-    ])
+    snap = _snap(
+        [
+            _commit("feat: add OAuth"),
+            _commit("fix: nullptr in parser"),
+            _commit("feat(api): paginate /users"),
+            _commit("just a regular message"),
+        ]
+    )
     out = p.generate({"snapshot": snap, "existing_todo": ""})
 
     joined = "\n".join(out.changelog_entries)
@@ -37,10 +43,12 @@ def test_groups_commits_by_conventional_type() -> None:
 
 def test_breaking_change_surfaces_first() -> None:
     p = AlgorithmicProvider()
-    snap = _snap([
-        _commit("feat!: removed legacy /v1 endpoint"),
-        _commit("fix: typo"),
-    ])
+    snap = _snap(
+        [
+            _commit("feat!: removed legacy /v1 endpoint"),
+            _commit("fix: typo"),
+        ]
+    )
     out = p.generate({"snapshot": snap, "existing_todo": ""})
     assert out.changelog_entries[0].startswith("### ⚠ BREAKING")
 
@@ -69,11 +77,14 @@ def test_detects_completion_via_token_overlap() -> None:
 
 def test_extracts_new_todos_from_commit_bodies() -> None:
     p = AlgorithmicProvider()
-    snap = _snap([
-        _commit("fix: parser bug",
-                body="Fixed the immediate issue.\nTODO: refactor the tokenizer"),
-        _commit("feat: caching", body="FIXME: invalidation strategy"),
-    ])
+    snap = _snap(
+        [
+            _commit(
+                "fix: parser bug", body="Fixed the immediate issue.\nTODO: refactor the tokenizer"
+            ),
+            _commit("feat: caching", body="FIXME: invalidation strategy"),
+        ]
+    )
     out = p.generate({"snapshot": snap, "existing_todo": ""})
     text = "\n".join(out.todo_new)
     assert "tokenizer" in text

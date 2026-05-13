@@ -1,4 +1,5 @@
 """Bulk operations tests."""
+
 from __future__ import annotations
 
 import subprocess
@@ -17,26 +18,35 @@ def _make_repo(path: Path) -> Path:
     """Create a minimal git repo at the given path."""
     path.mkdir(parents=True, exist_ok=True)
     subprocess.run(
-        ["git", "init", "-q"], cwd=path, check=True,
+        ["git", "init", "-q"],
+        cwd=path,
+        check=True,
         capture_output=True,
     )
     subprocess.run(
-        ["git", "config", "user.email", "test@test"], cwd=path, check=True,
+        ["git", "config", "user.email", "test@test"],
+        cwd=path,
+        check=True,
     )
     subprocess.run(
-        ["git", "config", "user.name", "test"], cwd=path, check=True,
+        ["git", "config", "user.name", "test"],
+        cwd=path,
+        check=True,
     )
     # initial commit so HEAD exists
     (path / "README.md").write_text("# test\n", encoding="utf-8")
     subprocess.run(["git", "add", "."], cwd=path, check=True, capture_output=True)
     subprocess.run(
-        ["git", "commit", "-q", "-m", "initial"], cwd=path, check=True,
+        ["git", "commit", "-q", "-m", "initial"],
+        cwd=path,
+        check=True,
         capture_output=True,
     )
     return path
 
 
 # ─── find_repos ────────────────────────────────────────────────────────────
+
 
 def test_find_repos_finds_direct_children(tmp_path: Path) -> None:
     """Repos at depth 1 should be found."""
@@ -88,6 +98,7 @@ def test_find_repos_returns_empty_for_nonexistent(tmp_path: Path) -> None:
 
 
 # ─── resolve_repo_config ──────────────────────────────────────────────────
+
 
 def test_resolve_repo_config_uses_local_yaml(tmp_path: Path) -> None:
     """Local taskill.yaml should win over shared config."""
@@ -155,6 +166,7 @@ def test_resolve_repo_config_local_wins_over_shared(tmp_path: Path) -> None:
 
 # ─── bulk_run ─────────────────────────────────────────────────────────────
 
+
 def test_bulk_run_no_repos(tmp_path: Path) -> None:
     """Empty directory should yield empty result."""
     result = bulk_run(tmp_path, max_depth=1, force=True, dry_run=True)
@@ -182,7 +194,10 @@ def test_bulk_run_repo_filter(tmp_path: Path) -> None:
     _make_repo(tmp_path / "gamma")
 
     result = bulk_run(
-        tmp_path, max_depth=1, force=True, dry_run=True,
+        tmp_path,
+        max_depth=1,
+        force=True,
+        dry_run=True,
         repo_filter=["alpha", "gamma"],
     )
     # 2 ran, 1 skipped (beta)
@@ -207,8 +222,11 @@ def test_bulk_run_with_shared_config(tmp_path: Path) -> None:
     )
 
     result = bulk_run(
-        tmp_path, shared_config=shared_yml,
-        max_depth=1, force=True, dry_run=True,
+        tmp_path,
+        shared_config=shared_yml,
+        max_depth=1,
+        force=True,
+        dry_run=True,
     )
     assert result.ran_count == 2
 
@@ -220,8 +238,11 @@ def test_bulk_run_max_projects_limits_count(tmp_path: Path) -> None:
     _make_repo(tmp_path / "c")
 
     result = bulk_run(
-        tmp_path, max_depth=1, max_projects=2,
-        force=True, dry_run=True,
+        tmp_path,
+        max_depth=1,
+        max_projects=2,
+        force=True,
+        dry_run=True,
     )
     # Only 2 of 3 repos should be processed
     assert len(result.per_repo) == 2
@@ -235,8 +256,11 @@ def test_bulk_run_max_projects_zero_means_unlimited(tmp_path: Path) -> None:
     _make_repo(tmp_path / "c")
 
     result = bulk_run(
-        tmp_path, max_depth=1, max_projects=0,
-        force=True, dry_run=True,
+        tmp_path,
+        max_depth=1,
+        max_projects=0,
+        force=True,
+        dry_run=True,
     )
     assert len(result.per_repo) == 3
 
@@ -248,8 +272,11 @@ def test_bulk_run_filters_before_max_projects(tmp_path: Path) -> None:
     _make_repo(tmp_path / "gamma")
 
     result = bulk_run(
-        tmp_path, max_depth=1, max_projects=1,
-        force=True, dry_run=True,
+        tmp_path,
+        max_depth=1,
+        max_projects=1,
+        force=True,
+        dry_run=True,
         repo_filter=["gamma"],
     )
     assert len(result.per_repo) == 1

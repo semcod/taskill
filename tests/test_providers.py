@@ -1,4 +1,5 @@
 """Provider discovery and chain building tests."""
+
 from __future__ import annotations
 
 from taskill.config import ProviderConfig

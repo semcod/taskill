@@ -1,4 +1,5 @@
 """Updater tests — keep edits idempotent and bounded."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -9,6 +10,7 @@ from taskill.updaters.readme import END, START, update_readme
 from taskill.updaters.todo import empty_todo, update_todo
 
 # ─── changelog ───────────────────────────────────────────────────────────
+
 
 def test_changelog_creates_file_with_entries(tmp_path: Path) -> None:
     cl = tmp_path / "CHANGELOG.md"
@@ -61,6 +63,7 @@ def test_release_promotes_unreleased(tmp_path: Path) -> None:
 
 # ─── todo ────────────────────────────────────────────────────────────────
 
+
 def test_todo_archives_completed(tmp_path: Path) -> None:
     td = tmp_path / "TODO.md"
     td.write_text("# TODO\n\n- [x] done\n- not done\n", encoding="utf-8")
@@ -106,6 +109,7 @@ def test_empty_todo_resets(tmp_path: Path) -> None:
 
 # ─── readme ──────────────────────────────────────────────────────────────
 
+
 def _snap() -> ProjectSnapshot:
     return ProjectSnapshot(
         head_sha="abc1234567890",
@@ -121,7 +125,7 @@ def test_readme_inserts_status_when_no_markers(tmp_path: Path) -> None:
     update_readme(rm, _snap(), "test summary")
     txt = rm.read_text(encoding="utf-8")
     assert START in txt and END in txt
-    assert "Intro paragraph." in txt   # didn't touch existing content
+    assert "Intro paragraph." in txt  # didn't touch existing content
     assert "abc1234" in txt
     assert "87.5%" in txt
 
