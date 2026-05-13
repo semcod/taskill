@@ -15,6 +15,7 @@ If the optional `mcp` package is not installed, this provider is unavailable
 (returns False from is_available) and the chain falls through cleanly to
 OpenRouter. This is intentional — taskill should not require MCP to work.
 """
+
 from __future__ import annotations
 
 import os
@@ -34,6 +35,7 @@ from taskill.providers.base import (
 def _mcp_lib_present() -> bool:
     try:
         import mcp  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -48,8 +50,7 @@ def _candidate_endpoints(options: dict[str, Any]) -> list[str]:
     if env_ep:
         cands.append(env_ep)
     home = Path.home()
-    for sock in (home / ".codeium" / "windsurf" / "mcp.sock",
-                 home / ".windsurf" / "mcp.sock"):
+    for sock in (home / ".codeium" / "windsurf" / "mcp.sock", home / ".windsurf" / "mcp.sock"):
         if sock.exists():
             cands.append(f"unix://{sock}")
     return cands
@@ -66,9 +67,7 @@ class WindsurfMcpProvider(Provider):
 
     def generate(self, context: dict[str, Any]) -> GeneratedDocs:
         if not _mcp_lib_present():
-            raise ProviderError(
-                "MCP library not installed (pip install 'taskill[mcp]')"
-            )
+            raise ProviderError("MCP library not installed (pip install 'taskill[mcp]')")
 
         # Lazy import — keep MCP truly optional
         try:

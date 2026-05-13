@@ -1,4 +1,5 @@
 """Read project state from git, filesystem, and (optionally) pyqual reports."""
+
 from __future__ import annotations
 
 import hashlib
@@ -83,8 +84,9 @@ def commits_since(project_root: Path, since_sha: str | None) -> list[Commit]:
             continue
         sha, short, author, date, subject = parts[:5]
         body = parts[5] if len(parts) > 5 else ""
-        commits.append(Commit(sha=sha, short_sha=short, author=author,
-                              date=date, subject=subject, body=body))
+        commits.append(
+            Commit(sha=sha, short_sha=short, author=author, date=date, subject=subject, body=body)
+        )
     return commits
 
 

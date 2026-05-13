@@ -9,6 +9,7 @@ HTML comment markers, so users can curate the rest by hand:
 
 If the markers don't exist, we append a status block at the bottom.
 """
+
 from __future__ import annotations
 
 import re
@@ -26,9 +27,7 @@ END = "<!-- taskill:status:end -->"
 def render_status_block(snapshot: ProjectSnapshot, summary: str) -> str:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     coverage = f"{snapshot.coverage_pct:.1f}%" if snapshot.coverage_pct is not None else "—"
-    failed = (
-        str(snapshot.failed_tests) if snapshot.failed_tests is not None else "—"
-    )
+    failed = str(snapshot.failed_tests) if snapshot.failed_tests is not None else "—"
     head = (snapshot.head_sha or "")[:7] or "—"
 
     lines = [
@@ -78,9 +77,7 @@ class ReadmeUpdater(DocumentUpdater):
         original = path.read_text(encoding="utf-8")
 
         if START in original and END in original:
-            pattern = re.compile(
-                rf"{re.escape(START)}.*?{re.escape(END)}", re.DOTALL
-            )
+            pattern = re.compile(rf"{re.escape(START)}.*?{re.escape(END)}", re.DOTALL)
             updated = pattern.sub(block, original)
         else:
             updated = f"{original.rstrip()}\n\n{block}\n"

@@ -2,6 +2,7 @@
 
 Detects project types/languages based on manifest files and directory structure.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -61,6 +62,7 @@ MANIFEST_PROJECT_TYPES: dict[str, str] = {
 @dataclass
 class ProjectInfo:
     """Detected project information."""
+
     path: Path
     name: str
     detected_languages: list[str]
@@ -151,6 +153,7 @@ def create_manifest_filter(manifests: list[str]) -> Callable[[Path], bool]:
     Returns:
         Filter function that returns True if all manifests exist
     """
+
     def _filter(path: Path) -> bool:
         for manifest in manifests:
             if manifest.startswith("*."):
@@ -160,6 +163,7 @@ def create_manifest_filter(manifests: list[str]) -> Callable[[Path], bool]:
             elif not (path / manifest).exists():
                 return False
         return True
+
     return _filter
 
 
@@ -178,6 +182,7 @@ def create_language_filter(languages: list[str]) -> Callable[[Path], bool]:
         detected = detect_project_languages(path)
         detected_lower = [d.lower() for d in detected]
         return any(lang in detected_lower for lang in lang_lower)
+
     return _filter
 
 
@@ -198,6 +203,7 @@ def create_extension_filter(extensions: list[str]) -> Callable[[Path], bool]:
             if file.is_file() and file.suffix in exts:
                 return True
         return False
+
     return _filter
 
 
@@ -215,4 +221,5 @@ def create_name_filter(patterns: list[str]) -> Callable[[Path], bool]:
     def _filter(path: Path) -> bool:
         name_lower = path.name.lower()
         return any(pattern in name_lower for pattern in patterns_lower)
+
     return _filter

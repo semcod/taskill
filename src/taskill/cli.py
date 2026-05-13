@@ -7,6 +7,7 @@ Commands:
   taskill release    — promote [Unreleased] CHANGELOG block to a versioned heading
   taskill clean-todo — wipe TODO.md (use after manually moving items elsewhere)
 """
+
 from __future__ import annotations
 
 import json
@@ -50,7 +51,10 @@ def _setup_logging(verbose: bool) -> None:
 @click.version_option(__version__, prog_name="taskill")
 @click.option("--verbose", "-v", is_flag=True, help="Verbose logging")
 @click.option(
-    "--config", "-c", default="taskill.yaml", show_default=True,
+    "--config",
+    "-c",
+    default="taskill.yaml",
+    show_default=True,
     help="Path to taskill.yaml",
 )
 @click.pass_context
@@ -69,9 +73,7 @@ def _print_run_result(result) -> None:
                 console.print(f"  [red]error:[/red] {e}")
         return
 
-    console.print(
-        f"[green]✓ Ran via [bold]{result.provider_used}[/bold][/green]"
-    )
+    console.print(f"[green]✓ Ran via [bold]{result.provider_used}[/bold][/green]")
     if result.docs and result.docs.summary:
         console.print(f"  [dim]{result.docs.summary}[/dim]")
 
@@ -118,35 +120,57 @@ def _format_output(data: dict, output_format: str) -> str:
 @click.argument("directory", required=False, default=".")
 @click.option("--force", is_flag=True, help="Run even if triggers say no")
 @click.option("--dry-run", is_flag=True, help="Don't write files or persist state")
-@click.option("--json", "as_json", is_flag=True, help="Output result as JSON (deprecated: use --format json)")
 @click.option(
-    "--format", "output_format",
+    "--json", "as_json", is_flag=True, help="Output result as JSON (deprecated: use --format json)"
+)
+@click.option(
+    "--format",
+    "output_format",
     type=click.Choice(["table", "json", "yaml", "markdown"], case_sensitive=False),
     default="table",
     help="Output format: table (default), json, yaml, or markdown (yaml in codeblock)",
 )
 @click.option(
-    "--manifest", "-m", "manifests", multiple=True,
+    "--manifest",
+    "-m",
+    "manifests",
+    multiple=True,
     help="Filter: require specific manifest file (repeatable). E.g. -m pyproject.toml -m package.json",
 )
 @click.option(
-    "--language", "-l", "languages", multiple=True,
+    "--language",
+    "-l",
+    "languages",
+    multiple=True,
     help="Filter: project language - python, javascript, typescript, rust, go, java, etc. (repeatable)",
 )
 @click.option(
-    "--ext", "-e", "extensions", multiple=True,
+    "--ext",
+    "-e",
+    "extensions",
+    multiple=True,
     help="Filter: require files with extension (repeatable). E.g. -e .py -e .js",
 )
 @click.option(
-    "--name-filter", "-n", "name_filters", multiple=True,
+    "--name-filter",
+    "-n",
+    "name_filters",
+    multiple=True,
     help="Filter: repo name contains substring (repeatable)",
 )
 @click.option(
-    "--max-depth", "-d", default=2, show_default=True, type=int,
+    "--max-depth",
+    "-d",
+    default=2,
+    show_default=True,
+    type=int,
     help="Max depth to scan for repos when filters are used",
 )
 @click.option(
-    "--max-projects", default=0, show_default=True, type=int,
+    "--max-projects",
+    default=0,
+    show_default=True,
+    type=int,
     help="Max projects to process when scanning (0 = unlimited)",
 )
 @click.pass_context
@@ -284,9 +308,12 @@ def run(
 
 @main.command()
 @click.argument("directory", required=False, default=".")
-@click.option("--json", "as_json", is_flag=True, help="Output as JSON (deprecated: use --format json)")
 @click.option(
-    "--format", "output_format",
+    "--json", "as_json", is_flag=True, help="Output as JSON (deprecated: use --format json)"
+)
+@click.option(
+    "--format",
+    "output_format",
     type=click.Choice(["table", "json", "yaml", "markdown"], case_sensitive=False),
     default="table",
     help="Output format: table (default), json, yaml, or markdown (yaml in codeblock)",
@@ -360,7 +387,9 @@ def init(force: bool) -> None:
 @main.command()
 @click.argument("version")
 @click.option(
-    "--changelog", default="CHANGELOG.md", show_default=True,
+    "--changelog",
+    default="CHANGELOG.md",
+    show_default=True,
     help="Path to CHANGELOG.md",
 )
 def release(version: str, changelog: str) -> None:
@@ -414,32 +443,48 @@ def _print_bulk_table(result) -> None:
 
 @main.command("bulk-run")
 @click.option(
-    "--root", "-r", default=".", show_default=True,
+    "--root",
+    "-r",
+    default=".",
+    show_default=True,
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     help="Parent directory to scan for repos",
 )
 @click.option(
-    "--shared-config", "-s", default=None,
+    "--shared-config",
+    "-s",
+    default=None,
     type=click.Path(exists=False),
     help="Optional shared taskill.yaml used as base for repos without their own config",
 )
 @click.option(
-    "--max-depth", default=2, show_default=True, type=int,
+    "--max-depth",
+    default=2,
+    show_default=True,
+    type=int,
     help="Max directory levels to descend looking for git repos",
 )
 @click.option(
-    "--max-projects", default=0, show_default=True, type=int,
+    "--max-projects",
+    default=0,
+    show_default=True,
+    type=int,
     help="Maximum number of projects to process (0 = unlimited)",
 )
 @click.option("--force", is_flag=True, help="Run even if triggers say no")
 @click.option("--dry-run", is_flag=True, help="Don't write files or persist state")
 @click.option("--json", "as_json", is_flag=True, help="Output result as JSON")
 @click.option(
-    "--filter", "-f", "repo_filter", multiple=True,
+    "--filter",
+    "-f",
+    "repo_filter",
+    multiple=True,
     help="Only run on repos whose name contains this substring (repeatable)",
 )
 @click.option(
-    "--require-file", "required_files", multiple=True,
+    "--require-file",
+    "required_files",
+    multiple=True,
     help="Only run on repos that contain this file (repeatable). E.g. --require-file pyproject.toml",
 )
 def bulk_run_cmd(
@@ -458,8 +503,10 @@ def bulk_run_cmd(
     Useful for fleet-wide hygiene: keep README/CHANGELOG/TODO in sync
     across many self-hosted projects with a single shared config.
     """
+
     def _on_term(_s, _f):
         raise KeyboardInterrupt
+
     signal.signal(signal.SIGTERM, _on_term)
     result = bulk_run(
         root=Path(root),

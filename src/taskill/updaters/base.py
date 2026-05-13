@@ -1,4 +1,5 @@
 """Updater abstraction + shared types."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -12,6 +13,7 @@ from taskill.git_state import ProjectSnapshot
 @dataclass
 class UpdateResult:
     """What every updater returns."""
+
     changed: bool
     path: Path
     updater_name: str = "unknown"

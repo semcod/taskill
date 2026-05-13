@@ -1,4 +1,5 @@
 """Decide whether thresholds in taskill.yaml are met → should we run?"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -23,7 +24,10 @@ class TriggerEvaluation:
 
 
 def _check_time(
-    state: TaskillState, triggers: Triggers, reasons: list[str], skipped: list[str],
+    state: TaskillState,
+    triggers: Triggers,
+    reasons: list[str],
+    skipped: list[str],
 ) -> None:
     if state.last_run_dt is None:
         reasons.append("never run before")
@@ -36,7 +40,10 @@ def _check_time(
 
 
 def _check_commits(
-    snapshot: ProjectSnapshot, triggers: Triggers, reasons: list[str], skipped: list[str],
+    snapshot: ProjectSnapshot,
+    triggers: Triggers,
+    reasons: list[str],
+    skipped: list[str],
 ) -> None:
     n_commits = len(snapshot.commits_since_last_run)
     if n_commits >= triggers.min_commits_since_last_run:
@@ -46,7 +53,10 @@ def _check_commits(
 
 
 def _check_changed_files(
-    snapshot: ProjectSnapshot, triggers: Triggers, reasons: list[str], skipped: list[str],
+    snapshot: ProjectSnapshot,
+    triggers: Triggers,
+    reasons: list[str],
+    skipped: list[str],
 ) -> None:
     n_changed = len(snapshot.changed_files)
     if n_changed >= triggers.changed_files_threshold:
@@ -90,14 +100,19 @@ def _check_failed_tests(
 
 
 def _check_sumd(
-    snapshot: ProjectSnapshot, state: TaskillState, reasons: list[str],
+    snapshot: ProjectSnapshot,
+    state: TaskillState,
+    reasons: list[str],
 ) -> None:
     if snapshot.sumd_hash and snapshot.sumd_hash != state.last_sumd_hash:
         reasons.append("SUMD.md changed")
 
 
 def _check_watched_files(
-    triggers: Triggers, state: TaskillState, project_root: Path, reasons: list[str],
+    triggers: Triggers,
+    state: TaskillState,
+    project_root: Path,
+    reasons: list[str],
 ) -> None:
     for rel in triggers.watch_files:
         p = project_root / rel

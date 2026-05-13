@@ -2,6 +2,7 @@
 
 Mirrors pyqual's config style (declarative, YAML-first, profile-friendly).
 """
+
 from __future__ import annotations
 
 import os
@@ -14,6 +15,7 @@ from dotenv import load_dotenv
 
 # ───────────────────────────── data classes ─────────────────────────────
 
+
 @dataclass
 class Triggers:
     """Conditions that must be met to run an update.
@@ -21,6 +23,7 @@ class Triggers:
     All thresholds are OR-ed by default (any one true → run).
     Set `require_all: true` for AND semantics.
     """
+
     min_hours_since_last_run: float = 24.0
     min_commits_since_last_run: int = 1
     changed_files_threshold: int = 1
@@ -34,6 +37,7 @@ class Triggers:
 @dataclass
 class ProviderConfig:
     """Single provider configuration."""
+
     name: str  # "windsurf_mcp" | "openrouter" | "algorithmic"
     enabled: bool = True
     options: dict[str, Any] = field(default_factory=dict)
@@ -42,6 +46,7 @@ class ProviderConfig:
 @dataclass
 class IntegrationConfig:
     """Optional CI / VCS / orchestrator integration."""
+
     github: dict[str, Any] = field(default_factory=dict)
     gitlab: dict[str, Any] = field(default_factory=dict)
     ansible: dict[str, Any] = field(default_factory=dict)
@@ -56,8 +61,8 @@ DEFAULT_FILES = {
 }
 
 DEFAULT_REUSE = {
-    "pyqual": True,    # invoke `pyqual report` if available
-    "llx": False,      # invoke llx for richer LLM context
+    "pyqual": True,  # invoke `pyqual report` if available
+    "llx": False,  # invoke llx for richer LLM context
     "prefact": False,  # invoke prefact for refactoring hints
 }
 
@@ -85,16 +90,24 @@ class TaskillConfig:
 # ───────────────────────────── loader ─────────────────────────────
 
 DEFAULT_PROVIDERS = [
-    ProviderConfig(name="windsurf_mcp", enabled=True, options={
-        "endpoint": "stdio",  # or ws://localhost:PORT
-        "tool_name": "windsurf",
-    }),
-    ProviderConfig(name="openrouter", enabled=True, options={
-        "base_url": "https://openrouter.ai/api/v1",
-        "temperature": 0.2,
-        "max_tokens": 4096,
-        "timeout": 120,  # seconds
-    }),
+    ProviderConfig(
+        name="windsurf_mcp",
+        enabled=True,
+        options={
+            "endpoint": "stdio",  # or ws://localhost:PORT
+            "tool_name": "windsurf",
+        },
+    ),
+    ProviderConfig(
+        name="openrouter",
+        enabled=True,
+        options={
+            "base_url": "https://openrouter.ai/api/v1",
+            "temperature": 0.2,
+            "max_tokens": 4096,
+            "timeout": 120,  # seconds
+        },
+    ),
     ProviderConfig(name="algorithmic", enabled=True, options={}),
 ]
 

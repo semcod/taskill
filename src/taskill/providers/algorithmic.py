@@ -8,6 +8,7 @@ Strategy:
 
 This is the safety net. Always available, always deterministic, ~zero deps.
 """
+
 from __future__ import annotations
 
 import re
@@ -17,17 +18,17 @@ from typing import Any
 from taskill.providers.base import GeneratedDocs, Provider
 
 CATEGORY_HEADINGS = {
-    "feat":     "### Added",
-    "fix":      "### Fixed",
-    "perf":     "### Performance",
+    "feat": "### Added",
+    "fix": "### Fixed",
+    "perf": "### Performance",
     "refactor": "### Changed",
-    "docs":     "### Documentation",
-    "test":     "### Tests",
-    "build":    "### Build",
-    "ci":       "### CI",
-    "chore":    "### Chore",
-    "style":    "### Style",
-    "revert":   "### Reverted",
+    "docs": "### Documentation",
+    "test": "### Tests",
+    "build": "### Build",
+    "ci": "### CI",
+    "chore": "### Chore",
+    "style": "### Style",
+    "revert": "### Reverted",
 }
 
 
@@ -60,8 +61,19 @@ class AlgorithmicProvider(Provider):
         if breaking:
             entries.append("### ⚠ BREAKING CHANGES")
             entries.extend(breaking)
-        for ctype in ["feat", "fix", "perf", "refactor", "docs", "test",
-                      "build", "ci", "chore", "style", "revert"]:
+        for ctype in [
+            "feat",
+            "fix",
+            "perf",
+            "refactor",
+            "docs",
+            "test",
+            "build",
+            "ci",
+            "chore",
+            "style",
+            "revert",
+        ]:
             if by_type.get(ctype):
                 entries.append(CATEGORY_HEADINGS[ctype])
                 entries.extend(by_type[ctype])
@@ -77,10 +89,14 @@ class AlgorithmicProvider(Provider):
 
         n_total = len(snap.commits_since_last_run)
         summary = (
-            f"{n_total} commit(s); "
-            f"{len(by_type.get('feat', []))} features, "
-            f"{len(by_type.get('fix', []))} fixes."
-        ) if n_total else "No new commits — refreshing docs only."
+            (
+                f"{n_total} commit(s); "
+                f"{len(by_type.get('feat', []))} features, "
+                f"{len(by_type.get('fix', []))} fixes."
+            )
+            if n_total
+            else "No new commits — refreshing docs only."
+        )
 
         return GeneratedDocs(
             changelog_entries=entries,

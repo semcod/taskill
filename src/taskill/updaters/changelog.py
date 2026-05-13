@@ -5,6 +5,7 @@ Strategy:
 - Find or create the `## [Unreleased]` section.
 - Append new entries under it (deduplicated by exact line match).
 """
+
 from __future__ import annotations
 
 import re
@@ -90,7 +91,7 @@ class ChangelogUpdater(DocumentUpdater):
         # appropriate subsection if a heading-of-headings exists; otherwise dump at end
         joined_new = "\n".join(new_lines)
         new_block = f"{block_body.rstrip()}\n\n{joined_new}\n\n"
-        updated = f"{original[:m.start(2)]}{new_block}{original[m.end(2):]}"
+        updated = f"{original[: m.start(2)]}{new_block}{original[m.end(2) :]}"
 
         path.write_text(updated, encoding="utf-8")
         return True

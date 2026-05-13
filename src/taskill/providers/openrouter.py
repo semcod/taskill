@@ -3,6 +3,7 @@
 Reads OPENROUTER_API_KEY and LLM_MODEL from env (loaded via .env in config).
 Uses HTTP directly to keep deps minimal — no openai SDK needed.
 """
+
 from __future__ import annotations
 
 import json
@@ -26,7 +27,7 @@ from taskill.providers.base import (
 # "qwen/qwen3-coder-next". We strip the prefix automatically.
 def _normalize_model(model: str) -> str:
     if model.startswith("openrouter/"):
-        return model[len("openrouter/"):]
+        return model[len("openrouter/") :]
     return model
 
 
@@ -95,4 +96,3 @@ class OpenRouterProvider(Provider):
             summary=str(parsed.get("summary", "")),
             provider_name=f"{self.name}:{model}",
         )
-

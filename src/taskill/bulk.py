@@ -17,6 +17,7 @@ Usage:
     for repo, repo_result in result.per_repo.items():
         print(repo, repo_result.ran)
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -38,10 +39,11 @@ LOCAL_CONFIG_NAMES = ("taskill.yaml", ".taskill.yaml")
 @dataclass
 class BulkResult:
     """Aggregate result of running taskill across multiple repos."""
+
     root: Path
     per_repo: dict[Path, TaskillResult] = field(default_factory=dict)
     skipped: list[tuple[Path, str]] = field(default_factory=list)  # (path, reason)
-    errors: list[tuple[Path, str]] = field(default_factory=list)   # (path, error)
+    errors: list[tuple[Path, str]] = field(default_factory=list)  # (path, error)
 
     @property
     def total_repos(self) -> int:
@@ -63,9 +65,7 @@ class BulkResult:
             "changed": self.changed_count,
             "skipped": [{"path": str(p), "reason": r} for p, r in self.skipped],
             "errors": [{"path": str(p), "error": e} for p, e in self.errors],
-            "per_repo": {
-                str(p): r.as_dict() for p, r in self.per_repo.items()
-            },
+            "per_repo": {str(p): r.as_dict() for p, r in self.per_repo.items()},
         }
 
     def summary(self) -> str:
@@ -129,8 +129,15 @@ def _scan(directory: Path, repos: list[Path], depth: int, max_depth: int) -> Non
             continue
         # skip hidden / common noise dirs
         if child.name.startswith(".") or child.name in {
-            "node_modules", "__pycache__", "venv", ".venv", "dist", "build",
-            "target", ".tox", ".pytest_cache",
+            "node_modules",
+            "__pycache__",
+            "venv",
+            ".venv",
+            "dist",
+            "build",
+            "target",
+            ".tox",
+            ".pytest_cache",
         }:
             continue
         _scan(child, repos, depth + 1, max_depth)
@@ -171,6 +178,7 @@ def resolve_repo_config(
 def _rebase_config(base: TaskillConfig, new_root: Path) -> TaskillConfig:
     """Return a copy of `base` with project_root rebased to `new_root`."""
     from copy import deepcopy
+
     cfg = deepcopy(base)
     cfg.project_root = Path(new_root).resolve()
     return cfg
@@ -216,7 +224,10 @@ def _apply_filters(
 
 
 def _run_single_repo(
-    repo: Path, shared_cfg: TaskillConfig | None, force: bool, dry_run: bool,
+    repo: Path,
+    shared_cfg: TaskillConfig | None,
+    force: bool,
+    dry_run: bool,
 ) -> TaskillResult:
     """Run taskill on a single repo."""
     cfg = resolve_repo_config(repo, shared_cfg)
@@ -235,34 +246,37 @@ def _file_hash(path: Path) -> str | None:
 
 def _should_skip_repo(repo: Path, cfg: TaskillConfig) -> tuple[bool, str]:
     """Check if repo should be skipped based on TODO/README hash unchanged.
-    
+
     Returns (should_skip, reason).
     """
     state_path = repo / cfg.state_file
     state = load_state(state_path)
-    
+
     # If no previous state, don't skip
     if not state.last_todo_hash and not state.last_readme_hash:
         log.debug("%s: no previous hash state", repo.name)
         return False, ""
-    
+
     # Check current hashes
     todo_path = repo / cfg.files.get("todo", "TODO.md")
     readme_path = repo / cfg.files.get("readme", "README.md")
-    
+
     current_todo_hash = _file_hash(todo_path)
     current_readme_hash = _file_hash(readme_path)
-    
+
     log.debug(
         "%s: last_todo_hash=%s, current_todo_hash=%s, last_readme_hash=%s, current_readme_hash=%s",
-        repo.name, state.last_todo_hash, current_todo_hash,
-        state.last_readme_hash, current_readme_hash
+        repo.name,
+        state.last_todo_hash,
+        current_todo_hash,
+        state.last_readme_hash,
+        current_readme_hash,
     )
-    
+
     # If hashes match, skip
     if state.last_todo_hash == current_todo_hash and state.last_readme_hash == current_readme_hash:
         return True, "TODO and README hashes unchanged"
-    
+
     return False, ""
 
 
@@ -308,7 +322,7 @@ def bulk_run(
     for repo in repos:
         try:
             cfg = resolve_repo_config(repo, shared_cfg)
-            
+
             # Quick skip: if hashes unchanged and not forced, skip
             if not force:
                 should_skip, skip_reason = _should_skip_repo(repo, cfg)
@@ -316,12 +330,14 @@ def bulk_run(
                     result.skipped.append((repo, skip_reason))
                     log.info("%s: skipped (%s)", repo.name, skip_reason)
                     continue
-            
+
             repo_result = _run_single_repo(repo, shared_cfg, force, dry_run)
             result.per_repo[repo] = repo_result
             log.info(
                 "%s: ran=%s, changed=%s",
-                repo.name, repo_result.ran, repo_result.files_changed,
+                repo.name,
+                repo_result.ran,
+                repo_result.files_changed,
             )
         except Exception as e:
             log.exception("Error running taskill in %s", repo)

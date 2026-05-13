@@ -1,4 +1,5 @@
 """Provider abstraction + shared types."""
+
 from __future__ import annotations
 
 import json
@@ -15,10 +16,11 @@ class ProviderError(Exception):
 @dataclass
 class GeneratedDocs:
     """What every provider returns."""
+
     readme: str | None = None
     changelog_entries: list[str] = None  # type: ignore[assignment]  # markdown bullets
-    todo_completed: list[str] = None     # type: ignore[assignment]  # items to remove from TODO
-    todo_new: list[str] = None           # type: ignore[assignment]  # new items detected
+    todo_completed: list[str] = None  # type: ignore[assignment]  # items to remove from TODO
+    todo_new: list[str] = None  # type: ignore[assignment]  # new items detected
     summary: str = ""
     provider_name: str = "unknown"
 
@@ -84,16 +86,20 @@ MAX_SUMD_CHARS = 3000
 
 def build_user_prompt(context: dict[str, Any]) -> str:
     snap = context["snapshot"]
-    commits = "\n".join(
-        f"  {c.short_sha} {c.subject}" for c in snap.commits_since_last_run[:MAX_COMMITS_IN_PROMPT]
-    ) or "  (no new commits)"
+    commits = (
+        "\n".join(
+            f"  {c.short_sha} {c.subject}"
+            for c in snap.commits_since_last_run[:MAX_COMMITS_IN_PROMPT]
+        )
+        or "  (no new commits)"
+    )
     changed = "\n".join(f"  {f}" for f in snap.changed_files[:MAX_COMMITS_IN_PROMPT]) or "  (none)"
     todo = context.get("existing_todo") or "(empty)"
     sumd = context.get("sumd") or "(no SUMD.md)"
     coverage = f"{snap.coverage_pct:.1f}%" if snap.coverage_pct else "n/a"
     failed = snap.failed_tests if snap.failed_tests is not None else "n/a"
 
-    return f"""Project: {context.get('project_name', 'unknown')}
+    return f"""Project: {context.get("project_name", "unknown")}
 
 # Commits since last taskill run
 {commits}

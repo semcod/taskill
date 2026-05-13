@@ -1,4 +1,5 @@
 """Persistent state — what was the project's snapshot last time we ran?"""
+
 from __future__ import annotations
 
 import json

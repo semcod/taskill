@@ -8,6 +8,7 @@ Pipeline:
   5. Apply updates to README/CHANGELOG/TODO
   6. Persist new state
 """
+
 from __future__ import annotations
 
 import json
@@ -71,7 +72,8 @@ class Taskill:
         chain = build_chain(self.config.providers)
         if not chain:
             return TaskillResult(
-                ran=False, trigger_eval=trig,
+                ran=False,
+                trigger_eval=trig,
                 errors=["No providers configured"],
             )
 
@@ -97,7 +99,8 @@ class Taskill:
 
         if docs is None:
             return TaskillResult(
-                ran=False, trigger_eval=trig,
+                ran=False,
+                trigger_eval=trig,
                 errors=errors or ["All providers failed or unavailable"],
             )
 
@@ -173,7 +176,10 @@ class Taskill:
             res = subprocess.run(
                 ["pyqual", "report", "--json"],
                 cwd=self.config.project_root,
-                capture_output=True, text=True, timeout=_PYQUAL_TIMEOUT, check=False,
+                capture_output=True,
+                text=True,
+                timeout=_PYQUAL_TIMEOUT,
+                check=False,
             )
             if res.returncode == 0 and res.stdout.strip():
                 return json.loads(res.stdout)

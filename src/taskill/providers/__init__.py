@@ -5,6 +5,7 @@ Default order: windsurf_mcp → openrouter → algorithmic.
 
 Providers are discovered via entry points under "taskill.providers".
 """
+
 from __future__ import annotations
 
 import importlib.metadata

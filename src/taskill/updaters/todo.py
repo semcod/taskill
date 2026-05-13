@@ -6,6 +6,7 @@ Two operations:
 
 Behavior is conservative — we never delete user-authored text we don't recognize.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -100,7 +101,10 @@ class TodoUpdater(DocumentUpdater):
         kept, archived = self._partition_lines(lines, completed_set)
         fresh_new = self._dedup_new_items(kept, new_items)
         out_lines = self._assemble_output(
-            kept, fresh_new, archived, archive_completed=archive_completed,
+            kept,
+            fresh_new,
+            archived,
+            archive_completed=archive_completed,
         )
 
         joined = "\n".join(out_lines).rstrip()
@@ -123,7 +127,10 @@ def update_todo(
     """Remove completed_lines from TODO and append new_items. Returns True on change."""
     updater = TodoUpdater()
     return updater._update_todo(
-        path, completed_lines, new_items, archive_completed=archive_completed,
+        path,
+        completed_lines,
+        new_items,
+        archive_completed=archive_completed,
     )
 
 
