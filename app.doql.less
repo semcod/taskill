@@ -2,23 +2,38 @@
 
 app {
   name: taskill;
-  version: 0.1.7;
+  version: 0.1.14;
+  description: "Daily project hygiene: keep README / CHANGELOG / TODO in sync with reality. LLM-first, algorithmic fallback.";
+  license: Apache-2.0;
+  authors: "Tom Sapletta, Tom Sapletta <tom@sapletta.com>";
+  keywords: "changelog, readme, todo, llm, openrouter, mcp, ci-cd, automation";
+  homepage: https://github.com/oqlos/taskill;
 }
 
 dependencies {
-  runtime: "pyyaml>=6.0, python-dotenv>=1.0, httpx>=0.27, click>=8.1, rich>=13.7, goal>=2.1.0, costs>=0.1.20, pfix>=0.1.60";
-  dev: "pytest>=7.0, pytest-asyncio>=0.21, ruff>=0.1, mypy>=1.5, goal>=2.1.0, costs>=0.1.20, pfix>=0.1.60";
+  runtime: "pyyaml>=6.0, python-dotenv>=1.0, httpx>=0.27, click>=8.1, rich>=13.7, goal>=2.1.218, costs>=0.1.20, pfix>=0.1.60";
+  mcp: mcp>=1.0;
+  schedule: apscheduler>=3.10;
+  dev: "pytest>=7.0, pytest-asyncio>=0.21, ruff>=0.1, mypy>=1.5, goal>=2.1.218, costs>=0.1.20, pfix>=0.1.60";
 }
 
 interface[type="cli"] {
   framework: click;
 }
 interface[type="cli"] page[name="taskill"] {
-
+  entry: taskill.cli:main;
 }
 
 integration[name="github"] {
   type: scm;
+}
+
+tests {
+  import: testql-scenarios/**/*.testql.toon.yaml;
+}
+
+env_vars {
+  keys: OPENROUTER_API_KEY, LLM_MODEL, PFIX_AUTO_APPLY, PFIX_AUTO_INSTALL_DEPS, PFIX_AUTO_RESTART, PFIX_MAX_RETRIES, PFIX_DRY_RUN, PFIX_ENABLED, PFIX_GIT_COMMIT, PFIX_GIT_PREFIX, PFIX_CREATE_BACKUPS, GITHUB_ROOT, TASKILL_MAX_DEPTH, TASKILL_MAX_PROJECTS, TASKILL_DRY_RUN, TASKILL_FORCE, TASKILL_FILTER, WINDSURF_MCP_ENDPOINT;
 }
 
 deploy {
@@ -28,5 +43,9 @@ deploy {
 environment[name="local"] {
   runtime: python;
   env_file: .env;
+  template_file: .env.example;
   python_version: >=3.10;
+  vars: GITHUB_ROOT, LLM_MODEL, OPENROUTER_API_KEY, PFIX_AUTO_APPLY, PFIX_AUTO_INSTALL_DEPS, PFIX_AUTO_RESTART, PFIX_CREATE_BACKUPS, PFIX_DRY_RUN, PFIX_ENABLED, PFIX_GIT_COMMIT, PFIX_GIT_PREFIX, PFIX_MAX_RETRIES, TASKILL_DRY_RUN, TASKILL_FILTER, TASKILL_FORCE, TASKILL_MAX_DEPTH, TASKILL_MAX_PROJECTS;
+  runtime_llm: OPENROUTER_API_KEY;
+  runtime_pfix: PFIX_AUTO_APPLY, PFIX_AUTO_INSTALL_DEPS, PFIX_AUTO_RESTART, PFIX_CREATE_BACKUPS, PFIX_DRY_RUN, PFIX_ENABLED, PFIX_GIT_COMMIT, PFIX_GIT_PREFIX, PFIX_MAX_RETRIES;
 }
