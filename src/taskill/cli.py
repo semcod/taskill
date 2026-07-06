@@ -1,6 +1,8 @@
 """Command-line interface for taskill.
 
 Commands:
+  taskill            — autonomously run pending tasks via koru/coru (no subcommand)
+  taskill koru       — same as bare taskill, with --dry-run / -y / --limit flags
   taskill run        — execute the pipeline (respects triggers; --force overrides)
   taskill status     — show what would happen without running
   taskill init       — write a starter taskill.yaml + .env.example
@@ -47,7 +49,7 @@ def _setup_logging(verbose: bool) -> None:
     )
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.version_option(__version__, prog_name="taskill")
 @click.option("--verbose", "-v", is_flag=True, help="Verbose logging")
 @click.option(
@@ -59,10 +61,199 @@ def _setup_logging(verbose: bool) -> None:
 )
 @click.pass_context
 def main(ctx: click.Context, verbose: bool, config: str) -> None:
-    """taskill — keep README/CHANGELOG/TODO honest."""
+    """taskill — execute the tasks on your list, autonomously.
+
+    Run with no subcommand to hand pending tasks (from TODO/planfile/task file)
+    to koru/coru for autonomous execution. Subcommands (run/status/init/…) keep
+    the original doc-hygiene behavior.
+    """
     _setup_logging(verbose)
     ctx.ensure_object(dict)
     ctx.obj["config_path"] = config
+    if ctx.invoked_subcommand is None:
+        _run_autopilot(ctx, dry_run=False, yes=False, limit=None)
+
+
+def _resolve_capped(config, limit: int | None):
+    """Resolve pending tasks for a project and apply the max-tasks cap."""
+    from taskill.autopilot import resolve_tasks
+
+    tasks, source = resolve_tasks(config)
+    cap = limit if limit is not None else config.koru.max_tasks
+    if cap is not None:
+        tasks = tasks[:cap]
+    return tasks, source
+
+
+def _execute_tasks(config, tasks, source, *, dry_run: bool):
+    """Run each resolved task for one project; tick TODO on success."""
+    from taskill.autopilot import mark_task_done, run_task
+
+    todo_path = config.project_root / config.files.get("todo", "TODO.md")
+    runs = []
+    for t in tasks:
+        console.rule(f"[bold]coru ▸ {t}")
+        result = run_task(t, config, dry_run=dry_run)
+        runs.append(result)
+        if result.ok and not dry_run and source == "todo" and config.koru.mark_done:
+            if mark_task_done(todo_path, t):
+                console.print(f"[green]✓ marked done in TODO:[/green] {t}")
+    return runs
+
+
+def _print_summary(runs, *, dry_run: bool, prefix: str = "") -> int:
+    """Print an ok/failed summary; return the number of failed tasks."""
+    if dry_run:
+        console.print(
+            f"\n[bold]{prefix}Autopilot (dry-run):[/bold] "
+            f"{len(runs)} task(s) previewed, nothing executed."
+        )
+        return 0
+    ok = [r for r in runs if r.ok]
+    failed = [r for r in runs if not r.ok and not r.skipped]
+    summary = f"\n[bold]{prefix}Autopilot summary:[/bold] [green]{len(ok)} ok[/green]"
+    if failed:
+        summary += f", [red]{len(failed)} failed[/red]"
+    console.print(summary)
+    for r in failed:
+        console.print(f"  [red]✗ (rc={r.returncode})[/red] {r.task}")
+    return len(failed)
+
+
+def _run_autopilot(
+    ctx: click.Context, *, dry_run: bool, yes: bool, limit: int | None
+) -> None:
+    """Single-project: resolve pending tasks in cwd and run each via koru/coru."""
+    config = load_config(ctx.obj["config_path"])
+    if not config.koru.enabled:
+        console.print(
+            "[yellow]koru autonomous execution is disabled[/yellow] "
+            "(set koru.enabled: true in taskill.yaml)."
+        )
+        return
+
+    tasks, source = _resolve_capped(config, limit)
+    if not tasks:
+        console.print(
+            "[yellow]No pending tasks found[/yellow] "
+            "(looked at TODO checkboxes, planfile tickets, and the task file)."
+        )
+        return
+
+    console.print(
+        f"[cyan]Tasks to run ({len(tasks)}) from [bold]{source}[/bold]:[/cyan]"
+    )
+    for t in tasks:
+        console.print(f"  • {t}")
+    console.print(f"[dim]Each runs: {' '.join(config.koru.command)}[/dim]")
+
+    if not dry_run and not (yes or config.koru.auto_confirm):
+        if not click.confirm(
+            f"Run coru autonomously on these {len(tasks)} task(s)?", default=True
+        ):
+            console.print("[red]Aborted.[/red]")
+            raise SystemExit(1)
+
+    runs = _execute_tasks(config, tasks, source, dry_run=dry_run)
+    if _print_summary(runs, dry_run=dry_run) > 0:
+        raise SystemExit(1)
+
+
+def _expand_project_dirs(paths) -> list[str]:
+    """Expand path/glob arguments into a sorted, de-duplicated list of dirs."""
+    from glob import glob
+
+    dirs: list[str] = []
+    seen: set[str] = set()
+    for p in paths:
+        matches = glob(p) if any(c in p for c in "*?[") else [p]
+        if not matches and Path(p).is_dir():
+            matches = [p]
+        for m in matches:
+            path = Path(m)
+            key = str(path.resolve())
+            if path.is_dir() and key not in seen:
+                seen.add(key)
+                dirs.append(str(path))
+    return sorted(dirs)
+
+
+def _run_autopilot_fleet(
+    ctx: click.Context, paths, *, dry_run: bool, yes: bool, limit: int | None
+) -> None:
+    """Fleet: run the autopilot in every project directory under the given paths."""
+    config_name = Path(ctx.obj["config_path"]).name  # e.g. "taskill.yaml"
+
+    plan = []  # (dir, config, tasks, source)
+    for d in _expand_project_dirs(paths):
+        cfg = load_config(Path(d) / config_name, project_root=Path(d).resolve())
+        if not cfg.koru.enabled:
+            continue
+        tasks, source = _resolve_capped(cfg, limit)
+        if tasks:
+            plan.append((d, cfg, tasks, source))
+
+    if not plan:
+        console.print(
+            "[yellow]No projects with pending tasks found[/yellow] under the given paths."
+        )
+        return
+
+    total = sum(len(tasks) for _, _, tasks, _ in plan)
+    console.print(
+        f"[cyan]Projects with pending tasks ({len(plan)}), {total} task(s) total:[/cyan]"
+    )
+    for d, _cfg, tasks, source in plan:
+        console.print(f"  [bold]{d}[/bold] ({len(tasks)} from {source})")
+        for t in tasks:
+            console.print(f"      • {t}")
+
+    if not dry_run and not yes:
+        if not click.confirm(
+            f"Run coru autonomously across {len(plan)} project(s) ({total} task(s))?",
+            default=True,
+        ):
+            console.print("[red]Aborted.[/red]")
+            raise SystemExit(1)
+
+    any_failed = 0
+    per_project = []
+    for d, cfg, tasks, source in plan:
+        console.rule(f"[bold cyan]▸ {d}")
+        runs = _execute_tasks(cfg, tasks, source, dry_run=dry_run)
+        failed = _print_summary(runs, dry_run=dry_run, prefix=f"{d} · ")
+        per_project.append((d, len(runs), failed))
+        any_failed += failed
+
+    console.print("\n[bold]Fleet summary:[/bold]")
+    for d, n, failed in per_project:
+        status = "[green]ok[/green]" if failed == 0 else f"[red]{failed} failed[/red]"
+        console.print(f"  {d}: {n} task(s) — {status}")
+    if any_failed and not dry_run:
+        raise SystemExit(1)
+
+
+@main.command(name="koru")
+@click.argument("paths", nargs=-1)
+@click.option(
+    "--dry-run", is_flag=True, help="List tasks and the command without executing"
+)
+@click.option("--yes", "-y", is_flag=True, help="Skip the batch confirmation")
+@click.option("--limit", type=int, default=None, help="Max tasks to run per project")
+@click.pass_context
+def koru_cmd(
+    ctx: click.Context, paths, dry_run: bool, yes: bool, limit: int | None
+) -> None:
+    """Autonomously execute pending tasks via coru (natural-language planner).
+
+    With no PATHS, runs on the current project (same as bare ``taskill``). With
+    PATHS (directories or globs), sweeps every project under them — running the
+    autopilot in each folder that has pending tasks, e.g. ``taskill koru ./*``.
+    """
+    if paths:
+        _run_autopilot_fleet(ctx, paths, dry_run=dry_run, yes=yes, limit=limit)
+    else:
+        _run_autopilot(ctx, dry_run=dry_run, yes=yes, limit=limit)
 
 
 def _print_run_result(result) -> None:
@@ -595,6 +786,17 @@ integrations:
   ansible: {}
 
 dry_run: false
+
+# Autonomous task execution — `taskill` (no subcommand) or `taskill koru`
+# resolves pending tasks from a list and runs each through coru autonomously.
+koru:
+  enabled: true
+  command: ["coru", "text", "{task}", "--llm"]  # {task} => the task text
+  source: auto            # auto | todo | planfile | file
+  task_file: TASK.md      # used when source is "file" (one task per line)
+  max_tasks: 1            # cap tasks per invocation (null = no cap)
+  auto_confirm: false     # true => never prompt (like always passing -y)
+  mark_done: true         # tick the "- [ ]" checkbox in TODO.md on success
 """
 
 STARTER_ENV = """# Copy this file to .env and fill in your credentials.

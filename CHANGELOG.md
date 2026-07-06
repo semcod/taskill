@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Autonomous task execution via koru/coru.** Running `taskill` with no
+  subcommand (or `taskill koru`) resolves pending tasks from a list — `TODO.md`
+  `- [ ]` checkboxes, `planfile.yaml` tickets, or a plain `TASK.md` file — and
+  runs each one through `coru text "<task>" --llm` (coru's litellm/OpenRouter
+  planner) so the task is executed autonomously instead of being typed out or
+  hunted down by hand.
+  - Lists the resolved tasks and asks one confirmation before running (skipped
+    with `-y`/`--yes` or `koru.auto_confirm: true`, or `--dry-run`).
+  - `koru.max_tasks` (default `1`) caps how many tasks run per invocation;
+    `--limit N` overrides it.
+  - Continues past per-task failures and prints an `ok/failed` summary; exits
+    non-zero if any task failed.
+  - On success, ticks the task's `- [ ]` checkbox in `TODO.md` (`koru.mark_done`).
+  - New `koru:` section in `taskill.yaml` (also written by `taskill init`):
+    `enabled`, `command`, `source`, `task_file`, `max_tasks`, `auto_confirm`,
+    `mark_done`.
+- New `taskill koru [PATHS...] [--dry-run] [-y] [--limit N]` subcommand
+  (explicit form of the bare-`taskill` autopilot). With `PATHS` (dirs or globs)
+  it runs **fleet mode** — sweeps every project under the paths, running the
+  autopilot in each folder that has pending tasks (e.g. `taskill koru ./*`),
+  loading each project's own `taskill.yaml`, with one batch confirmation and a
+  per-project + fleet summary.
+
+## [0.1.16] - 2026-07-06
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+- Update TODO.md
+
+### Other
+- Update local.dev.txt
+- Update taskill.yaml
+- Update uv.lock
+
 ## [0.1.10] - 2026-04-25
 
 ### Fixed

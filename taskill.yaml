@@ -45,6 +45,17 @@ reuse:
   llx: false
   prefact: false
 
+# Autonomous task execution — `taskill` (no subcommand) or `taskill koru`
+# resolves pending tasks from a list and runs each through coru autonomously.
+koru:
+  enabled: true
+  command: ["coru", "text", "{task}", "--llm"]  # {task} ⇒ the task text
+  source: auto            # auto | todo | planfile | file
+  task_file: TASK.md      # used when source is "file" (one task per line)
+  max_tasks: 1            # cap tasks per invocation (null = no cap)
+  auto_confirm: false     # true ⇒ never prompt (like always passing -y)
+  mark_done: true         # tick the "- [ ]" checkbox in TODO.md on success
+
 # Where state lives (tracks last run, last sha, last coverage…)
 state_file: .taskill/state.json
 

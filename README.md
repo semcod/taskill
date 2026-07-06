@@ -3,11 +3,13 @@
 
 ## AI Cost Tracking
 
-![AI Cost](https://img.shields.io/badge/AI%20Cost-$2.40-green) ![AI Model](https://img.shields.io/badge/AI%20Model-openrouter%2Fqwen%2Fqwen3-coder-next-lightgrey)
+![PyPI](https://img.shields.io/badge/pypi-costs-blue) ![Version](https://img.shields.io/badge/version-0.1.16-blue) ![Python](https://img.shields.io/badge/python-3.9+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
+![AI Cost](https://img.shields.io/badge/AI%20Cost-$1.11-orange) ![Human Time](https://img.shields.io/badge/Human%20Time-12.1h-blue) ![Model](https://img.shields.io/badge/Model-openrouter%2Fqwen%2Fqwen3--coder--next-lightgrey)
 
-This project uses AI-generated code. Total cost: **$2.4000** with **16** AI commits.
+- 🤖 **LLM usage:** $1.1082 (17 commits)
+- 👤 **Human dev:** ~$1213 (12.1h @ $100/h, 30min dedup)
 
-Generated on 2026-06-29 using [openrouter/qwen/qwen3-coder-next](https://openrouter.ai/models/openrouter/qwen/qwen3-coder-next)
+Generated on 2026-07-06 using [openrouter/qwen/qwen3-coder-next](https://openrouter.ai/qwen/qwen3-coder-next)
 
 ---
 
@@ -38,6 +40,62 @@ taskill status                # preview without running
 taskill run --dry-run         # see what would change
 taskill run                   # do it
 ```
+
+## Autonomous task execution (koru)
+
+`taskill` doesn't only keep docs honest — it can **do the tasks on your list**.
+Run it with no subcommand and it resolves pending tasks from a list and hands
+each one to the koru/coru autonomous pipeline, so the work you'd otherwise have
+to write out or hunt down just gets done.
+
+```bash
+taskill                 # resolve pending tasks and run them autonomously
+taskill koru --dry-run  # preview: show the tasks + the command, run nothing
+taskill koru -y         # run without the confirmation prompt
+taskill koru --limit 3  # run at most 3 tasks this invocation
+taskill koru ./*        # fleet mode: sweep every project folder under ./
+```
+
+**Fleet mode** — pass directories or globs to run the autopilot across many
+projects at once (each loads its own `taskill.yaml`; projects with no pending
+tasks are skipped):
+
+```bash
+taskill koru ./*            # every sub-folder with pending tasks
+taskill koru ./* --dry-run  # preview the whole fleet plan
+taskill koru repoA repoB    # only these projects
+```
+
+**Where tasks come from** (`koru.source`, default `auto` tries them in order):
+1. `TODO.md` — every unchecked `- [ ]` item.
+2. `planfile.yaml` — every open ticket's `title`.
+3. `TASK.md` (or `koru.task_file`) — one task per non-empty, non-comment line.
+
+**How each task runs:** by default `coru text "<task>" --llm`, which routes the
+natural-language task through coru's litellm planner (OpenRouter) and executes
+the mapped actions. Override the command with `koru.command`.
+
+taskill lists the resolved tasks and asks **one** confirmation before running
+(skipped with `-y` or `koru.auto_confirm`, or `--dry-run`), caps the batch at
+`koru.max_tasks` (default `1`), continues past per-task failures with an
+`ok/failed` summary, and ticks the `- [ ]` checkbox in `TODO.md` after a task
+succeeds (`koru.mark_done`).
+
+```yaml
+# taskill.yaml
+koru:
+  enabled: true
+  command: ["coru", "text", "{task}", "--llm"]   # {task} ⇒ task text
+  source: auto            # auto | todo | planfile | file
+  task_file: TASK.md
+  max_tasks: 1            # cap per invocation (null = no cap)
+  auto_confirm: false     # true ⇒ never prompt (like always passing -y)
+  mark_done: true         # tick the TODO checkbox on success
+```
+
+> **Requires** `coru` on `PATH` (part of the koru ecosystem) and an
+> `OPENROUTER_API_KEY` for the litellm planner. `taskill koru --dry-run` works
+> without either.
 
 ## What it does
 
@@ -134,6 +192,8 @@ See `examples/ansible-playbook.yml`. Useful for fleet-wide hygiene across many s
 ## CLI
 
 ```
+taskill                # autonomously run pending tasks via koru/coru
+taskill koru           # same, explicit form (--dry-run / -y / --limit N)
 taskill init           # generate taskill.yaml + .env.example
 taskill status         # show what would happen, no writes
 taskill run            # execute (respects triggers)

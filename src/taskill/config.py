@@ -52,6 +52,37 @@ class IntegrationConfig:
     ansible: dict[str, Any] = field(default_factory=dict)
 
 
+# Default command template taskill shells out to for each task. ``{task}`` is
+# replaced with the task text. ``coru text ... --llm`` routes the natural-language
+# task through coru's litellm planner (OpenRouter) and executes the mapped
+# actions autonomously.
+DEFAULT_KORU_COMMAND = ["coru", "text", "{task}", "--llm"]
+
+
+@dataclass
+class KoruConfig:
+    """Autonomous task execution via the koru/coru ecosystem.
+
+    When ``taskill`` runs with no subcommand, it resolves pending tasks from a
+    list (see ``source``) and hands each one to ``command`` (default:
+    ``coru text "<task>" --llm``) so coru executes it autonomously.
+    """
+
+    enabled: bool = True
+    # Command template; a single "{task}" token is replaced with the task text.
+    command: list[str] = field(default_factory=lambda: list(DEFAULT_KORU_COMMAND))
+    # Where to read the task list from: "auto" tries todo → planfile → file.
+    source: str = "auto"  # "auto" | "todo" | "planfile" | "file"
+    # Path used when source is "file" (one task per non-empty, non-comment line).
+    task_file: str = "TASK.md"
+    # Cap tasks executed per invocation (None = no cap). Keep small for safety.
+    max_tasks: int | None = 1
+    # Skip the batch confirmation (equivalent to passing -y on the CLI).
+    auto_confirm: bool = False
+    # After a task succeeds, tick its "- [ ]" checkbox in TODO.md (todo source).
+    mark_done: bool = True
+
+
 DEFAULT_FILES = {
     "readme": "README.md",
     "changelog": "CHANGELOG.md",
@@ -77,6 +108,7 @@ class TaskillConfig:
     state_file: str = ".taskill/state.json"
     dry_run: bool = False
     reuse: dict[str, bool] = field(default_factory=lambda: dict(DEFAULT_REUSE))
+    koru: KoruConfig = field(default_factory=KoruConfig)
 
     @property
     def env_model(self) -> str:
@@ -170,6 +202,18 @@ def load_config(
         ansible=integ_raw.get("ansible", {}),
     )
 
+    # Koru autonomous execution
+    koru_raw = raw.get("koru", {}) or {}
+    koru = KoruConfig(
+        enabled=koru_raw.get("enabled", True),
+        command=koru_raw.get("command", list(DEFAULT_KORU_COMMAND)),
+        source=koru_raw.get("source", "auto"),
+        task_file=koru_raw.get("task_file", "TASK.md"),
+        max_tasks=koru_raw.get("max_tasks", 1),
+        auto_confirm=koru_raw.get("auto_confirm", False),
+        mark_done=koru_raw.get("mark_done", True),
+    )
+
     return TaskillConfig(
         project_root=Path(raw.get("project_root", project_root)).resolve(),
         files={**DEFAULT_FILES, **raw.get("files", {})},
@@ -179,4 +223,5 @@ def load_config(
         state_file=raw.get("state_file", ".taskill/state.json"),
         dry_run=raw.get("dry_run", False),
         reuse={**DEFAULT_REUSE, **raw.get("reuse", {})},
+        koru=koru,
     )
