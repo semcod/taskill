@@ -81,6 +81,16 @@ class KoruConfig:
     auto_confirm: bool = False
     # After a task succeeds, tick its "- [ ]" checkbox in TODO.md (todo source).
     mark_done: bool = True
+    # Verification gate: commands run after each task. A string is run via the
+    # shell; a list is run as argv. "{task}" is substituted. When any command
+    # exits non-zero the task is marked FAILED (and rolled back if enabled), and
+    # its TODO checkbox is NOT ticked. Empty list = no gate (legacy behavior).
+    #   e.g. ["pytest -q", "pyqual", "prefact --check {task}"]
+    verify: list = field(default_factory=list)
+    # On a failed task (command error or failed verification), restore the
+    # working tree: revert tracked changes and delete task-created untracked
+    # files (pre-existing untracked files are left untouched).
+    rollback_on_fail: bool = True
 
 
 DEFAULT_FILES = {
@@ -212,6 +222,8 @@ def load_config(
         max_tasks=koru_raw.get("max_tasks", 1),
         auto_confirm=koru_raw.get("auto_confirm", False),
         mark_done=koru_raw.get("mark_done", True),
+        verify=koru_raw.get("verify", []) or [],
+        rollback_on_fail=koru_raw.get("rollback_on_fail", True),
     )
 
     return TaskillConfig(

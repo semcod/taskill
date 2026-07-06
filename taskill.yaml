@@ -55,6 +55,10 @@ koru:
   max_tasks: 1            # cap tasks per invocation (null = no cap)
   auto_confirm: false     # true ⇒ never prompt (like always passing -y)
   mark_done: true         # tick the "- [ ]" checkbox in TODO.md on success
+  # Verification gate: commands run after each task; any non-zero exit ⇒ task
+  # FAILED and NOT marked done. String ⇒ shell, list ⇒ argv, {task} substituted.
+  verify: []              # e.g. ["pytest -q", "pyqual"]
+  rollback_on_fail: true  # on failure, revert tracked changes + drop new files
 
 # Where state lives (tracks last run, last sha, last coverage…)
 state_file: .taskill/state.json

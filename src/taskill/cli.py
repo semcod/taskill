@@ -86,18 +86,25 @@ def _resolve_capped(config, limit: int | None):
 
 
 def _execute_tasks(config, tasks, source, *, dry_run: bool):
-    """Run each resolved task for one project; tick TODO on success."""
-    from taskill.autopilot import mark_task_done, run_task
+    """Run each resolved task for one project; verify, then tick TODO on success."""
+    from taskill.autopilot import mark_task_done, run_task_verified
 
     todo_path = config.project_root / config.files.get("todo", "TODO.md")
     runs = []
     for t in tasks:
         console.rule(f"[bold]coru ▸ {t}")
-        result = run_task(t, config, dry_run=dry_run)
+        result = run_task_verified(t, config, dry_run=dry_run)
         runs.append(result)
-        if result.ok and not dry_run and source == "todo" and config.koru.mark_done:
-            if mark_task_done(todo_path, t):
-                console.print(f"[green]✓ marked done in TODO:[/green] {t}")
+        if result.ok:
+            if config.koru.verify and not dry_run:
+                console.print("[green]✓ verification passed[/green]")
+            if not dry_run and source == "todo" and config.koru.mark_done:
+                if mark_task_done(todo_path, t):
+                    console.print(f"[green]✓ marked done in TODO:[/green] {t}")
+        elif not result.skipped:
+            detail = f" ({result.reason})" if result.reason else ""
+            rolled = " — rolled back" if result.rolled_back else ""
+            console.print(f"[red]✗ task failed{detail}{rolled}[/red]")
     return runs
 
 
@@ -797,6 +804,10 @@ koru:
   max_tasks: 1            # cap tasks per invocation (null = no cap)
   auto_confirm: false     # true => never prompt (like always passing -y)
   mark_done: true         # tick the "- [ ]" checkbox in TODO.md on success
+  # Verification gate: commands run after each task. Any non-zero exit =>
+  # task FAILED (not marked done). String => shell; list => argv; {task} subst.
+  verify: []              # e.g. ["pytest -q", "pyqual"]
+  rollback_on_fail: true  # on failure, revert tracked changes + drop new files
 """
 
 STARTER_ENV = """# Copy this file to .env and fill in your credentials.

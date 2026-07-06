@@ -30,6 +30,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   autopilot in each folder that has pending tasks (e.g. `taskill koru ./*`),
   loading each project's own `taskill.yaml`, with one batch confirmation and a
   per-project + fleet summary.
+- **Verification gate with rollback.** New `koru.verify` (list of commands run
+  after each task) and `koru.rollback_on_fail` (default `true`). A task is only
+  marked done — and its `- [ ]` checkbox ticked — when every verify command
+  exits `0`; otherwise it is marked FAILED and the working tree is restored
+  (tracked changes reverted, task-created untracked files removed, pre-existing
+  untracked files left untouched). Verify entries accept a shell string or an
+  argv list, with `{task}` substituted. This lets the autopilot self-check with
+  semcod tools (`pytest`, `pyqual`, `prefact --check {task}`, …) instead of
+  keeping broken autonomous edits.
+
+## [0.1.17] - 2026-07-06
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+
+### Other
+- Update taskill.yaml
 
 ## [0.1.16] - 2026-07-06
 

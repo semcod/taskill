@@ -33,6 +33,8 @@ class TaskRun:
     task: str
     returncode: int
     skipped: bool = False
+    reason: str = ""  # why it failed (e.g. "verify: pytest -q", "command error")
+    rolled_back: bool = False
 
     @property
     def ok(self) -> bool:
@@ -139,6 +141,97 @@ def run_task(task: str, config: TaskillConfig, *, dry_run: bool) -> TaskRun:
     except FileNotFoundError:
         log.error("Command not found: %s (is coru installed and on PATH?)", cmd[0])
         return TaskRun(task=task, returncode=127)
+
+
+# ───────────────────────────── verification & rollback ─────────────────────────────
+
+
+def _norm_verify_command(entry, task: str) -> list[str]:
+    """Normalize a verify entry (str → shell, list → argv) with {task} substituted."""
+    if isinstance(entry, str):
+        return ["sh", "-c", entry.replace("{task}", task)]
+    return [str(tok).replace("{task}", task) for tok in entry]
+
+
+def run_verify(config: TaskillConfig, task: str) -> tuple[bool, str]:
+    """Run each configured verify command. Return (all_passed, failed_command).
+
+    An empty ``verify`` list means "no gate" and always passes.
+    """
+    for entry in config.koru.verify:
+        cmd = _norm_verify_command(entry, task)
+        label = entry if isinstance(entry, str) else " ".join(cmd)
+        try:
+            result = subprocess.run(cmd, cwd=config.project_root)
+        except FileNotFoundError:
+            log.error("Verify command not found: %s", cmd[0])
+            return False, label
+        if result.returncode != 0:
+            return False, label
+    return True, ""
+
+
+def _git_untracked(root: Path) -> set[str]:
+    """Return the set of untracked (not-ignored) file paths in the repo."""
+    result = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "--others", "--exclude-standard"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return set()
+    return {line for line in result.stdout.splitlines() if line.strip()}
+
+
+def rollback_worktree(root: Path, untracked_before: set[str]) -> None:
+    """Undo the working-tree changes a task made.
+
+    Reverts tracked modifications (``git checkout -- .``) and deletes untracked
+    files that appeared during the task; untracked files that already existed
+    before the task are left untouched.
+    """
+    subprocess.run(
+        ["git", "-C", str(root), "checkout", "--", "."],
+        capture_output=True,
+        text=True,
+    )
+    new_untracked = _git_untracked(root) - untracked_before
+    for rel in new_untracked:
+        target = root / rel
+        try:
+            if target.is_file() or target.is_symlink():
+                target.unlink()
+        except OSError as exc:
+            log.warning("Could not remove task-created file %s: %s", target, exc)
+
+
+def run_task_verified(task: str, config: TaskillConfig, *, dry_run: bool) -> TaskRun:
+    """Run a task, then gate on ``verify``; roll back the working tree on failure."""
+    root = config.project_root
+    has_git = (root / ".git").exists()
+    guard = has_git and (bool(config.koru.verify) or config.koru.rollback_on_fail)
+    untracked_before = _git_untracked(root) if (guard and not dry_run) else set()
+
+    run = run_task(task, config, dry_run=dry_run)
+    if dry_run or run.skipped:
+        return run
+
+    def _fail(reason: str) -> TaskRun:
+        rolled = False
+        if config.koru.rollback_on_fail and has_git:
+            rollback_worktree(root, untracked_before)
+            rolled = True
+        rc = run.returncode if run.returncode != 0 else 1
+        return TaskRun(task=task, returncode=rc, reason=reason, rolled_back=rolled)
+
+    if run.returncode != 0:
+        return _fail("command error")
+
+    passed, failed_cmd = run_verify(config, task)
+    if not passed:
+        return _fail(f"verify: {failed_cmd}")
+
+    return run
 
 
 def mark_task_done(todo_path: Path, task: str) -> bool:

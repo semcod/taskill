@@ -3,11 +3,11 @@
 
 ## AI Cost Tracking
 
-![PyPI](https://img.shields.io/badge/pypi-costs-blue) ![Version](https://img.shields.io/badge/version-0.1.16-blue) ![Python](https://img.shields.io/badge/python-3.9+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
-![AI Cost](https://img.shields.io/badge/AI%20Cost-$1.11-orange) ![Human Time](https://img.shields.io/badge/Human%20Time-12.1h-blue) ![Model](https://img.shields.io/badge/Model-openrouter%2Fqwen%2Fqwen3--coder--next-lightgrey)
+![PyPI](https://img.shields.io/badge/pypi-costs-blue) ![Version](https://img.shields.io/badge/version-0.1.17-blue) ![Python](https://img.shields.io/badge/python-3.9+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
+![AI Cost](https://img.shields.io/badge/AI%20Cost-$1.51-orange) ![Human Time](https://img.shields.io/badge/Human%20Time-13.1h-blue) ![Model](https://img.shields.io/badge/Model-openrouter%2Fqwen%2Fqwen3--coder--next-lightgrey)
 
-- 🤖 **LLM usage:** $1.1082 (17 commits)
-- 👤 **Human dev:** ~$1213 (12.1h @ $100/h, 30min dedup)
+- 🤖 **LLM usage:** $1.5067 (18 commits)
+- 👤 **Human dev:** ~$1313 (13.1h @ $100/h, 30min dedup)
 
 Generated on 2026-07-06 using [openrouter/qwen/qwen3-coder-next](https://openrouter.ai/qwen/qwen3-coder-next)
 
@@ -91,7 +91,31 @@ koru:
   max_tasks: 1            # cap per invocation (null = no cap)
   auto_confirm: false     # true ⇒ never prompt (like always passing -y)
   mark_done: true         # tick the TODO checkbox on success
+  verify: []              # gate: commands run after each task (see below)
+  rollback_on_fail: true  # undo the working tree when a task fails
 ```
+
+### Verification gate (don't keep broken changes)
+
+Autonomous edits are only useful if they actually work. Set `koru.verify` to a
+list of commands that must pass **after** each task — tests, a quality gate,
+whatever proves the change is good. A task is only marked done (and its TODO
+checkbox ticked) when every verify command exits `0`; otherwise the task is
+marked **FAILED** and, with `rollback_on_fail: true` (default), taskill reverts
+the tracked changes and deletes files the task created (pre-existing untracked
+files are left alone).
+
+```yaml
+koru:
+  verify:
+    - "pytest -q"        # string ⇒ run via the shell
+    - "pyqual"           # e.g. a semcod quality gate
+    - ["ruff", "check", "."]   # list ⇒ run as argv
+  rollback_on_fail: true
+```
+
+`{task}` is substituted in verify commands too, so you can re-check the exact
+finding a task was supposed to fix (e.g. `prefact --check "{task}"`).
 
 > **Requires** `coru` on `PATH` (part of the koru ecosystem) and an
 > `OPENROUTER_API_KEY` for the litellm planner. `taskill koru --dry-run` works
