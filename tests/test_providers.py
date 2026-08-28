@@ -75,3 +75,20 @@ def test_build_chain_all_disabled() -> None:
     ]
     chain = build_chain(configs)
     assert len(chain) == 0
+def test_openrouter_provider_uses_subllm(monkeypatch):
+    from taskill.providers import openrouter
+
+    captured = {}
+
+    def fake_complete(application, function, messages, **kwargs):
+        captured.update(application=application, function=function, messages=messages)
+        return type("Response", (), {"content": '{"summary":"ok"}', "model": "glm-5.3"})()
+
+    monkeypatch.setattr(openrouter, "subllm_complete", fake_complete)
+    monkeypatch.setattr(openrouter, "build_user_prompt", lambda context: "project state")
+    result = OpenRouterProvider().generate({})
+
+    assert result.summary == "ok"
+    assert result.provider_name == "openrouter:glm-5.3"
+    assert captured["application"] == "semcod-taskill"
+    assert captured["function"] == "execute"

@@ -6,11 +6,14 @@ Uses HTTP directly to keep deps minimal — no openai SDK needed.
 
 from __future__ import annotations
 
-import json
 import os
 from typing import Any
 
-import httpx
+try:
+    from subllm import available_routes, complete as subllm_complete
+except ImportError:
+    available_routes = None
+    subllm_complete = None
 
 from taskill.providers.base import (
     SYSTEM_PROMPT,
@@ -35,55 +38,30 @@ class OpenRouterProvider(Provider):
     name = "openrouter"
 
     def is_available(self) -> bool:
-        return bool(os.getenv("OPENROUTER_API_KEY"))
+        if available_routes is None:
+            return False
+        return bool(available_routes("semcod-taskill", "execute"))
 
     def generate(self, context: dict[str, Any]) -> GeneratedDocs:
-        api_key = os.getenv("OPENROUTER_API_KEY")
-        if not api_key:
-            raise ProviderError("OPENROUTER_API_KEY not set")
+        if subllm_complete is None:
+            raise ProviderError("subactor-subllm is not available")
 
         _DEFAULT_TIMEOUT = 120
-        _MAX_ERROR_TEXT = 300
-        model = _normalize_model(os.getenv("LLM_MODEL", "qwen/qwen3-coder-next"))
-        base_url = self.options.get("base_url", "https://openrouter.ai/api/v1")
         timeout = self.options.get("timeout", _DEFAULT_TIMEOUT)
-
-        payload = {
-            "model": model,
-            "temperature": self.options.get("temperature", 0.2),
-            "max_tokens": self.options.get("max_tokens", 4096),
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": build_user_prompt(context)},
-            ],
-            # JSON mode if model supports it; harmless if it doesn't
-            "response_format": {"type": "json_object"},
-        }
-
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            # OpenRouter recommends these for analytics / better routing
-            "HTTP-Referer": self.options.get("referer", "https://github.com/oqlos/taskill"),
-            "X-Title": "taskill",
-        }
-
         try:
-            with httpx.Client(timeout=timeout) as client:
-                resp = client.post(f"{base_url}/chat/completions", json=payload, headers=headers)
-        except httpx.HTTPError as e:
-            raise ProviderError(f"OpenRouter request failed: {e}") from e
-
-        if resp.status_code != 200:
-            raise ProviderError(
-                f"OpenRouter returned {resp.status_code}: {resp.text[:_MAX_ERROR_TEXT]}"
+            response = subllm_complete(
+                "semcod-taskill",
+                "execute",
+                [
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": build_user_prompt(context)},
+                ],
+                timeout_seconds=timeout,
             )
-
-        try:
-            data = resp.json()
-            content = data["choices"][0]["message"]["content"]
-        except (KeyError, IndexError, json.JSONDecodeError) as e:
-            raise ProviderError(f"Malformed OpenRouter response: {e}") from e
+            content = response.content
+            model = response.model
+        except Exception as e:
+            raise ProviderError(f"SubLLM request failed: {e}") from e
 
         parsed = parse_json_loosely(content)
         if parsed is None:
